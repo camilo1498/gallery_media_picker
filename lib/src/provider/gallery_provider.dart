@@ -73,6 +73,7 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
 
   /// save selected asset item
   List<AssetEntity> picked = [];
+  List<String> pickedFile = [];
 
   final isOriginNotifier =  ValueNotifier(false);
 
@@ -91,13 +92,16 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
     _singlePickMode = singlePickMode;
     if (singlePickMode) {
       maxNotifier.value = 1;
+      notifyListeners();
     }
+    notifyListeners();
   }
 
   /// notify changes
   final pickedNotifier = ValueNotifier<List<AssetEntity>>([]);
+  final pickedFileNotifier = ValueNotifier<List<String>>([]);
 
-  /// pick path
+  /// pick asset entity
   void pickEntity(AssetEntity entity) {
     if (singlePickMode) {
       if (picked.contains(entity)) {
@@ -121,6 +125,31 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
     pickedNotifier.notifyListeners();
     notifyListeners();
   }
+
+  void pickPath(String path) {
+    if (singlePickMode) {
+      if (pickedFile.contains(path)) {
+        pickedFile.remove(path);
+      } else {
+        pickedFile.clear();
+        pickedFile.add(path);
+      }
+    } else {
+      if (pickedFile.contains(path)) {
+        pickedFile.remove(path);
+      } else {
+        if (pickedFile.length == max) {
+          onPickMax.notifyListeners();
+          return;
+        }
+        pickedFile.add(path);
+      }
+    }
+    pickedFileNotifier.value = pickedFile;
+    pickedFileNotifier.notifyListeners();
+    notifyListeners();
+  }
+
    /// picked path index
   int pickIndex(AssetEntity entity) {
     return picked.indexOf(entity);

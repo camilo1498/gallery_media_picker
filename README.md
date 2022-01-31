@@ -2,11 +2,11 @@ Gallery Photo Picker has the same concept as image_picker but with a more attrac
 
 ## Features
 
-[✔️] pick image
+[✔] pick image
 
-[x] pick video
+[✔] pick video
 
-[x] pick multi image
+[✔] pick multi image
 
 ## Demo
 

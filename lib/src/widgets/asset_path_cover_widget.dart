@@ -70,21 +70,4 @@ class PathCoverImageProvider extends ImageProvider<PathCoverImageProvider> {
     return this;
   }
 
-  @override
-  bool operator ==(other) {
-    if (identical(other, this)) {
-      return true;
-    }
-    if (other is! PathCoverImageProvider) {
-      return false;
-    }
-    final PathCoverImageProvider o = other;
-    return o.entity == entity &&
-        o.scale == scale &&
-        o.thumbSize == thumbSize &&
-        o.index == index;
-  }
-
-  @override
-  int get hashCode => hashValues(entity, scale, thumbSize, index);
 }

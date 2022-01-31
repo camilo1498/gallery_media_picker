@@ -1,10 +1,10 @@
 // ignore_for_file: unnecessary_null_comparison
 library gallery_media_picker;
 
+
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/provider/gallery_provider.dart';
 import 'package:gallery_media_picker/src/widgets/gallery_grid_view.dart';
-import 'package:gallery_media_picker/src/widgets/asset_widget.dart';
 import 'package:gallery_media_picker/src/widgets/current_path_selector.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -16,9 +16,9 @@ class GalleryMediaPicker extends StatefulWidget {
   /// maximum images allowed (default 2)
   final int maxPickImages;
   /// picker mode
-  final bool multiPicker;
+  final bool singlePick;
   /// return all selected paths
-  //final Function(List path) pathList;
+  final Function(List<String> path) pathList;
   /// dropdown appbar color
   final Color appBarColor;
   /// appBar TextColor
@@ -26,9 +26,9 @@ class GalleryMediaPicker extends StatefulWidget {
   /// appBar icon Color
   final Color? appBarIconColor;
   /// gridView background color
-  final Color? gridViewBackgroundColor;
+  final Color gridViewBackgroundColor;
   /// grid image backGround color
-  final Color? gridImageBackgroundColor;
+  final Color imageBackgroundColor;
   /// album background color
   final Color? albumBackGroundColor;
   /// album text color
@@ -49,10 +49,15 @@ class GalleryMediaPicker extends StatefulWidget {
   final ScrollPhysics? gridViewPhysics;
   /// gridView controller
   final ScrollController? gridViewController;
+  /// selected background color
+  final Color selectedBackgroundColor;
+  /// selected check color
+  final Color selectedCheckColor;
+
   const GalleryMediaPicker({
     Key? key,
     this.maxPickImages = 2,
-    this.multiPicker = false,
+    this.singlePick = true,
     this.appBarColor = Colors.black,
     this.albumBackGroundColor,
     this.albumDividerColor,
@@ -60,15 +65,17 @@ class GalleryMediaPicker extends StatefulWidget {
     this.appBarIconColor,
     this.appBarTextColor = Colors.white,
     this.crossAxisCount,
-    this.gridViewBackgroundColor,
+    this.gridViewBackgroundColor = Colors.black54,
     this.childAspectRatio,
     this.appBarLeadingWidget,
     this.appBarHeight = 100,
-    this.gridImageBackgroundColor,
+    this.imageBackgroundColor = Colors.white,
     this.gridPadding,
     this.gridViewController,
-    this.gridViewPhysics
-   // required this.pathList
+    this.gridViewPhysics,
+    required this.pathList,
+    this.selectedBackgroundColor = Colors.black,
+    this.selectedCheckColor = Colors.white
   }) : super(key: key);
 
   @override
@@ -83,6 +90,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   void initState() {
     provider.max = widget.maxPickImages;
     provider.onPickMax.addListener(onPickMax);
+    provider.singlePickMode = widget.singlePick;
     if (provider.pathList.isEmpty) {
       PhotoManager.getAssetPathList().then((value) {
         provider.resetPathList(value);
@@ -101,58 +109,67 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
     showToast("Already pick ${provider.max} items.");
   }
 
+
   @override
   Widget build(BuildContext context) {
     final key = GlobalKey();
-    return Column(
-      children: [
-        Center(
-          child: Container(
-            color: widget.appBarColor,
-            alignment: Alignment.bottomLeft,
-            height: widget.appBarHeight,
-            child: SelectedPathDropdownButton(
-              dropdownRelativeKey: key,
-              provider: provider,
-              appBarColor: widget.appBarColor,
-              appBarIconColor: widget.appBarIconColor ?? const Color(0xFFB2B2B2),
-              appBarTextColor: widget.appBarTextColor,
-              albumTextColor: widget.albumTextColor,
-              albumDividerColor: widget.albumDividerColor ?? const Color(0xFF484848),
-              albumBackGroundColor: widget.albumBackGroundColor ?? const Color(0xFF333333),
-              appBarLeadingWidget: widget.appBarLeadingWidget,
+
+    return OKToast(
+      child:  Column(
+        children: [
+          Center(
+            child: Container(
+              color: widget.appBarColor,
+              alignment: Alignment.bottomLeft,
+              height: widget.appBarHeight,
+              child: SelectedPathDropdownButton(
+                dropdownRelativeKey: key,
+                provider: provider,
+                appBarColor: widget.appBarColor,
+                appBarIconColor: widget.appBarIconColor ?? const Color(0xFFB2B2B2),
+                appBarTextColor: widget.appBarTextColor,
+                albumTextColor: widget.albumTextColor,
+                albumDividerColor: widget.albumDividerColor ?? const Color(0xFF484848),
+                albumBackGroundColor: widget.albumBackGroundColor ?? const Color(0xFF333333),
+                appBarLeadingWidget: widget.appBarLeadingWidget,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: provider != null ? AnimatedBuilder(
-              animation: provider.currentPathNotifier,
-              builder: (BuildContext context, child) => GalleryGridView(
-                path: provider.currentPath,
-                padding: widget.gridPadding,
-                childAspectRatio: widget.childAspectRatio ?? 0.5,
-                crossAxisCount: widget.crossAxisCount ?? 3,
-                gridViewBackgroundColor: widget.gridViewBackgroundColor,
-                gridViewController: widget.gridViewController,
-                gridViewPhysics: widget.gridViewPhysics,
-                buildItem: (_, asset, __) {
-                  return AssetWidget(
-                      asset: asset,
-                    backGroundColor: widget.gridImageBackgroundColor ?? Colors.white,
-                  );
-                },
-                onAssetItemClick: (ctx, asset, index) async{
-                  //var _file = await asset.file;
-                 // widget.pathList(_file!.path as List);
-                },
-              ),
-            ) : Container(),
-          ),
-        )
-      ],
+          Expanded(
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: provider != null ? AnimatedBuilder(
+                animation: provider.currentPathNotifier,
+                builder: (BuildContext context, child) => GalleryGridView(
+                  path: provider.currentPath,
+                  provider: provider,
+                  padding: widget.gridPadding,
+                  childAspectRatio: widget.childAspectRatio ?? 0.5,
+                  crossAxisCount: widget.crossAxisCount ?? 3,
+                  gridViewBackgroundColor: widget.gridViewBackgroundColor,
+                  gridViewController: widget.gridViewController,
+                  gridViewPhysics: widget.gridViewPhysics,
+                  imageBackgroundColor: widget.imageBackgroundColor,
+                  selectedBackgroundColor: widget.selectedBackgroundColor,
+                  selectedCheckColor: widget.selectedCheckColor,
+                  onAssetItemClick: (ctx, asset, index) async{
+                    provider.pickEntity(asset);
+                    _getFile(asset).then((value) {
+                      provider.pickPath(value);
+                      widget.pathList(provider.pickedFile);
+                    });
+                  },
+                ),
+              ) : Container(),
+            ),
+          )
+        ],
+      ),
     );
+  }
+  Future _getFile(AssetEntity asset) async{
+    var _file = await asset.file;
+    return _file!.path;
   }
 }

@@ -36,6 +36,13 @@ class _ExampleState extends State<Example> {
         children: [
           Container(),
            GalleryMediaPicker(
+             childAspectRatio: 1,
+             crossAxisCount: 3,
+             singlePick: false,
+             maxPickImages: 3,
+             pathList: (paths) {
+               debugPrint(paths.toString());
+             },
           )
         ],
       ),
