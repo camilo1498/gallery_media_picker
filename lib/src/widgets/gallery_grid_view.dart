@@ -21,6 +21,10 @@ class GalleryGridView extends StatefulWidget {
   final Color? gridViewBackgroundColor;
   /// gridView Padding
   final EdgeInsets? padding;
+  /// gridView physics
+  final ScrollPhysics? gridViewPhysics;
+  /// gridView controller
+  final ScrollController? gridViewController;
 
   const GalleryGridView({
     Key? key,
@@ -31,7 +35,9 @@ class GalleryGridView extends StatefulWidget {
     this.childAspectRatio = 0.5,
     this.gridViewBackgroundColor,
     this.crossAxisCount = 3,
-    this.padding
+    this.padding,
+    this.gridViewController,
+    this.gridViewPhysics
   }) : super(key: key);
 
   @override
@@ -60,8 +66,8 @@ class _GalleryGridViewState extends State<GalleryGridView> {
           key: ValueKey(widget.path),
           shrinkWrap: true,
           padding: widget.padding ?? const EdgeInsets.all(0),
-          //physics: const NeverScrollableScrollPhysics(),
-          //controller: ,
+          physics: widget.gridViewPhysics ?? const ScrollPhysics(),
+          controller: widget.gridViewController ?? ScrollController(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             childAspectRatio: widget.childAspectRatio,
             crossAxisCount: widget.crossAxisCount,

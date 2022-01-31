@@ -83,7 +83,6 @@ class SelectedPathDropdownButton extends StatelessWidget {
       );
     } else {
       return Container(
-        //padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
         decoration: decoration,
         child: Row(
           children: [
@@ -128,7 +127,6 @@ class SelectedPathDropdownButton extends StatelessWidget {
             ),
             Container(
               width: MediaQuery.of(context).size.width / 2,
-              padding: const EdgeInsets.only(right: 15,bottom: 15),
               alignment: Alignment.bottomLeft,
               child: appBarLeadingWidget ?? Container(),
             )

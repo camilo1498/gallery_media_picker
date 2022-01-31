@@ -45,6 +45,10 @@ class GalleryMediaPicker extends StatefulWidget {
   final double appBarHeight;
   /// gridView Padding
   final EdgeInsets? gridPadding;
+  /// gridView physics
+  final ScrollPhysics? gridViewPhysics;
+  /// gridView controller
+  final ScrollController? gridViewController;
   const GalleryMediaPicker({
     Key? key,
     this.maxPickImages = 2,
@@ -61,7 +65,9 @@ class GalleryMediaPicker extends StatefulWidget {
     this.appBarLeadingWidget,
     this.appBarHeight = 100,
     this.gridImageBackgroundColor,
-    this.gridPadding
+    this.gridPadding,
+    this.gridViewController,
+    this.gridViewPhysics
    // required this.pathList
   }) : super(key: key);
 
@@ -100,11 +106,11 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
     final key = GlobalKey();
     return Column(
       children: [
-        Container(
-          color: widget.appBarColor,
-          alignment: Alignment.bottomLeft,
-          height: widget.appBarHeight,
-          child: SafeArea(
+        Center(
+          child: Container(
+            color: widget.appBarColor,
+            alignment: Alignment.bottomLeft,
+            height: widget.appBarHeight,
             child: SelectedPathDropdownButton(
               dropdownRelativeKey: key,
               provider: provider,
@@ -130,6 +136,8 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                 childAspectRatio: widget.childAspectRatio ?? 0.5,
                 crossAxisCount: widget.crossAxisCount ?? 3,
                 gridViewBackgroundColor: widget.gridViewBackgroundColor,
+                gridViewController: widget.gridViewController,
+                gridViewPhysics: widget.gridViewPhysics,
                 buildItem: (_, asset, __) {
                   return AssetWidget(
                       asset: asset,
