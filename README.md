@@ -2,7 +2,7 @@ Gallery Photo Picker has the same concept as image_picker but with a more attrac
 
 ## Features
 
-[x] pick image
+[O] pick image
 
 [x] pick video
 
