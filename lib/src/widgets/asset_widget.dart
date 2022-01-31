@@ -17,7 +17,7 @@ class AssetWidget extends StatelessWidget {
   const AssetWidget({
     Key? key,
     required this.asset,
-    this.thumbSize = 200,
+    this.thumbSize = 600,
     this.backGroundColor = Colors.white
   }) : super(key: key);
 
