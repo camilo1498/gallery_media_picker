@@ -35,7 +35,10 @@ class _ExampleState extends State<Example> {
         scrollDirection: Axis.vertical,
         children: [
           Container(),
-          const GalleryMediaPicker()
+          const GalleryMediaPicker(
+            gridViewBackgroundColor: Colors.red,
+            gridImageBackgroundColor: Colors.black,
+          )
         ],
       ),
     );

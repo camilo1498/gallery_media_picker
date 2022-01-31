@@ -43,8 +43,8 @@ class GalleryMediaPicker extends StatefulWidget {
   final Widget? appBarLeadingWidget;
   /// appBar height
   final double appBarHeight;
-
-
+  /// gridView Padding
+  final EdgeInsets? gridPadding;
   const GalleryMediaPicker({
     Key? key,
     this.maxPickImages = 2,
@@ -60,7 +60,8 @@ class GalleryMediaPicker extends StatefulWidget {
     this.childAspectRatio,
     this.appBarLeadingWidget,
     this.appBarHeight = 100,
-    this.gridImageBackgroundColor
+    this.gridImageBackgroundColor,
+    this.gridPadding
    // required this.pathList
   }) : super(key: key);
 
@@ -125,6 +126,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
               animation: provider.currentPathNotifier,
               builder: (BuildContext context, child) => GalleryGridView(
                 path: provider.currentPath,
+                padding: widget.gridPadding,
                 childAspectRatio: widget.childAspectRatio ?? 0.5,
                 crossAxisCount: widget.crossAxisCount ?? 3,
                 gridViewBackgroundColor: widget.gridViewBackgroundColor,
@@ -135,7 +137,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                   );
                 },
                 onAssetItemClick: (ctx, asset, index) async{
-                  var _file = await asset.file;
+                  //var _file = await asset.file;
                  // widget.pathList(_file!.path as List);
                 },
               ),

@@ -9,12 +9,12 @@ class AssetPathCoverWidget extends StatelessWidget {
   final BoxFit fit;
   final int index;
 
-  const AssetPathCoverWidget({
+  const AssetPathCoverWidget({Key? key,
     required this.entity,
     this.thumbSize = 120,
     this.fit = BoxFit.cover,
     this.index = 0,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +70,7 @@ class PathCoverImageProvider extends ImageProvider<PathCoverImageProvider> {
     return this;
   }
 
+  @override
   bool operator ==(other) {
     if (identical(other, this)) {
       return true;

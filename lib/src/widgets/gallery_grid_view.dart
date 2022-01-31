@@ -19,6 +19,8 @@ class GalleryGridView extends StatefulWidget {
   final double childAspectRatio;
   /// gridView background color
   final Color? gridViewBackgroundColor;
+  /// gridView Padding
+  final EdgeInsets? padding;
 
   const GalleryGridView({
     Key? key,
@@ -29,6 +31,7 @@ class GalleryGridView extends StatefulWidget {
     this.childAspectRatio = 0.5,
     this.gridViewBackgroundColor,
     this.crossAxisCount = 3,
+    this.padding
   }) : super(key: key);
 
   @override
@@ -56,7 +59,7 @@ class _GalleryGridViewState extends State<GalleryGridView> {
         child: GridView.builder(
           key: ValueKey(widget.path),
           shrinkWrap: true,
-          padding: const EdgeInsets.all(0),
+          padding: widget.padding ?? const EdgeInsets.all(0),
           //physics: const NeverScrollableScrollPhysics(),
           //controller: ,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -258,7 +261,7 @@ class __WrapItemState extends State<_WrapItem> {
   Future<void> _load() async {
     final list = await widget.path
         .getAssetListRange(start: widget.index, end: widget.index + 1);
-    if (list != null && list.isNotEmpty) {
+    if (list.isNotEmpty) {
       final asset = list[0];
       _loaded = true;
       widget.onLoaded(asset);

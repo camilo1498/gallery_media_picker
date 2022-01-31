@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-typedef Widget AssetWidgetBuilder(
+typedef AssetWidgetBuilder = Widget Function(
   BuildContext context,
   AssetEntity asset,
   int thumbSize,
@@ -89,6 +89,7 @@ class AssetEntityThumbImage extends ImageProvider<AssetEntityThumbImage> {
     return this;
   }
 
+  @override
   bool operator ==(other) {
     if (identical(other, this)) {
       return true;
