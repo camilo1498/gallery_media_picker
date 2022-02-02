@@ -45,6 +45,7 @@ FeatureController<T> _showDropDown<T>({
   final screenWidth = MediaQuery.of(context).size.width;
   final space = screenHeight - height!;
 
+  /// overlay widget
   entry = OverlayEntry(builder: (context) {
     return Padding(
       padding: EdgeInsets.only(top: space,),
@@ -114,12 +115,15 @@ class _DropDownState<T> extends State<DropDown<T>>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      /// return album list
       child: widget.child,
+      /// on tap dropdown
       onTap: () async {
         if (controller != null) {
           controller!.close(null);
           return;
         }
+        /// render overlay
         final height = MediaQuery.of(context).size.height;
         final ctx = widget.relativeKey?.currentContext ?? context;
         RenderBox box = ctx.findRenderObject() as RenderBox;

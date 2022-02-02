@@ -53,7 +53,10 @@ class GalleryMediaPicker extends StatefulWidget {
   final Color selectedBackgroundColor;
   /// selected check color
   final Color selectedCheckColor;
-
+  /// thumbnail box fit
+  final BoxFit thumbnailBoxFix;
+  /// selected Check Background Color
+  final Color selectedCheckBackgroundColor;
   const GalleryMediaPicker({
     Key? key,
     this.maxPickImages = 2,
@@ -75,7 +78,9 @@ class GalleryMediaPicker extends StatefulWidget {
     this.gridViewPhysics,
     required this.pathList,
     this.selectedBackgroundColor = Colors.black,
-    this.selectedCheckColor = Colors.white
+    this.selectedCheckColor = Colors.white,
+    this.thumbnailBoxFix = BoxFit.cover,
+    this.selectedCheckBackgroundColor = Colors.white
   }) : super(key: key);
 
   @override
@@ -89,18 +94,47 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   @override
   void initState() {
     provider.onPickMax.addListener(onPickMax);
-    if (provider.pathList.isEmpty) {
-      PhotoManager.getAssetPathList().then((value) {
-        provider.resetPathList(value);
-      });
-    }
+    _getPermission();
     super.initState();
   }
+  _getPermission() async{
+    var result = await PhotoManager.requestPermissionExtend();
+    if (result.isAuth) {
+      PhotoManager.startChangeNotify();
+      PhotoManager.addChangeCallback((value) {
+        _refreshPathList();
+      });
+
+      if(provider.pathList.isEmpty){
+       _refreshPathList();
+      }
+    } else {
+      /// if result is fail, you can call `PhotoManager.openSetting();`
+      /// to open android/ios application's setting to get permission
+      PhotoManager.openSetting();
+    }
+  }
+
+  _refreshPathList(){
+    PhotoManager.getAssetPathList().then((pathList){
+      /// don't delete setState
+      setState(() {
+        provider.resetPathList(pathList);
+      });
+    });
+  }
+
 
   @override
   void dispose() {
-    provider.onPickMax.removeListener(onPickMax);
-    super.dispose();
+    if(mounted){
+      provider.onPickMax.removeListener(onPickMax);
+      provider.pickedFile.clear();
+      provider.picked.clear();
+      provider.pathList.clear();
+      PhotoManager.stopChangeNotify();
+      super.dispose();
+    }
   }
 
   void onPickMax() {
@@ -159,6 +193,8 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                   imageBackgroundColor: widget.imageBackgroundColor,
                   selectedBackgroundColor: widget.selectedBackgroundColor,
                   selectedCheckColor: widget.selectedCheckColor,
+                  thumbnailBoxFix: widget.thumbnailBoxFix,
+                  selectedCheckBackgroundColor: widget.selectedCheckBackgroundColor,
                   onAssetItemClick: (ctx, asset, index) async{
                     provider.pickEntity(asset);
                     _getFile(asset).then((value) {

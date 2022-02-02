@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:example/src/provider/imageProvider.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gallery_media_picker/gallery_media_picker.dart';
@@ -38,7 +37,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Example(),
+      home: const Example(),
     );
   }
 }
@@ -62,11 +61,43 @@ class _ExampleState extends State<Example> {
             body: Column(
               children: [
                 Container(
-                  height: 340,
+                  height: 300,
                   color: Colors.black,
-                  child: PageView(
+                  child: media.pickedFile.isEmpty
+                  /// no images selected
+                      ? Container(
+                    height: double.infinity,
+                    width:double.infinity,
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Transform.scale(
+                          scale: 8,
+                          child: const Icon(
+                            Icons.image_outlined,
+                            color: Colors.white,
+                            size: 10,
+                          ),
+                        ),
+                        const SizedBox(height: 50),
+                        const Text(
+                          'No images selected',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white70
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                  /// selected images
+                      : PageView(
                     children: [
                       ...media.pickedFile.map((data) {
+                        /// show image
                         if(data['type'] == 'image'){
                           return Center(
                             child: PhotoView.customChild(
@@ -76,28 +107,36 @@ class _ExampleState extends State<Example> {
                               minScale: 1.0,
                             ),
                           );
-                        } else{
+                        }
+                        /// show video
+                        else{
                           return Container(color: Colors.blue,);
                         }
                       })
                     ],
                   ),
                 ),
+                /// gallery media picker
                 Expanded(
                   child: GalleryMediaPicker(
-                    //viewType: ViewType.gridWithPreView,
                     childAspectRatio: 1,
                     crossAxisCount: 3,
+                    thumbnailBoxFix: BoxFit.cover,
                     singlePick: _singlePick,
+                    gridViewBackgroundColor: Colors.grey[900]!,
+                    imageBackgroundColor: Colors.black,
                     maxPickImages: 5,
                     appBarHeight: 60,
                     selectedBackgroundColor: Colors.black,
+                    selectedCheckColor: Colors.black87,
+                    selectedCheckBackgroundColor: Colors.white10,
                     pathList: (paths) {
                       setState(() {
-                        /// for this example i use provider, you can choose the state management that you prefer
+                        /// for this example i used provider, you can choose the state management that you prefer
                         media.pickedFile = paths;
                       });
                     },
+                    /// select multiple image
                     appBarLeadingWidget: Align(
                       alignment: Alignment.bottomRight,
                       child: Padding(
@@ -154,7 +193,6 @@ class _ExampleState extends State<Example> {
                                     ),
                                   ),
                                 ),
-
                               ],
                             ),
                           ),

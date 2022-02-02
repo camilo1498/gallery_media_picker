@@ -54,14 +54,14 @@ mixin PhotoDataProvider on ChangeNotifier {
 
 class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
 
-  /// use this
+
   /// Notification when max is modified.
   final maxNotifier = ValueNotifier(0);
   int get max => maxNotifier.value;
   set max(int value) => maxNotifier.value = value;
   final onPickMax = ChangeNotifier();
 
-  /// use this
+
   /// In single-select mode, when you click an unselected item, the old one is automatically cleared and the new one is selected.
   bool get singlePickMode => _singlePickMode;
   bool _singlePickMode = false;
@@ -76,9 +76,6 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
   }
 
 
-
-
-  /// remove this
   /// pick asset entity
   /// notify changes
   final pickedNotifier = ValueNotifier<List<AssetEntity>>([]);
@@ -107,7 +104,8 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
     notifyListeners();
   }
 
-  /// use this
+
+  /// metadata map
   final pickedFileNotifier = ValueNotifier<List<Map<String, dynamic>>>([{}]);
   List<Map<String, dynamic>> pickedFile = [];
   void pickPath(Map<String, dynamic> path) {
@@ -133,6 +131,7 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
     pickedFileNotifier.notifyListeners();
     notifyListeners();
   }
+
 
    /// picked path index
   int pickIndex(AssetEntity entity) {

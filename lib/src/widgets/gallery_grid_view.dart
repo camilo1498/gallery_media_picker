@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/provider/gallery_provider.dart';
+import 'package:gallery_media_picker/src/widgets/thumbnail_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'asset_widget.dart';
 
 typedef OnAssetItemClick = void Function(BuildContext context, AssetEntity entity,int index);
 
-/// render media grid view
-
 class GalleryGridView extends StatefulWidget {
+  /// asset album
   final AssetPathEntity? path;
+  /// load if scrolling is false
   final bool loadWhenScrolling;
+  /// on tap thumbnail
   final OnAssetItemClick? onAssetItemClick;
+  /// picker data provider
   final PickerDataProvider provider;
-
   /// gallery gridview crossAxisCount
   final int crossAxisCount;
   /// gallery gridview aspect ratio
@@ -29,8 +30,12 @@ class GalleryGridView extends StatefulWidget {
   final Color selectedBackgroundColor;
   /// selected check color
   final Color selectedCheckColor;
+  /// selected Check Background Color
+  final Color selectedCheckBackgroundColor;
   /// background image color
   final Color imageBackgroundColor;
+  /// thumbnail box fit
+  final BoxFit thumbnailBoxFix;
 
   const GalleryGridView({
     Key? key,
@@ -47,6 +52,8 @@ class GalleryGridView extends StatefulWidget {
     this.selectedBackgroundColor = Colors.black,
     this.selectedCheckColor = Colors.white,
     this.imageBackgroundColor = Colors.white,
+    this.thumbnailBoxFix = BoxFit.cover,
+    this.selectedCheckBackgroundColor = Colors.white
   }) : super(key: key);
 
   @override
@@ -66,7 +73,7 @@ class _GalleryGridViewState extends State<GalleryGridView> {
 
   @override
   Widget build(BuildContext context) {
-    /// generate asset grid view
+    /// generate thumbnail grid view
     return widget.path != null ? NotificationListener<ScrollNotification>(
       onNotification: _onScroll,
       child: Container(
@@ -83,6 +90,7 @@ class _GalleryGridViewState extends State<GalleryGridView> {
             mainAxisSpacing: 2.5,
             crossAxisSpacing: 2.5,
           ),
+          /// render thumbnail
           itemBuilder: (context, index) => _buildItem(context, index, widget.provider),
           itemCount: widget.path!.assetCount,
           addRepaintBoundaries: true,
@@ -96,6 +104,7 @@ class _GalleryGridViewState extends State<GalleryGridView> {
   Widget _buildItem(BuildContext context, index, PickerDataProvider provider) {
 
       return GestureDetector(
+        /// on tap thumbnail
         onTap: () async {
           var asset = cacheMap[index];
           if (asset == null) {
@@ -105,21 +114,25 @@ class _GalleryGridViewState extends State<GalleryGridView> {
           }
           widget.onAssetItemClick?.call(context, asset,index);
         },
+        /// render thumbnail
         child: _buildScrollItem(context, index, provider),
       );
 
   }
 
   Widget _buildScrollItem(BuildContext context, int index, PickerDataProvider provider) {
+    /// load cache images
     final asset = cacheMap[index];
     if (asset != null) {
-      return AssetWidget(
+      return ThumbnailWidget(
         asset: asset,
         provider: provider,
         thumbSize: 100,
         selectedBackgroundColor: widget.selectedBackgroundColor,
         selectedCheckColor: widget.selectedCheckColor,
         imageBackgroundColor: widget.imageBackgroundColor,
+        thumbnailBoxFix: widget.thumbnailBoxFix,
+        selectedCheckBackgroundColor: widget.selectedCheckBackgroundColor,
       );
       } else {
       /// read the assets from selected album
@@ -135,13 +148,16 @@ class _GalleryGridViewState extends State<GalleryGridView> {
           }
           final asset = snapshot.data![0];
           cacheMap[index] = asset;
-          return AssetWidget(
+          /// thumbnail widget
+          return ThumbnailWidget(
             asset: asset,
             provider: provider,
             thumbSize: 100,
             selectedBackgroundColor: widget.selectedBackgroundColor,
             selectedCheckColor: widget.selectedCheckColor,
             imageBackgroundColor: widget.imageBackgroundColor,
+            thumbnailBoxFix: widget.thumbnailBoxFix,
+            selectedCheckBackgroundColor: widget.selectedCheckBackgroundColor,
           );
 
         },

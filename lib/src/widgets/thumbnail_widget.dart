@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/provider/gallery_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-class AssetWidget extends StatelessWidget {
+class ThumbnailWidget extends StatelessWidget {
   /// asset entity
   final AssetEntity asset;
   /// size of image thumbnail
@@ -16,24 +16,22 @@ class AssetWidget extends StatelessWidget {
   final Color selectedBackgroundColor;
   /// selected check color
   final Color selectedCheckColor;
-  const AssetWidget({
+  /// selected Check Background Color
+  final Color selectedCheckBackgroundColor;
+  /// thumbnail box fit
+  final BoxFit thumbnailBoxFix;
+  const ThumbnailWidget({
     Key? key,
     required this.asset,
     required this.provider,
     this.thumbSize = 200,
     this.imageBackgroundColor = Colors.white,
     this.selectedBackgroundColor =Colors.white,
-    this.selectedCheckColor = Colors.white
+    this.selectedCheckColor = Colors.white,
+    this.thumbnailBoxFix = BoxFit.cover,
+    this.selectedCheckBackgroundColor = Colors.white
   }) : super(key: key);
 
-  static AssetWidget buildWidget(
-      BuildContext context, AssetEntity asset, int thumbSize, PickerDataProvider provider) {
-    return AssetWidget(
-      asset: asset,
-      thumbSize: thumbSize,
-      provider: provider,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +50,14 @@ class AssetWidget extends StatelessWidget {
           future: asset.thumbData,
           builder: (_, data){
             if(data.hasData){
-              return Image.memory(
-                data.data!,
-                gaplessPlayback: true,
+              return SizedBox(
+                width: double.infinity,
+                height: double.infinity,
+                child: Image.memory(
+                  data.data!,
+                  gaplessPlayback: true,
+                  fit: thumbnailBoxFix,
+                ),
               );
             } else{
               return Container();
@@ -86,15 +89,15 @@ class AssetWidget extends StatelessWidget {
                 builder: (_, __){
                   final pickIndex = provider.pickIndex(asset);
                   final picked = pickIndex >= 0;
-                  return picked ? AnimatedOpacity(
-                    duration: const Duration(seconds: 1),
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
                     opacity: picked ? 1 : 0,
                     child: Container(
                       height: 20,
                       width: 20,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: picked ? selectedBackgroundColor.withOpacity(0.6) : Colors.transparent,
+                        color: picked ? selectedCheckBackgroundColor.withOpacity(0.6) : Colors.transparent,
                         border: Border.all(
                             width: 1.5,
                             color: selectedCheckColor
@@ -106,7 +109,7 @@ class AssetWidget extends StatelessWidget {
                         size: 14,
                       ),
                     ),
-                  ) : Container();
+                  );
                 }
             ),
           ),
