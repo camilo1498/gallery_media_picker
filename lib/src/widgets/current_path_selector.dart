@@ -40,26 +40,35 @@ class SelectedPathDropdownButton extends StatelessWidget {
     final arrowDownNotifier = ValueNotifier(false);
     return AnimatedBuilder(
       animation: provider.currentPathNotifier,
-      builder: (_, __) => DropDown<AssetPathEntity>(
-        relativeKey: dropdownRelativeKey!,
-        child: ((context) => buildButton(context, arrowDownNotifier))(context),
-        dropdownWidgetBuilder:(BuildContext context, close) {
-              return ChangePathWidget(
-                provider: provider as PickerDataProvider,
-                close: close,
-                albumBackGroundColor: albumBackGroundColor,
-                albumDividerColor: albumDividerColor,
-                albumTextColor: albumTextColor,
-              );
+      builder: (_, __) => Row(
+        children: [
+          DropDown<AssetPathEntity>(
+            relativeKey: dropdownRelativeKey!,
+            child: ((context) => buildButton(context, arrowDownNotifier))(context),
+            dropdownWidgetBuilder:(BuildContext context, close) {
+                  return ChangePathWidget(
+                    provider: provider as PickerDataProvider,
+                    close: close,
+                    albumBackGroundColor: albumBackGroundColor,
+                    albumDividerColor: albumDividerColor,
+                    albumTextColor: albumTextColor,
+                  );
+                },
+            onResult: (AssetPathEntity? value) {
+              if (value != null) {
+                provider.currentPath = value;
+              }
             },
-        onResult: (AssetPathEntity? value) {
-          if (value != null) {
-            provider.currentPath = value;
-          }
-        },
-        onShow: (value) {
-          arrowDownNotifier.value = value;
-        },
+            onShow: (value) {
+              arrowDownNotifier.value = value;
+            },
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width / 1.7,
+            alignment: Alignment.bottomLeft,
+            child: appBarLeadingWidget ?? Container(),
+          )
+        ],
       ),
     );
   }
@@ -84,53 +93,44 @@ class SelectedPathDropdownButton extends StatelessWidget {
     } else {
       return Container(
         decoration: decoration,
-        child: Row(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width / 2,
-              padding: const EdgeInsets.only(left: 15,bottom: 15),
-              alignment: Alignment.bottomLeft,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.28,
-                    child: Text(
-                      provider.currentPath!.name,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          color: appBarTextColor,
-                          fontSize: 18,
-                          letterSpacing: 0.8,
-                          fontWeight: FontWeight.w500
-                      ),
-                    ),
+        child: Container(
+          width: MediaQuery.of(context).size.width / 2.43,
+          padding: const EdgeInsets.only(left: 15,bottom: 15),
+          alignment: Alignment.bottomLeft,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.28,
+                child: Text(
+                  provider.currentPath!.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      color: appBarTextColor,
+                      fontSize: 18,
+                      letterSpacing: 0.8,
+                      fontWeight: FontWeight.w500
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 5),
-                    child: AnimatedBuilder(
-                      child: Icon(
-                        Icons.keyboard_arrow_down,
-                        color: appBarIconColor,
-                      ),
-                      animation: arrowDownNotifier,
-                      builder: (BuildContext context, child) {
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          child: child,
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width / 2,
-              alignment: Alignment.bottomLeft,
-              child: appBarLeadingWidget ?? Container(),
-            )
-          ],
+              Padding(
+                padding: const EdgeInsets.only(left: 5),
+                child: AnimatedBuilder(
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: appBarIconColor,
+                  ),
+                  animation: arrowDownNotifier,
+                  builder: (BuildContext context, child) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      child: child,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }

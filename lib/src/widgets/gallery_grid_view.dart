@@ -130,7 +130,7 @@ class _GalleryGridViewState extends State<GalleryGridView> {
             return Container(
               width: double.infinity,
               height: double.infinity,
-              color: const Color(0xFF4A4748),
+              color: widget.gridViewBackgroundColor,
             );
           }
           final asset = snapshot.data![0];
@@ -143,10 +143,12 @@ class _GalleryGridViewState extends State<GalleryGridView> {
             selectedCheckColor: widget.selectedCheckColor,
             imageBackgroundColor: widget.imageBackgroundColor,
           );
+
         },
       );
     }
   }
+
   /// scroll notifier
   bool _onScroll(ScrollNotification notification) {
     if (notification is ScrollEndNotification) {

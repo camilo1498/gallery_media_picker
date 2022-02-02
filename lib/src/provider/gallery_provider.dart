@@ -1,12 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 mixin PhotoDataProvider on ChangeNotifier {
-  AssetPathEntity? _current;
-
-  AssetPathEntity? get currentPath => _current;
 
   /// current gallery album
+  final currentPathNotifier = ValueNotifier<AssetPathEntity?>(null);
+  AssetPathEntity? _current;
+  AssetPathEntity? get currentPath => _current;
   set currentPath(AssetPathEntity? current) {
     if (_current != current) {
       _current = current;
@@ -14,13 +15,10 @@ mixin PhotoDataProvider on ChangeNotifier {
     }
   }
 
-  /// notify changes
-  final currentPathNotifier = ValueNotifier<AssetPathEntity?>(null);
-  final pathListNotifier = ValueNotifier<List<AssetPathEntity>>([]);
 
   /// save path in list
   List<AssetPathEntity> pathList = [];
-
+  final pathListNotifier = ValueNotifier<List<AssetPathEntity>>([]);
   /// order path by date
   static int _defaultSort(
       AssetPathEntity a,
@@ -35,7 +33,7 @@ mixin PhotoDataProvider on ChangeNotifier {
     return 0;
   }
 
-  /// clear path list
+  /// add assets to a list
   void resetPathList(
       List<AssetPathEntity> list, {
         int defaultIndex = 0,
@@ -55,36 +53,15 @@ mixin PhotoDataProvider on ChangeNotifier {
 }
 
 class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
-  PickerDataProvider({List<AssetPathEntity>? pathList, int max = 9}) {
-    if (pathList != null && pathList.isNotEmpty ) {
-      this.pathList.addAll(pathList);
-    }
-    pickedNotifier.value = picked;
-    maxNotifier.value = max;
-  }
 
+  /// use this
   /// Notification when max is modified.
   final maxNotifier = ValueNotifier(0);
-
   int get max => maxNotifier.value;
   set max(int value) => maxNotifier.value = value;
-
   final onPickMax = ChangeNotifier();
 
-  /// save selected asset item
-  List<AssetEntity> picked = [];
-  List<String> pickedFile = [];
-
-  final isOriginNotifier =  ValueNotifier(false);
-
-  bool get isOrigin => isOriginNotifier.value;
-
-  set isOrigin(bool isOrigin) {
-    isOriginNotifier.value = isOrigin;
-  }
-
-  /// Single-select mode, there are subtle differences between interaction and multiple selection.
-  ///
+  /// use this
   /// In single-select mode, when you click an unselected item, the old one is automatically cleared and the new one is selected.
   bool get singlePickMode => _singlePickMode;
   bool _singlePickMode = false;
@@ -94,14 +71,18 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
       maxNotifier.value = 1;
       notifyListeners();
     }
+    maxNotifier.value = max;
     notifyListeners();
   }
 
+
+
+
+  /// remove this
+  /// pick asset entity
   /// notify changes
   final pickedNotifier = ValueNotifier<List<AssetEntity>>([]);
-  final pickedFileNotifier = ValueNotifier<List<String>>([]);
-
-  /// pick asset entity
+  List<AssetEntity> picked = [];
   void pickEntity(AssetEntity entity) {
     if (singlePickMode) {
       if (picked.contains(entity)) {
@@ -126,17 +107,20 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
     notifyListeners();
   }
 
-  void pickPath(String path) {
+  /// use this
+  final pickedFileNotifier = ValueNotifier<List<Map<String, dynamic>>>([{}]);
+  List<Map<String, dynamic>> pickedFile = [];
+  void pickPath(Map<String, dynamic> path) {
     if (singlePickMode) {
-      if (pickedFile.contains(path)) {
-        pickedFile.remove(path);
+      if (pickedFile.where((element) => element['id'] == path['id']).isNotEmpty) {
+        pickedFile.removeWhere((val) => val['id'] == path['id']);
       } else {
         pickedFile.clear();
         pickedFile.add(path);
       }
     } else {
-      if (pickedFile.contains(path)) {
-        pickedFile.remove(path);
+      if (pickedFile.where((element) => element['id'] == path['id']).isNotEmpty) {
+        pickedFile.removeWhere((val) => val['id'] == path['id']);
       } else {
         if (pickedFile.length == max) {
           onPickMax.notifyListeners();

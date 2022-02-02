@@ -18,7 +18,7 @@ class GalleryMediaPicker extends StatefulWidget {
   /// picker mode
   final bool singlePick;
   /// return all selected paths
-  final Function(List<String> path) pathList;
+  final Function(List<Map<String,dynamic>> path) pathList;
   /// dropdown appbar color
   final Color appBarColor;
   /// appBar TextColor
@@ -88,9 +88,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
 
   @override
   void initState() {
-    provider.max = widget.maxPickImages;
     provider.onPickMax.addListener(onPickMax);
-    provider.singlePickMode = widget.singlePick;
     if (provider.pathList.isEmpty) {
       PhotoManager.getAssetPathList().then((value) {
         provider.resetPathList(value);
@@ -109,14 +107,21 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
     showToast("Already pick ${provider.max} items.");
   }
 
+  void isSinglePickMode(){
+    provider.singlePickMode = widget.singlePick;
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    provider.max = widget.maxPickImages;
+    provider.singlePickMode = widget.singlePick;
     final key = GlobalKey();
 
     return OKToast(
       child:  Column(
         children: [
+          /// album drop down
           Center(
             child: Container(
               color: widget.appBarColor,
@@ -135,6 +140,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
               ),
             ),
           ),
+          /// grid view
           Expanded(
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
@@ -156,7 +162,26 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                   onAssetItemClick: (ctx, asset, index) async{
                     provider.pickEntity(asset);
                     _getFile(asset).then((value) {
-                      provider.pickPath(value);
+                      /// add metadata to map list
+                      provider.pickPath({
+                        'id': asset.id,
+                        'path': value,
+                        'type': asset.typeInt == 1 ? 'image' : 'video',
+                        'videoDuration': asset.videoDuration,
+                        'createDateTime': asset.createDateTime,
+                        'latitude': asset.latitude,
+                        'longitude': asset.longitude,
+                        'thumbnail': asset.thumbData,
+                        'height': asset.height,
+                        'width': asset.width,
+                        'orientationHeight': asset.orientatedHeight,
+                        'orientationWidth': asset.orientatedWidth,
+                        'orientationSize': asset.orientatedSize,
+                        'file': asset.file,
+                        'modifiedDateTime': asset.modifiedDateTime,
+                        'title': asset.title,
+                        'size': asset.size,
+                      });
                       widget.pathList(provider.pickedFile);
                     });
                   },
@@ -168,6 +193,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
       ),
     );
   }
+  /// get asset path
   Future _getFile(AssetEntity asset) async{
     var _file = await asset.file;
     return _file!.path;

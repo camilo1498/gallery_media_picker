@@ -1,5 +1,4 @@
-import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/provider/gallery_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -49,13 +48,18 @@ class AssetWidget extends StatelessWidget {
         ),
 
         /// thumbnail image
-        Image(
-          image: AssetEntityThumbImage(
-            entity: asset,
-            width: thumbSize,
-            height: thumbSize,
-          ),
-          fit: BoxFit.cover,
+        FutureBuilder<Uint8List?>(
+          future: asset.thumbData,
+          builder: (_, data){
+            if(data.hasData){
+              return Image.memory(
+                data.data!,
+                gaplessPlayback: true,
+              );
+            } else{
+              return Container();
+            }
+          },
         ),
         /// selected image color mask
         AnimatedBuilder(
@@ -63,9 +67,10 @@ class AssetWidget extends StatelessWidget {
             builder: (_, __){
               final pickIndex = provider.pickIndex(asset);
               final picked = pickIndex >= 0;
-              return Container(
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
                 decoration: BoxDecoration(
-                  color: picked ? Colors.black.withOpacity(0.3) : Colors.transparent,
+                  color: picked ? selectedBackgroundColor.withOpacity(0.3) : Colors.transparent,
 
                 ) ,
               );
@@ -81,21 +86,25 @@ class AssetWidget extends StatelessWidget {
                 builder: (_, __){
                   final pickIndex = provider.pickIndex(asset);
                   final picked = pickIndex >= 0;
-                  return picked ? Container(
-                    height: 20,
-                    width: 20,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: picked ? selectedBackgroundColor.withOpacity(0.3) : Colors.transparent,
-                      border: Border.all(
-                          width: 1.5,
-                          color: selectedCheckColor
+                  return picked ? AnimatedOpacity(
+                    duration: const Duration(seconds: 1),
+                    opacity: picked ? 1 : 0,
+                    child: Container(
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: picked ? selectedBackgroundColor.withOpacity(0.6) : Colors.transparent,
+                        border: Border.all(
+                            width: 1.5,
+                            color: selectedCheckColor
+                        ),
+                      ) ,
+                      child: Icon(
+                        Icons.check,
+                        color: selectedCheckColor,
+                        size: 14,
                       ),
-                    ) ,
-                    child: Icon(
-                      Icons.check,
-                      color: selectedCheckColor,
-                      size: 14,
                     ),
                   ) : Container();
                 }
@@ -158,42 +167,4 @@ _parseDuration(int seconds){
   } else {
     return  '${Duration(seconds: seconds)}'.toString().substring(1,7);
   }
-}
-
-
-class AssetEntityThumbImage extends ImageProvider<AssetEntityThumbImage> {
-  final AssetEntity entity;
-  final int width;
-  final int height;
-  final double scale;
-
-  AssetEntityThumbImage({
-    required this.entity,
-    int? width,
-    int? height,
-    this.scale = 1.0,
-  })  : width = width ?? entity.width,
-        height = height ?? entity.height;
-
-  @override
-  ImageStreamCompleter load(AssetEntityThumbImage key, DecoderCallback decode) {
-    return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode),
-      scale: key.scale,
-    );
-  }
-
-  Future<ui.Codec> _loadAsync(
-      AssetEntityThumbImage key, DecoderCallback decode) async {
-    assert(key == this);
-    final bytes = await entity.thumbDataWithSize(width, height);
-    return decode(bytes!);
-  }
-
-  @override
-  Future<AssetEntityThumbImage> obtainKey(
-      ImageConfiguration configuration) async {
-    return this;
-  }
-
 }
