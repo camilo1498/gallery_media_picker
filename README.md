@@ -11,7 +11,7 @@ Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_w
 [x] take picture or video from camera
 
 ## Demo (custom view)
-![custom view](https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_custom_view.gif)
+<img src="https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_custom_view.gif" width="250" height=450"/>
 
 ## Demo (preset view)
 ![preset view](https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_preset_view.gif)
