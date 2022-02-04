@@ -11,10 +11,10 @@ Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_w
 [x] take picture or video from camera
 
 ## Demo (custom view)
-<img src="https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_custom_view.gif" width="250" height=450"/>
+<img src="https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_custom_view.gif" alt="showcase gif" title="custom view" width="200"/>
 
 ## Demo (preset view)
-![preset view](https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_preset_view.gif)
+<img src="https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_preset_view.gif" alt="showcase gif" title="preset view" width="200"/>
 
 ## Installation
 1) This package has only tested in android, add `gallery_media_picker: 0.0.4` in your `pubspec.yaml`
@@ -38,7 +38,29 @@ Create a `GalleryMediaPicker()` widget:
 Material(
     child: GalleryMediaPicker(
         /// required params
-        pathList: (List<Map<String,dynamic>> path) {}, /// => (type List<Map<String,dynamic>>) return a list map with selected media metadata
+        pathList: (List<Map<String,dynamic>> path) { /// => (type List<Map<String,dynamic>>) return a list map with selected media metadata
+          /// returned metadata
+          //Map {
+          //   'id': String,
+          //   'path': String,
+          //   'type': String,
+          //   'videoDuration': Duration,
+          //   'createDateTime': DateTime,
+          //   'latitude': double,
+          //  'longitude': double,
+          //   'thumbnail': Uint8List,
+          //   'height': double,
+          //   'width': double,
+          //   'orientationHeight': int,
+          //   'orientationWidth': int,
+          //   'orientationSize': Size,
+          //  'file': Future<File>,
+          //   'modifiedDateTime': DateTime,
+          //   'title': String,
+          //   'size': Size,
+          // }
+        }, 
+        
         /// optional params
         maxPickImages: , /// (type int)
         singlePick: , /// (type bool)
