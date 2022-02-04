@@ -8,7 +8,7 @@ Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_w
 
 [✔] pick multi image / video
 
-[x] take picture or video from camera
+[❌] take picture or video from camera
 
 ## Demo (custom view)
 <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_custom_view.gif" alt="showcase gif" title="custom view" width="200"/>
