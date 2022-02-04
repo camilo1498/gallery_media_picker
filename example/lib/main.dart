@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:better_video_player/better_video_player.dart';
 import 'package:example/src/provider/imageProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gallery_media_picker/gallery_media_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 void main() {
   Paint.enableDithering = true;
@@ -110,7 +112,27 @@ class _ExampleState extends State<Example> {
                         }
                         /// show video
                         else{
-                          return Container(color: Colors.blue,);
+                          if(mounted){
+                            return AspectRatio(
+                              aspectRatio: 16.0 / 9.0,
+                              child: BetterVideoPlayer(
+                                configuration: const BetterVideoPlayerConfiguration(
+                                  looping: true,
+                                  autoPlay: true,
+                                  allowedScreenSleep: false,
+                                  autoPlayWhenResume: true,
+                                ),
+                                controller: BetterVideoPlayerController(),
+                                dataSource: BetterVideoPlayerDataSource(
+                                  BetterVideoPlayerDataSourceType.file,
+                                  data['path'],
+                                ),
+                              ),
+                            );
+                          } else {
+                            return Container();
+                          }
+
                         }
                       })
                     ],
@@ -141,61 +163,103 @@ class _ExampleState extends State<Example> {
                       alignment: Alignment.bottomRight,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 15,bottom: 12),
-                        child: SizedBox(
-                          height: 30,
-                          child: Container(
-                            alignment: Alignment.centerRight,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                GestureDetector(
-                                  onTap: (){
-                                    setState(() {
-                                      _singlePick = !_singlePick;
-                                    });
-                                    debugPrint(_singlePick.toString());
-                                  },
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                        color: Colors.blue,
-                                        width: 1.5
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            /// select multiple / single
+                            SizedBox(
+                              height: 30,
+                              child: Container(
+                                alignment: Alignment.centerRight,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: (){
+                                        setState(() {
+                                          _singlePick = !_singlePick;
+                                        });
+                                        debugPrint(_singlePick.toString());
+                                      },
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 300),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(
+                                            color: Colors.blue,
+                                            width: 1.5
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              const Text(
+                                                'Select multiple',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 10
+                                                ),
+                                              ),
+                                              const SizedBox(width: 7,),
+                                               Transform.scale(
+                                                 scale: 1.5,
+                                                 child: Icon(
+                                                  _singlePick ? Icons.check_box_outline_blank : Icons.check_box_outlined,
+                                                  color: Colors.blue,
+                                                   size: 10,
+                                              ),
+                                               )
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Text(
-                                            'Select multiple',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 10
-                                            ),
-                                          ),
-                                          const SizedBox(width: 7,),
-                                           Transform.scale(
-                                             scale: 1.5,
-                                             child: Icon(
-                                              _singlePick ? Icons.check_box_outline_blank : Icons.check_box_outlined,
-                                              color: Colors.blue,
-                                               size: 10,
-                                          ),
-                                           )
-                                        ],
-                                      ),
-                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 40,),
+                            /// share
+                            GestureDetector(
+                              onTap: () async{
+                                List<String> _mediaPath = [];
+                                media.pickedFile.map((p) {
+                                  setState(() {
+                                    _mediaPath.add(p['path']);
+                                  });
+                                }).toString();
+                                if(_mediaPath.isNotEmpty){
+                                  await Share.shareFiles(_mediaPath);
+                                }
+                                _mediaPath.clear();
+                              },
+                              child: Container(
+                                height: 30,
+                                width: 30,
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: Colors.blue,
+                                    width: 1.5
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
+                                child: Transform.scale(
+                                  scale: 2,
+                                  child: const Icon(
+                                    Icons.share_outlined,
+                                    color: Colors.blue,
+                                    size: 10,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
                         ),
                       ),
                     ),

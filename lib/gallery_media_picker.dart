@@ -57,6 +57,11 @@ class GalleryMediaPicker extends StatefulWidget {
   final BoxFit thumbnailBoxFix;
   /// selected Check Background Color
   final Color selectedCheckBackgroundColor;
+  /// load video
+  final bool onlyVideos;
+  /// load images
+  final bool onlyImages;
+
   const GalleryMediaPicker({
     Key? key,
     this.maxPickImages = 2,
@@ -80,7 +85,9 @@ class GalleryMediaPicker extends StatefulWidget {
     this.selectedBackgroundColor = Colors.black,
     this.selectedCheckColor = Colors.white,
     this.thumbnailBoxFix = BoxFit.cover,
-    this.selectedCheckBackgroundColor = Colors.white
+    this.selectedCheckBackgroundColor = Colors.white,
+    this.onlyImages = false,
+    this.onlyVideos = false
   }) : super(key: key);
 
   @override
@@ -116,7 +123,9 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   }
 
   _refreshPathList(){
-    PhotoManager.getAssetPathList().then((pathList){
+    PhotoManager.getAssetPathList(
+      type: widget.onlyVideos ? RequestType.video : widget.onlyImages ? RequestType.image : RequestType.all
+    ).then((pathList){
       /// don't delete setState
       setState(() {
         provider.resetPathList(pathList);
