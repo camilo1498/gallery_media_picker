@@ -1,7 +1,6 @@
 // ignore_for_file: unnecessary_null_comparison
 library gallery_media_picker;
 
-
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/provider/gallery_provider.dart';
 import 'package:gallery_media_picker/src/widgets/gallery_grid_view.dart';
@@ -10,7 +9,7 @@ import 'package:oktoast/oktoast.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 export 'package:gallery_media_picker/gallery_media_picker.dart';
-
+export 'package:gallery_media_picker/src/widgets/cover_thumbnail.dart';
 
 class GalleryMediaPicker extends StatefulWidget {
   /// maximum images allowed (default 2)
@@ -18,7 +17,7 @@ class GalleryMediaPicker extends StatefulWidget {
   /// picker mode
   final bool singlePick;
   /// return all selected paths
-  final Function(List<Map<String,dynamic>> path) pathList;
+  final Function(List<Map<String,dynamic>> path)? pathList;
   /// dropdown appbar color
   final Color appBarColor;
   /// appBar TextColor
@@ -81,7 +80,7 @@ class GalleryMediaPicker extends StatefulWidget {
     this.gridPadding,
     this.gridViewController,
     this.gridViewPhysics,
-    required this.pathList,
+    this.pathList,
     this.selectedBackgroundColor = Colors.black,
     this.selectedCheckColor = Colors.white,
     this.thumbnailBoxFix = BoxFit.cover,
@@ -92,11 +91,13 @@ class GalleryMediaPicker extends StatefulWidget {
 
   @override
   _GalleryMediaPickerState createState() => _GalleryMediaPickerState();
+
 }
 
 class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   /// create object of PickerDataProvider
   final provider = PickerDataProvider();
+
 
   @override
   void initState() {
@@ -227,7 +228,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                         'title': asset.title,
                         'size': asset.size,
                       });
-                      widget.pathList(provider.pickedFile);
+                      widget.pathList!(provider.pickedFile);
                     });
                   },
                 ),

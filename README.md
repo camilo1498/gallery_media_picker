@@ -8,6 +8,8 @@ Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_w
 
 [✔] pick multi image / video
 
+[✔] cover thumbnail (preview first image on gallery)
+
 [❌] take picture or video from camera
 
 ## Demo (custom view)
@@ -105,6 +107,76 @@ class Example extends StatelessWidget {
       home: Material(
         child: GalleryMediaPicker(
             pathList: (pathList){}
+        ),
+      ),
+    );
+  }
+}
+
+```
+
+if you can use only cover thumbnail use this code line:
+```dart
+import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/gallery_media_picker.dart';
+
+void main() => runApp(const Example());
+
+class Example extends StatelessWidget {
+  const Example({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Material(
+        color: Colors.black,
+        child: Stack(
+            children: [
+              Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Container(
+                              height: 100,
+                              width: 100,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Colors.black,
+                                      width: 2
+                                  ),
+                                  borderRadius: BorderRadius.circular(10)
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: const CoverThumbnail(
+                                    thumbnailQuality: 200,
+                                    thumbnailFit: BoxFit.cover
+                                ),
+                              )
+                          )
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 15,bottom: 50),
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Text(
+                            'Only show the first image on gallery',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  )
+              )
+            ]
         ),
       ),
     );
