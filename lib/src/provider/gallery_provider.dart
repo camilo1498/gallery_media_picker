@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 mixin PhotoDataProvider on ChangeNotifier {
-
   /// current gallery album
   final currentPathNotifier = ValueNotifier<AssetPathEntity?>(null);
   AssetPathEntity? _current;
@@ -15,15 +14,15 @@ mixin PhotoDataProvider on ChangeNotifier {
     }
   }
 
-
   /// save path in list
   List<AssetPathEntity> pathList = [];
   final pathListNotifier = ValueNotifier<List<AssetPathEntity>>([]);
+
   /// order path by date
   static int _defaultSort(
-      AssetPathEntity a,
-      AssetPathEntity b,
-      ) {
+    AssetPathEntity a,
+    AssetPathEntity b,
+  ) {
     if (a.isAll) {
       return -1;
     }
@@ -35,13 +34,14 @@ mixin PhotoDataProvider on ChangeNotifier {
 
   /// add assets to a list
   void resetPathList(
-      List<AssetPathEntity> list, {
-        int defaultIndex = 0,
-        int Function(
-            AssetPathEntity a,
-            AssetPathEntity b,
-            ) sortBy = _defaultSort,
-      }) {
+    List<AssetPathEntity> list, {
+    int defaultIndex = 0,
+    int Function(
+      AssetPathEntity a,
+      AssetPathEntity b,
+    )
+        sortBy = _defaultSort,
+  }) {
     list.sort(sortBy);
     pathList.clear();
     pathList.addAll(list);
@@ -49,18 +49,14 @@ mixin PhotoDataProvider on ChangeNotifier {
     pathListNotifier.value = pathList;
     notifyListeners();
   }
-
 }
 
 class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
-
-
   /// Notification when max is modified.
   final maxNotifier = ValueNotifier(0);
   int get max => maxNotifier.value;
   set max(int value) => maxNotifier.value = value;
   final onPickMax = ChangeNotifier();
-
 
   /// In single-select mode, when you click an unselected item, the old one is automatically cleared and the new one is selected.
   bool get singlePickMode => _singlePickMode;
@@ -74,7 +70,6 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
     maxNotifier.value = max;
     notifyListeners();
   }
-
 
   /// pick asset entity
   /// notify changes
@@ -104,20 +99,23 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
     notifyListeners();
   }
 
-
   /// metadata map
   final pickedFileNotifier = ValueNotifier<List<Map<String, dynamic>>>([{}]);
   List<Map<String, dynamic>> pickedFile = [];
   void pickPath(Map<String, dynamic> path) {
     if (singlePickMode) {
-      if (pickedFile.where((element) => element['id'] == path['id']).isNotEmpty) {
+      if (pickedFile
+          .where((element) => element['id'] == path['id'])
+          .isNotEmpty) {
         pickedFile.removeWhere((val) => val['id'] == path['id']);
       } else {
         pickedFile.clear();
         pickedFile.add(path);
       }
     } else {
-      if (pickedFile.where((element) => element['id'] == path['id']).isNotEmpty) {
+      if (pickedFile
+          .where((element) => element['id'] == path['id'])
+          .isNotEmpty) {
         pickedFile.removeWhere((val) => val['id'] == path['id']);
       } else {
         if (pickedFile.length == max) {
@@ -132,10 +130,8 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
     notifyListeners();
   }
 
-
-   /// picked path index
+  /// picked path index
   int pickIndex(AssetEntity entity) {
     return picked.indexOf(entity);
   }
-
 }

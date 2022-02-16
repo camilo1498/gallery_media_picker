@@ -6,34 +6,41 @@ import 'dropdown.dart';
 class SelectedPathDropdownButton extends StatelessWidget {
   /// picker provider
   final PhotoDataProvider provider;
+
   /// global key
   final GlobalKey? dropdownRelativeKey;
   final Color appBarColor;
+
   /// appBar TextColor
   final Color appBarTextColor;
+
   /// appBar icon Color
   final Color appBarIconColor;
+
   /// album background color
   final Color albumBackGroundColor;
+
   /// album text color
   final Color albumTextColor;
+
   /// album divider color
   final Color albumDividerColor;
+
   /// appBar leading widget
   final Widget? appBarLeadingWidget;
 
-  const SelectedPathDropdownButton({
-    Key? key,
-    required this.provider,
-    required this.dropdownRelativeKey,
-    required this.appBarTextColor,
-    required this.appBarIconColor,
-    required this.appBarColor,
-    required this.albumBackGroundColor,
-    required this.albumDividerColor,
-    required this.albumTextColor,
-    this.appBarLeadingWidget
-  }) : super(key: key);
+  const SelectedPathDropdownButton(
+      {Key? key,
+      required this.provider,
+      required this.dropdownRelativeKey,
+      required this.appBarTextColor,
+      required this.appBarIconColor,
+      required this.appBarColor,
+      required this.albumBackGroundColor,
+      required this.albumDividerColor,
+      required this.albumTextColor,
+      this.appBarLeadingWidget})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,16 +51,17 @@ class SelectedPathDropdownButton extends StatelessWidget {
         children: [
           DropDown<AssetPathEntity>(
             relativeKey: dropdownRelativeKey!,
-            child: ((context) => buildButton(context, arrowDownNotifier))(context),
-            dropdownWidgetBuilder:(BuildContext context, close) {
-                  return ChangePathWidget(
-                    provider: provider as PickerDataProvider,
-                    close: close,
-                    albumBackGroundColor: albumBackGroundColor,
-                    albumDividerColor: albumDividerColor,
-                    albumTextColor: albumTextColor,
-                  );
-                },
+            child:
+                ((context) => buildButton(context, arrowDownNotifier))(context),
+            dropdownWidgetBuilder: (BuildContext context, close) {
+              return ChangePathWidget(
+                provider: provider as PickerDataProvider,
+                close: close,
+                albumBackGroundColor: albumBackGroundColor,
+                albumDividerColor: albumDividerColor,
+                albumTextColor: albumTextColor,
+              );
+            },
             onResult: (AssetPathEntity? value) {
               if (value != null) {
                 provider.currentPath = value;
@@ -95,7 +103,7 @@ class SelectedPathDropdownButton extends StatelessWidget {
         decoration: decoration,
         child: Container(
           width: MediaQuery.of(context).size.width / 2.43,
-          padding: const EdgeInsets.only(left: 15,bottom: 15),
+          padding: const EdgeInsets.only(left: 15, bottom: 15),
           alignment: Alignment.bottomLeft,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -109,8 +117,7 @@ class SelectedPathDropdownButton extends StatelessWidget {
                       color: appBarTextColor,
                       fontSize: 18,
                       letterSpacing: 0.8,
-                      fontWeight: FontWeight.w500
-                  ),
+                      fontWeight: FontWeight.w500),
                 ),
               ),
               Padding(
@@ -140,10 +147,13 @@ class SelectedPathDropdownButton extends StatelessWidget {
 class ChangePathWidget extends StatefulWidget {
   final PickerDataProvider provider;
   final ValueSetter<AssetPathEntity> close;
+
   /// album background color
   final Color albumBackGroundColor;
+
   /// album text color
   final Color albumTextColor;
+
   /// album divider color
   final Color albumDividerColor;
   const ChangePathWidget({
@@ -169,8 +179,7 @@ class _ChangePathWidgetState extends State<ChangePathWidget> {
   void initState() {
     super.initState();
     final index = provider.pathList.indexOf(provider.currentPath!);
-    controller =
-        ScrollController(initialScrollOffset: itemHeight * index);
+    controller = ScrollController(initialScrollOffset: itemHeight * index);
   }
 
   @override
@@ -209,6 +218,7 @@ class _ChangePathWidgetState extends State<ChangePathWidget> {
       children: <Widget>[
         /// list of album
         w,
+
         /// divider
         Positioned(
           height: 1,

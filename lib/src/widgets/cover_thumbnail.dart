@@ -7,12 +7,12 @@ class CoverThumbnail extends StatefulWidget {
   final int thumbnailQuality;
   final double thumbnailScale;
   final BoxFit thumbnailFit;
-  const CoverThumbnail({
-    Key? key,
-    this.thumbnailQuality = 120,
-    this.thumbnailScale = 1.0,
-    this.thumbnailFit = BoxFit.cover
-  }) : super(key: key);
+  const CoverThumbnail(
+      {Key? key,
+      this.thumbnailQuality = 120,
+      this.thumbnailScale = 1.0,
+      this.thumbnailFit = BoxFit.cover})
+      : super(key: key);
 
   @override
   State<CoverThumbnail> createState() => _CoverThumbnailState();
@@ -22,7 +22,6 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
   /// create object of PickerDataProvider
   final provider = PickerDataProvider();
 
-
   @override
   void initState() {
     _getPermission();
@@ -31,7 +30,7 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
 
   @override
   void dispose() {
-    if(mounted){
+    if (mounted) {
       provider.pickedFile.clear();
       provider.picked.clear();
       provider.pathList.clear();
@@ -39,19 +38,18 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
       super.dispose();
     }
   }
-  _getPermission() async{
+
+  _getPermission() async {
     var result = await PhotoManager.requestPermissionExtend(
         requestOption: const PermisstionRequestOption(
-            iosAccessLevel: IosAccessLevel.readWrite
-        )
-    );
+            iosAccessLevel: IosAccessLevel.readWrite));
     if (result.isAuth) {
       PhotoManager.startChangeNotify();
       PhotoManager.addChangeCallback((value) {
         _refreshPathList();
       });
 
-      if(provider.pathList.isEmpty){
+      if (provider.pathList.isEmpty) {
         _refreshPathList();
       }
     } else {
@@ -61,9 +59,8 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
     }
   }
 
-  _refreshPathList(){
-    PhotoManager.getAssetPathList(
-    ).then((pathList){
+  _refreshPathList() {
+    PhotoManager.getAssetPathList().then((pathList) {
       /// don't delete setState
       setState(() {
         provider.resetPathList(pathList);
@@ -73,16 +70,16 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    return provider.pathList.isNotEmpty ? Image(
-      image: PathCoverImageProvider(
-        provider.pathList[0],
-        thumbSize: widget.thumbnailQuality,
-        index: 0,
-        scale: widget.thumbnailScale
-      ),
-      fit: widget.thumbnailFit,
-      filterQuality: FilterQuality.high,
-    ) : Container();
+    return provider.pathList.isNotEmpty
+        ? Image(
+            image: PathCoverImageProvider(provider.pathList[0],
+                thumbSize: widget.thumbnailQuality,
+                index: 0,
+                scale: widget.thumbnailScale),
+            fit: widget.thumbnailFit,
+            filterQuality: FilterQuality.high,
+          )
+        : Container();
   }
 }
 
@@ -93,11 +90,11 @@ class PathCoverImageProvider extends ImageProvider<PathCoverImageProvider> {
   final int index;
 
   const PathCoverImageProvider(
-      this.entity, {
-        this.scale = 1.0,
-        this.thumbSize = 120,
-        this.index = 0,
-      });
+    this.entity, {
+    this.scale = 1.0,
+    this.thumbSize = 120,
+    this.index = 0,
+  });
 
   @override
   ImageStreamCompleter load(
@@ -113,7 +110,7 @@ class PathCoverImageProvider extends ImageProvider<PathCoverImageProvider> {
     assert(key == this);
 
     final coverEntity =
-    (await key.entity.getAssetListRange(start: index, end: index + 1))[0];
+        (await key.entity.getAssetListRange(start: index, end: index + 1))[0];
 
     final bytes = await coverEntity.thumbDataWithSize(thumbSize, thumbSize);
 
@@ -125,5 +122,4 @@ class PathCoverImageProvider extends ImageProvider<PathCoverImageProvider> {
       ImageConfiguration configuration) async {
     return this;
   }
-
 }
