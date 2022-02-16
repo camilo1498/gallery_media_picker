@@ -153,6 +153,7 @@ class Example extends StatelessWidget {
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
+                                /// this is the line to show the first image on gallery
                                 child: const CoverThumbnail(
                                     thumbnailQuality: 200,
                                     thumbnailFit: BoxFit.cover
