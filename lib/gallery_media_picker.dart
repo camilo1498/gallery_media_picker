@@ -106,7 +106,11 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
     super.initState();
   }
   _getPermission() async{
-    var result = await PhotoManager.requestPermissionExtend();
+    var result = await PhotoManager.requestPermissionExtend(
+      requestOption: const PermisstionRequestOption(
+        iosAccessLevel: IosAccessLevel.readWrite
+      )
+    );
     if (result.isAuth) {
       PhotoManager.startChangeNotify();
       PhotoManager.addChangeCallback((value) {
