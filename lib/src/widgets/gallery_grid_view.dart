@@ -52,6 +52,9 @@ class GalleryGridView extends StatefulWidget {
   /// thumbnail box fit
   final BoxFit thumbnailBoxFix;
 
+  /// image quality thumbnail
+  final int? thumbnailQuality;
+
   const GalleryGridView(
       {Key? key,
       required this.path,
@@ -68,7 +71,8 @@ class GalleryGridView extends StatefulWidget {
       this.selectedCheckColor = Colors.white,
       this.imageBackgroundColor = Colors.white,
       this.thumbnailBoxFix = BoxFit.cover,
-      this.selectedCheckBackgroundColor = Colors.white})
+      this.selectedCheckBackgroundColor = Colors.white,
+      this.thumbnailQuality = 200})
       : super(key: key);
 
   @override
@@ -144,7 +148,8 @@ class _GalleryGridViewState extends State<GalleryGridView> {
       return ThumbnailWidget(
         asset: asset,
         provider: provider,
-        thumbSize: 100,
+        index: index,
+        thumbnailQuality: widget.thumbnailQuality!,
         selectedBackgroundColor: widget.selectedBackgroundColor,
         selectedCheckColor: widget.selectedCheckColor,
         imageBackgroundColor: widget.imageBackgroundColor,
@@ -169,8 +174,9 @@ class _GalleryGridViewState extends State<GalleryGridView> {
           /// thumbnail widget
           return ThumbnailWidget(
             asset: asset,
+            index: index,
             provider: provider,
-            thumbSize: 100,
+            thumbnailQuality: widget.thumbnailQuality!,
             selectedBackgroundColor: widget.selectedBackgroundColor,
             selectedCheckColor: widget.selectedCheckColor,
             imageBackgroundColor: widget.imageBackgroundColor,

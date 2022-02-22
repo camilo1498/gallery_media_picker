@@ -84,6 +84,9 @@ class GalleryMediaPicker extends StatefulWidget {
   /// load images
   final bool onlyImages;
 
+  /// image quality thumbnail
+  final int? thumbnailQuality;
+
   const GalleryMediaPicker(
       {Key? key,
       this.maxPickImages = 2,
@@ -109,7 +112,8 @@ class GalleryMediaPicker extends StatefulWidget {
       this.thumbnailBoxFix = BoxFit.cover,
       this.selectedCheckBackgroundColor = Colors.white,
       this.onlyImages = false,
-      this.onlyVideos = false})
+      this.onlyVideos = false,
+      this.thumbnailQuality})
       : super(key: key);
 
   @override
@@ -224,6 +228,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                       animation: provider.currentPathNotifier,
                       builder: (BuildContext context, child) => GalleryGridView(
                         path: provider.currentPath,
+                        thumbnailQuality: widget.thumbnailQuality ?? 200,
                         provider: provider,
                         padding: widget.gridPadding,
                         childAspectRatio: widget.childAspectRatio ?? 0.5,

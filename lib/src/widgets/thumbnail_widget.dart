@@ -1,19 +1,20 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/provider/gallery_provider.dart';
+import 'package:gallery_media_picker/src/widgets/decode_image.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class ThumbnailWidget extends StatelessWidget {
   /// asset entity
   final AssetEntity asset;
 
-  /// size of image thumbnail
-  final int thumbSize;
+  /// image quality thumbnail
+  final int thumbnailQuality;
 
   /// background image color
   final Color imageBackgroundColor;
 
-  /// iamge provider
+  /// image provider
   final PickerDataProvider provider;
 
   /// selected background color
@@ -25,13 +26,16 @@ class ThumbnailWidget extends StatelessWidget {
   /// selected Check Background Color
   final Color selectedCheckBackgroundColor;
 
+  final int index;
+
   /// thumbnail box fit
   final BoxFit thumbnailBoxFix;
   const ThumbnailWidget(
       {Key? key,
       required this.asset,
       required this.provider,
-      this.thumbSize = 200,
+      required this.index,
+      this.thumbnailQuality = 200,
       this.imageBackgroundColor = Colors.white,
       this.selectedBackgroundColor = Colors.white,
       this.selectedCheckColor = Colors.white,
@@ -57,10 +61,15 @@ class ThumbnailWidget extends StatelessWidget {
               return SizedBox(
                 width: double.infinity,
                 height: double.infinity,
-                child: Image.memory(
-                  data.data!,
+                child: Image(
+                  image: DecodeImage(
+                      provider.pathList[
+                          provider.pathList.indexOf(provider.currentPath!)],
+                      thumbSize: thumbnailQuality,
+                      index: index),
                   gaplessPlayback: true,
                   fit: thumbnailBoxFix,
+                  filterQuality: FilterQuality.high,
                 ),
               );
             } else {
