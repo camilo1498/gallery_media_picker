@@ -30,21 +30,21 @@ import 'package:gallery_media_picker/gallery_media_picker.dart';
 1) update kotlin version to `1.6.0` and `classpath 'com.android.tools.build:gradle:7.0.4'` in your `build.gradle`
 2) in `android` set the `minSdkVersion` to `25` in your `build.gradle`
 3) 
-##Android
-add uses-permission `AndroidMAnifest.xml` file
-```xml
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-```
-### ios
-add this config in your `info.plist` file 
-```xml
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>Privacy - Photo Library Usage Description</string>
-    <key>NSMotionUsageDescription</key>
-    <string>Motion usage description</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>NSPhotoLibraryAddUsageDescription</string>
-```
+    #### Android
+    add uses-permission `AndroidMAnifest.xml` file
+    ```xml
+        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    ```
+    #### ios
+    add this config in your `info.plist` file 
+    ```xml
+        <key>NSPhotoLibraryUsageDescription</key>
+        <string>Privacy - Photo Library Usage Description</string>
+        <key>NSMotionUsageDescription</key>
+        <string>Motion usage description</string>
+        <key>NSPhotoLibraryAddUsageDescription</key>
+        <string>NSPhotoLibraryAddUsageDescription</string>
+    ```
 
 ## How to use
 Create a `GalleryMediaPicker()` widget:
