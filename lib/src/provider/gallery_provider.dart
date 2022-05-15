@@ -45,7 +45,7 @@ mixin PhotoDataProvider on ChangeNotifier {
     list.sort(sortBy);
     pathList.clear();
     pathList.addAll(list);
-    currentPath = list[defaultIndex];
+    currentPath = list.isNotEmpty ? list[defaultIndex] : null;
     pathListNotifier.value = pathList;
     notifyListeners();
   }
@@ -104,18 +104,14 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
   List<Map<String, dynamic>> pickedFile = [];
   void pickPath(Map<String, dynamic> path) {
     if (singlePickMode) {
-      if (pickedFile
-          .where((element) => element['id'] == path['id'])
-          .isNotEmpty) {
+      if (pickedFile.where((element) => element['id'] == path['id']).isNotEmpty) {
         pickedFile.removeWhere((val) => val['id'] == path['id']);
       } else {
         pickedFile.clear();
         pickedFile.add(path);
       }
     } else {
-      if (pickedFile
-          .where((element) => element['id'] == path['id'])
-          .isNotEmpty) {
+      if (pickedFile.where((element) => element['id'] == path['id']).isNotEmpty) {
         pickedFile.removeWhere((val) => val['id'] == path['id']);
       } else {
         if (pickedFile.length == max) {

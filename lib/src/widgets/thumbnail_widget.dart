@@ -55,7 +55,7 @@ class ThumbnailWidget extends StatelessWidget {
 
         /// thumbnail image
         FutureBuilder<Uint8List?>(
-          future: asset.thumbData,
+          future: asset.thumbnailData,
           builder: (_, data) {
             if (data.hasData) {
               return SizedBox(
@@ -63,8 +63,7 @@ class ThumbnailWidget extends StatelessWidget {
                 height: double.infinity,
                 child: Image(
                   image: DecodeImage(
-                      provider.pathList[
-                          provider.pathList.indexOf(provider.currentPath!)],
+                      provider.pathList[provider.pathList.indexOf(provider.currentPath!)],
                       thumbSize: thumbnailQuality,
                       index: index),
                   gaplessPlayback: true,
@@ -87,9 +86,7 @@ class ThumbnailWidget extends StatelessWidget {
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 decoration: BoxDecoration(
-                  color: picked
-                      ? selectedBackgroundColor.withOpacity(0.3)
-                      : Colors.transparent,
+                  color: picked ? selectedBackgroundColor.withOpacity(0.3) : Colors.transparent,
                 ),
               );
             }),
@@ -115,8 +112,7 @@ class ThumbnailWidget extends StatelessWidget {
                         color: picked
                             ? selectedCheckBackgroundColor.withOpacity(0.6)
                             : Colors.transparent,
-                        border:
-                            Border.all(width: 1.5, color: selectedCheckColor),
+                        border: Border.all(width: 1.5, color: selectedCheckColor),
                       ),
                       child: Icon(
                         Icons.check,
@@ -140,8 +136,7 @@ class ThumbnailWidget extends StatelessWidget {
                       color: Colors.black.withOpacity(0.8),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.white, width: 1)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -158,9 +153,7 @@ class ThumbnailWidget extends StatelessWidget {
                       Text(
                         _parseDuration(asset.videoDuration.inSeconds),
                         style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 8),
+                            color: Colors.white, fontWeight: FontWeight.w600, fontSize: 8),
                       ),
                     ],
                   )),

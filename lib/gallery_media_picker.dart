@@ -133,8 +133,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
 
   _getPermission() async {
     var result = await PhotoManager.requestPermissionExtend(
-        requestOption: const PermisstionRequestOption(
-            iosAccessLevel: IosAccessLevel.readWrite));
+        requestOption: const PermisstionRequestOption(iosAccessLevel: IosAccessLevel.readWrite));
     if (result.isAuth) {
       PhotoManager.startChangeNotify();
       PhotoManager.addChangeCallback((value) {
@@ -205,14 +204,11 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                 dropdownRelativeKey: key,
                 provider: provider,
                 appBarColor: widget.appBarColor,
-                appBarIconColor:
-                    widget.appBarIconColor ?? const Color(0xFFB2B2B2),
+                appBarIconColor: widget.appBarIconColor ?? const Color(0xFFB2B2B2),
                 appBarTextColor: widget.appBarTextColor,
                 albumTextColor: widget.albumTextColor,
-                albumDividerColor:
-                    widget.albumDividerColor ?? const Color(0xFF484848),
-                albumBackGroundColor:
-                    widget.albumBackGroundColor ?? const Color(0xFF333333),
+                albumDividerColor: widget.albumDividerColor ?? const Color(0xFF484848),
+                albumBackGroundColor: widget.albumBackGroundColor ?? const Color(0xFF333333),
                 appBarLeadingWidget: widget.appBarLeadingWidget,
               ),
             ),
@@ -240,8 +236,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                         selectedBackgroundColor: widget.selectedBackgroundColor,
                         selectedCheckColor: widget.selectedCheckColor,
                         thumbnailBoxFix: widget.thumbnailBoxFix,
-                        selectedCheckBackgroundColor:
-                            widget.selectedCheckBackgroundColor,
+                        selectedCheckBackgroundColor: widget.selectedCheckBackgroundColor,
                         onAssetItemClick: (ctx, asset, index) async {
                           provider.pickEntity(asset);
                           _getFile(asset).then((value) {
@@ -254,7 +249,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                               'createDateTime': asset.createDateTime,
                               'latitude': asset.latitude,
                               'longitude': asset.longitude,
-                              'thumbnail': asset.thumbData,
+                              'thumbnail': asset.thumbnailData,
                               'height': asset.height,
                               'width': asset.width,
                               'orientationHeight': asset.orientatedHeight,
