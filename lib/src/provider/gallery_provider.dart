@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/src/models/asset_model.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 mixin PhotoDataProvider on ChangeNotifier {
@@ -100,19 +101,19 @@ class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
   }
 
   /// metadata map
-  final pickedFileNotifier = ValueNotifier<List<Map<String, dynamic>>>([{}]);
-  List<Map<String, dynamic>> pickedFile = [];
-  void pickPath(Map<String, dynamic> path) {
+  final pickedFileNotifier = ValueNotifier<List<PickedAssetModel>>([]);
+  List<PickedAssetModel> pickedFile = [];
+  void pickPath(PickedAssetModel path) {
     if (singlePickMode) {
-      if (pickedFile.where((element) => element['id'] == path['id']).isNotEmpty) {
-        pickedFile.removeWhere((val) => val['id'] == path['id']);
+      if (pickedFile.where((element) => element.id == path.id).isNotEmpty) {
+        pickedFile.removeWhere((val) => val.id == path.id);
       } else {
         pickedFile.clear();
         pickedFile.add(path);
       }
     } else {
-      if (pickedFile.where((element) => element['id'] == path['id']).isNotEmpty) {
-        pickedFile.removeWhere((val) => val['id'] == path['id']);
+      if (pickedFile.where((element) => element.id == path.id).isNotEmpty) {
+        pickedFile.removeWhere((val) => val.id == path.id);
       } else {
         if (pickedFile.length == max) {
           onPickMax.notifyListeners();

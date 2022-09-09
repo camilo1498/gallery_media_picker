@@ -96,10 +96,10 @@ class _ExampleState extends State<Example> {
                           children: [
                             ...media.pickedFile.map((data) {
                               /// show image
-                              if (data['type'] == 'image') {
+                              if (data.type == 'image') {
                                 return Center(
                                   child: PhotoView.customChild(
-                                    child: Image.file(File(data['path'])),
+                                    child: Image.file(File(data.path!)),
                                     enablePanAlways: true,
                                     maxScale: 2.0,
                                     minScale: 1.0,
@@ -123,7 +123,7 @@ class _ExampleState extends State<Example> {
                                       controller: BetterVideoPlayerController(),
                                       dataSource: BetterVideoPlayerDataSource(
                                         BetterVideoPlayerDataSourceType.file,
-                                        data['path'],
+                                        data.path!,
                                       ),
                                     ),
                                   );
@@ -240,7 +240,7 @@ class _ExampleState extends State<Example> {
                                 List<String> _mediaPath = [];
                                 media.pickedFile.map((p) {
                                   setState(() {
-                                    _mediaPath.add(p['path']);
+                                    _mediaPath.add(p.path!);
                                   });
                                 }).toString();
                                 if (_mediaPath.isNotEmpty) {

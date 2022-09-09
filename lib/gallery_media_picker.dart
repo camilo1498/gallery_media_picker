@@ -2,6 +2,7 @@
 library gallery_media_picker;
 
 import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/src/models/asset_model.dart';
 import 'package:gallery_media_picker/src/provider/gallery_provider.dart';
 import 'package:gallery_media_picker/src/widgets/gallery_grid_view.dart';
 import 'package:gallery_media_picker/src/widgets/current_path_selector.dart';
@@ -11,6 +12,9 @@ import 'package:photo_manager/photo_manager.dart';
 export 'package:gallery_media_picker/gallery_media_picker.dart';
 export 'package:gallery_media_picker/src/widgets/cover_thumbnail.dart';
 
+export './gallery_media_picker.dart';
+export './src/models/asset_model.dart';
+
 class GalleryMediaPicker extends StatefulWidget {
   /// maximum images allowed (default 2)
   final int maxPickImages;
@@ -19,7 +23,7 @@ class GalleryMediaPicker extends StatefulWidget {
   final bool singlePick;
 
   /// return all selected paths
-  final Function(List<Map<String, dynamic>> path)? pathList;
+  final Function(List<PickedAssetModel> path)? pathList;
 
   /// dropdown appbar color
   final Color appBarColor;
@@ -239,27 +243,29 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                         selectedCheckBackgroundColor: widget.selectedCheckBackgroundColor,
                         onAssetItemClick: (ctx, asset, index) async {
                           provider.pickEntity(asset);
-                          _getFile(asset).then((value) {
+                          _getFile(asset).then((value) async{
                             /// add metadata to map list
-                            provider.pickPath({
-                              'id': asset.id,
-                              'path': value,
-                              'type': asset.typeInt == 1 ? 'image' : 'video',
-                              'videoDuration': asset.videoDuration,
-                              'createDateTime': asset.createDateTime,
-                              'latitude': asset.latitude,
-                              'longitude': asset.longitude,
-                              'thumbnail': asset.thumbnailData,
-                              'height': asset.height,
-                              'width': asset.width,
-                              'orientationHeight': asset.orientatedHeight,
-                              'orientationWidth': asset.orientatedWidth,
-                              'orientationSize': asset.orientatedSize,
-                              'file': asset.file,
-                              'modifiedDateTime': asset.modifiedDateTime,
-                              'title': asset.title,
-                              'size': asset.size,
-                            });
+                            provider.pickPath(
+                                PickedAssetModel(
+                                  id: asset.id,
+                                  path: value,
+                                  type: asset.typeInt == 1 ? 'image' : 'video',
+                                  videoDuration: asset.videoDuration,
+                                  createDateTime: asset.createDateTime,
+                                  latitude: asset.latitude,
+                                  longitude: asset.longitude,
+                                  thumbnail: await asset.thumbnailData,
+                                  height: asset.height,
+                                  width: asset.width,
+                                  orientationHeight: asset.orientatedHeight,
+                                  orientationWidth: asset.orientatedWidth,
+                                  orientationSize: asset.orientatedSize,
+                                  file: await asset.file,
+                                  modifiedDateTime: asset.modifiedDateTime,
+                                  title: asset.title,
+                                  size: asset.size,
+                                )
+                            );
                             widget.pathList!(provider.pickedFile);
                           });
                         },
