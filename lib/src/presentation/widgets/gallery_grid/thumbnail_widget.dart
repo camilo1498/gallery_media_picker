@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:gallery_media_picker/src/provider/gallery_provider.dart';
-import 'package:gallery_media_picker/src/widgets/decode_image.dart';
+import 'package:gallery_media_picker/src/core/decode_image.dart';
+import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class ThumbnailWidget extends StatelessWidget {
@@ -15,7 +15,7 @@ class ThumbnailWidget extends StatelessWidget {
   final Color imageBackgroundColor;
 
   /// image provider
-  final PickerDataProvider provider;
+  final GalleryMediaPickerController provider;
 
   /// selected background color
   final Color selectedBackgroundColor;
@@ -63,7 +63,7 @@ class ThumbnailWidget extends StatelessWidget {
                 height: double.infinity,
                 child: Image(
                   image: DecodeImage(
-                      provider.pathList[provider.pathList.indexOf(provider.currentPath!)],
+                      provider.pathList[provider.pathList.indexOf(provider.currentAlbum!)],
                       thumbSize: thumbnailQuality,
                       index: index),
                   gaplessPlayback: true,
@@ -72,7 +72,7 @@ class ThumbnailWidget extends StatelessWidget {
                 ),
               );
             } else {
-              return Container();
+              return Container(color: imageBackgroundColor,);
             }
           },
         ),
