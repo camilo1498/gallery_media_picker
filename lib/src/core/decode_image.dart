@@ -10,11 +10,11 @@ class DecodeImage extends ImageProvider<DecodeImage> {
   final int index;
 
   const DecodeImage(
-    this.entity, {
-    this.scale = 1.0,
-    this.thumbSize = 120,
-    this.index = 0,
-  });
+      this.entity, {
+        this.scale = 1.0,
+        this.thumbSize = 120,
+        this.index = 0,
+      });
 
   @override
   ImageStreamCompleter load(DecodeImage key, DecoderCallback decode) {

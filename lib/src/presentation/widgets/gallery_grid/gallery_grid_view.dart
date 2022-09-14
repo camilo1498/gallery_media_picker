@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_media_picker/src/provider/gallery_provider.dart';
-import 'package:gallery_media_picker/src/widgets/thumbnail_widget.dart';
+import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
+import 'package:gallery_media_picker/src/presentation/widgets/gallery_grid/thumbnail_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-typedef OnAssetItemClick = void Function(
-    BuildContext context, AssetEntity entity, int index);
+typedef OnAssetItemClick = void Function(AssetEntity entity, int index);
 
 class GalleryGridView extends StatefulWidget {
   /// asset album
@@ -17,7 +16,7 @@ class GalleryGridView extends StatefulWidget {
   final OnAssetItemClick? onAssetItemClick;
 
   /// picker data provider
-  final PickerDataProvider provider;
+  final GalleryMediaPickerController provider;
 
   /// gallery gridview crossAxisCount
   final int crossAxisCount;
@@ -76,10 +75,10 @@ class GalleryGridView extends StatefulWidget {
       : super(key: key);
 
   @override
-  _GalleryGridViewState createState() => _GalleryGridViewState();
+  GalleryGridViewState createState() => GalleryGridViewState();
 }
 
-class _GalleryGridViewState extends State<GalleryGridView> {
+class GalleryGridViewState extends State<GalleryGridView> {
   static Map<int?, AssetEntity?> _createMap() {
     return {};
   }
@@ -91,7 +90,13 @@ class _GalleryGridViewState extends State<GalleryGridView> {
   final scrolling = ValueNotifier(false);
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+
     /// generate thumbnail grid view
     return widget.path != null
         ? NotificationListener<ScrollNotification>(
@@ -122,7 +127,7 @@ class _GalleryGridViewState extends State<GalleryGridView> {
         : Container();
   }
 
-  Widget _buildItem(BuildContext context, index, PickerDataProvider provider) {
+  Widget _buildItem(BuildContext context, index, GalleryMediaPickerController provider) {
     return GestureDetector(
       /// on tap thumbnail
       onTap: () async {
@@ -132,7 +137,7 @@ class _GalleryGridViewState extends State<GalleryGridView> {
               .getAssetListRange(start: index, end: index + 1))[0];
           cacheMap[index] = asset;
         }
-        widget.onAssetItemClick?.call(context, asset, index);
+        widget.onAssetItemClick?.call(asset, index);
       },
 
       /// render thumbnail
@@ -141,7 +146,7 @@ class _GalleryGridViewState extends State<GalleryGridView> {
   }
 
   Widget _buildScrollItem(
-      BuildContext context, int index, PickerDataProvider provider) {
+      BuildContext context, int index, GalleryMediaPickerController provider) {
     /// load cache images
     final asset = cacheMap[index];
     if (asset != null) {

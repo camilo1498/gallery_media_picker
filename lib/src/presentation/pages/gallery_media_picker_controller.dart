@@ -1,17 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_media_picker/src/models/asset_model.dart';
+import 'package:gallery_media_picker/src/data/models/picked_asset_model.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-mixin PhotoDataProvider on ChangeNotifier {
+mixin PhotoDataController on ChangeNotifier {
   /// current gallery album
-  final currentPathNotifier = ValueNotifier<AssetPathEntity?>(null);
+  final currentAlbumNotifier = ValueNotifier<AssetPathEntity?>(null);
   AssetPathEntity? _current;
-  AssetPathEntity? get currentPath => _current;
-  set currentPath(AssetPathEntity? current) {
+  AssetPathEntity? get currentAlbum => _current;
+  set currentAlbum(AssetPathEntity? current) {
     if (_current != current) {
       _current = current;
-      currentPathNotifier.value = current;
+      currentAlbumNotifier.value = current;
     }
   }
 
@@ -21,9 +21,9 @@ mixin PhotoDataProvider on ChangeNotifier {
 
   /// order path by date
   static int _defaultSort(
-    AssetPathEntity a,
-    AssetPathEntity b,
-  ) {
+      AssetPathEntity a,
+      AssetPathEntity b,
+      ) {
     if (a.isAll) {
       return -1;
     }
@@ -35,24 +35,24 @@ mixin PhotoDataProvider on ChangeNotifier {
 
   /// add assets to a list
   void resetPathList(
-    List<AssetPathEntity> list, {
-    int defaultIndex = 0,
-    int Function(
-      AssetPathEntity a,
-      AssetPathEntity b,
-    )
+      List<AssetPathEntity> list, {
+        int defaultIndex = 0,
+        int Function(
+            AssetPathEntity a,
+            AssetPathEntity b,
+            )
         sortBy = _defaultSort,
-  }) {
+      }) {
     list.sort(sortBy);
     pathList.clear();
     pathList.addAll(list);
-    currentPath = list.isNotEmpty ? list[defaultIndex] : null;
+    currentAlbum = list.isNotEmpty ? list[defaultIndex] : null;
     pathListNotifier.value = pathList;
     notifyListeners();
   }
 }
 
-class PickerDataProvider extends ChangeNotifier with PhotoDataProvider {
+class GalleryMediaPickerController extends ChangeNotifier with PhotoDataController {
   /// Notification when max is modified.
   final maxNotifier = ValueNotifier(0);
   int get max => maxNotifier.value;
