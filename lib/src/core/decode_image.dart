@@ -29,7 +29,7 @@ class DecodeImage extends ImageProvider<DecodeImage> {
 
     final coverEntity = (await key.entity.getAssetListRange(start: index, end: index + 1))[0];
 
-    final bytes = await coverEntity.thumbnailDataWithSize(ThumbnailSize(thumbSize, thumbSize));
+    final bytes = await coverEntity.thumbDataWithSize(thumbSize, thumbSize);
 
     return decode(bytes!);
   }

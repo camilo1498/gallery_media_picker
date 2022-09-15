@@ -61,7 +61,7 @@ class GalleryFunctions {
   static getPermission(setState, GalleryMediaPickerController provider) async {
     /// request for device permission
     var result = await PhotoManager.requestPermissionExtend(
-        requestOption: const PermissionRequestOption(iosAccessLevel: IosAccessLevel.readWrite));
+        requestOption: const PermisstionRequestOption(iosAccessLevel: IosAccessLevel.readWrite));
     if (result.isAuth) {
       PhotoManager.startChangeNotify();
       PhotoManager.addChangeCallback((value) {

@@ -116,7 +116,7 @@ class GalleryMediaPicker extends StatefulWidget {
 
 class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   /// create object of PickerDataProvider
-  final provider = GalleryMediaPickerController();
+  final GalleryMediaPickerController provider = GalleryMediaPickerController();
 
   @override
   void initState() {
@@ -211,7 +211,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                               createDateTime: asset.createDateTime,
                               latitude: asset.latitude,
                               longitude: asset.longitude,
-                              thumbnail: await asset.thumbnailData,
+                              thumbnail: await asset.thumbData,
                               height: asset.height,
                               width: asset.width,
                               orientationHeight: asset.orientatedHeight,

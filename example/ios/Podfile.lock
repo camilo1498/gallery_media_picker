@@ -5,7 +5,7 @@ PODS:
     - Flutter
     - Reachability
   - Flutter (1.0.0)
-  - photo_manager (2.0.0):
+  - photo_manager (1.0.0):
     - Flutter
     - FlutterMacOS
   - Reachability (3.2)
@@ -54,13 +54,13 @@ SPEC CHECKSUMS:
   better_video_player: a201d38370c115406e5387da62458991ad6787b5
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
+  photo_manager: 84fa94fbeb82e607333ea9a13c43b58e0903a463
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
   url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
   video_player_avfoundation: e489aac24ef5cf7af82702979ed16f2a5ef84cff
   wakelock: d0fc7c864128eac40eba1617cb5264d9c940b46f
 
-PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d
+PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
 
 COCOAPODS: 1.11.3
