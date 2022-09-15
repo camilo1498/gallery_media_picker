@@ -55,7 +55,7 @@ class ThumbnailWidget extends StatelessWidget {
 
         /// thumbnail image
         FutureBuilder<Uint8List?>(
-          future: asset.thumbData,
+          future: asset.thumbnailData,
           builder: (_, data) {
             if (data.hasData) {
               return SizedBox(

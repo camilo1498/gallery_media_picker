@@ -141,7 +141,7 @@ class _ExampleState extends State<Example> {
                   child: GalleryMediaPicker(
                     childAspectRatio: 1,
                     crossAxisCount: 3,
-                    thumbnailQuality: 100,
+                    thumbnailQuality: 200,
                     thumbnailBoxFix: BoxFit.cover,
                     singlePick: _singlePick,
                     gridViewBackgroundColor: Colors.grey[900]!,

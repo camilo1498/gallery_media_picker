@@ -147,6 +147,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   Widget build(BuildContext context) {
     provider.max = widget.maxPickImages;
     provider.singlePickMode = widget.singlePick;
+
     return OKToast(
       child: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: (overscroll) {
@@ -211,7 +212,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                               createDateTime: asset.createDateTime,
                               latitude: asset.latitude,
                               longitude: asset.longitude,
-                              thumbnail: await asset.thumbData,
+                              thumbnail: await asset.thumbnailData,
                               height: asset.height,
                               width: asset.width,
                               orientationHeight: asset.orientatedHeight,

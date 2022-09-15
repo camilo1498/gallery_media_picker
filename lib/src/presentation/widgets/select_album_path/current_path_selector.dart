@@ -69,7 +69,7 @@ class SelectedPathDropdownButton extends StatelessWidget {
                 /// save selected album
                 if (value != null) {
                   provider.currentAlbum = value;
-                  print(provider.currentAlbum!.assetCount);
+                  //provider.setAssetCount();
                 }
               },
               onShow: (value) {

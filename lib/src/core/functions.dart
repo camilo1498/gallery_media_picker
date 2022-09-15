@@ -61,8 +61,10 @@ class GalleryFunctions {
   static getPermission(setState, GalleryMediaPickerController provider) async {
     /// request for device permission
     var result = await PhotoManager.requestPermissionExtend(
-        requestOption: const PermisstionRequestOption(iosAccessLevel: IosAccessLevel.readWrite));
+        requestOption: const PermissionRequestOption(iosAccessLevel: IosAccessLevel.readWrite));
     if (result.isAuth) {
+      /// load "recent" album
+      provider.setAssetCount();
       PhotoManager.startChangeNotify();
       PhotoManager.addChangeCallback((value) {
         _refreshPathList(setState, provider);
