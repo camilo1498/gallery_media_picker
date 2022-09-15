@@ -21,9 +21,9 @@ mixin PhotoDataController on ChangeNotifier {
 
   /// order path by date
   static int _defaultSort(
-      AssetPathEntity a,
-      AssetPathEntity b,
-      ) {
+    AssetPathEntity a,
+    AssetPathEntity b,
+  ) {
     if (a.isAll) {
       return -1;
     }
@@ -35,14 +35,14 @@ mixin PhotoDataController on ChangeNotifier {
 
   /// add assets to a list
   void resetPathList(
-      List<AssetPathEntity> list, {
-        int defaultIndex = 0,
-        int Function(
-            AssetPathEntity a,
-            AssetPathEntity b,
-            )
+    List<AssetPathEntity> list, {
+    int defaultIndex = 0,
+    int Function(
+      AssetPathEntity a,
+      AssetPathEntity b,
+    )
         sortBy = _defaultSort,
-      }) {
+  }) {
     list.sort(sortBy);
     pathList.clear();
     pathList.addAll(list);
@@ -52,7 +52,8 @@ mixin PhotoDataController on ChangeNotifier {
   }
 }
 
-class GalleryMediaPickerController extends ChangeNotifier with PhotoDataController {
+class GalleryMediaPickerController extends ChangeNotifier
+    with PhotoDataController {
   /// Notification when max is modified.
   final maxNotifier = ValueNotifier(0);
   int get max => maxNotifier.value;
@@ -137,9 +138,9 @@ class GalleryMediaPickerController extends ChangeNotifier with PhotoDataControll
   get assetCount => _assetCount;
   final assetCountNotifier = ValueNotifier<int>(0);
 
-  setAssetCount() async{
-    Future.delayed(const Duration(seconds: 1), () async{
-      if(currentAlbum != null) {
+  setAssetCount() async {
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (currentAlbum != null) {
         _assetCount = await currentAlbum!.assetCountAsync;
         assetCountNotifier.value = _assetCount;
         assetCountNotifier.notifyListeners();

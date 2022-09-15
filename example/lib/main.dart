@@ -231,6 +231,7 @@ class _ExampleState extends State<Example> {
                               ),
                             ),
                             const Spacer(),
+
                             /// share
                             GestureDetector(
                               onTap: () async {

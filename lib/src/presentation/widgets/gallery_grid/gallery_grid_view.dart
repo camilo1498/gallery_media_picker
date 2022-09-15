@@ -71,8 +71,7 @@ class GalleryGridView extends StatefulWidget {
       this.imageBackgroundColor = Colors.white,
       this.thumbnailBoxFix = BoxFit.cover,
       this.selectedCheckBackgroundColor = Colors.white,
-      this.thumbnailQuality = 200
-      })
+      this.thumbnailQuality = 200})
       : super(key: key);
 
   @override
@@ -89,7 +88,6 @@ class GalleryGridViewState extends State<GalleryGridView> {
 
   /// notifier for scroll events
   final scrolling = ValueNotifier(false);
-
 
   @override
   void initState() {
@@ -131,7 +129,8 @@ class GalleryGridViewState extends State<GalleryGridView> {
         : Container();
   }
 
-  Widget _buildItem(BuildContext context, index, GalleryMediaPickerController provider) {
+  Widget _buildItem(
+      BuildContext context, index, GalleryMediaPickerController provider) {
     return GestureDetector(
       /// on tap thumbnail
       onTap: () async {

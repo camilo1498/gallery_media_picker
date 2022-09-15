@@ -1,6 +1,6 @@
 Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_widget) package and has the same concept as image_picker but with a more attractive interface to choose an image or video from the device gallery, whether it is Android or iOS.
 
-## Flutter 3.3.1
+## Flutter 3.3.2
 
 ## Features
 
@@ -9,8 +9,6 @@ Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_w
 [✔] pick video
 
 [✔] pick multi image / video
-
-[✔] cover thumbnail (preview first image on gallery)
 
 [❌] take picture or video from camera
 
@@ -54,9 +52,9 @@ Create a `GalleryMediaPicker()` widget:
 Material(
     child: GalleryMediaPicker(
         /// required params
-        pathList: (List<Map<String,dynamic>> path) { /// => (type List<Map<String,dynamic>>) return a list map with selected media metadata
-          /// returned metadata
-          //Map {
+        pathList: (path) { /// => (type List<PickedAssetModel>) return a list map with selected media metadata
+          /// returned data model
+          //PickedAssetModel {
           //   'id': String,
           //   'path': String,
           //   'type': String,

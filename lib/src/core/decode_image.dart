@@ -10,11 +10,11 @@ class DecodeImage extends ImageProvider<DecodeImage> {
   final int index;
 
   const DecodeImage(
-      this.entity, {
-        this.scale = 1.0,
-        this.thumbSize = 120,
-        this.index = 0,
-      });
+    this.entity, {
+    this.scale = 1.0,
+    this.thumbSize = 120,
+    this.index = 0,
+  });
 
   @override
   ImageStreamCompleter load(DecodeImage key, DecoderCallback decode) {
@@ -27,9 +27,11 @@ class DecodeImage extends ImageProvider<DecodeImage> {
   Future<ui.Codec> _loadAsync(DecodeImage key, DecoderCallback decode) async {
     assert(key == this);
 
-    final coverEntity = (await key.entity.getAssetListRange(start: index, end: index + 1))[0];
+    final coverEntity =
+        (await key.entity.getAssetListRange(start: index, end: index + 1))[0];
 
-    final bytes = await coverEntity.thumbnailDataWithSize(ThumbnailSize(thumbSize, thumbSize));
+    final bytes = await coverEntity
+        .thumbnailDataWithSize(ThumbnailSize(thumbSize, thumbSize));
 
     return decode(bytes!);
   }

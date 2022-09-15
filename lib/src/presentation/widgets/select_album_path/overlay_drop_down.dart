@@ -11,7 +11,7 @@ class OverlayDropDown<T> extends StatelessWidget {
     required this.height,
     required this.close,
     required this.animationController,
-    required  this.builder,
+    required this.builder,
   }) : super(key: key);
 
   @override
@@ -30,7 +30,9 @@ class OverlayDropDown<T> extends StatelessWidget {
         alignment: Alignment.topLeft,
         child: Builder(
           builder: (ctx) => GestureDetector(
-            onTap: () => close, /// close overlay
+            onTap: () => close,
+
+            /// close overlay
             child: AnimatedBuilder(
               animation: animationController,
               builder: (BuildContext context, child) {
@@ -38,7 +40,9 @@ class OverlayDropDown<T> extends StatelessWidget {
                   children: [
                     /// full content transparent container
                     GestureDetector(
-                      onTap: () => close(null), /// close overlay
+                      onTap: () => close(null),
+
+                      /// close overlay
                       child: Container(
                         color: Colors.transparent,
                         height: height * animationController.value,
