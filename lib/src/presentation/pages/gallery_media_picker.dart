@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/core/functions.dart';
 import 'package:gallery_media_picker/src/data/models/picked_asset_model.dart';
