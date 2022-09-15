@@ -139,10 +139,16 @@ class GalleryMediaPickerController extends ChangeNotifier with PhotoDataControll
 
   setAssetCount() async{
     Future.delayed(const Duration(seconds: 1), () async{
-      _assetCount = await currentAlbum!.assetCountAsync;
-      assetCountNotifier.value = _assetCount;
-      assetCountNotifier.notifyListeners();
-      notifyListeners();
+      if(currentAlbum != null) {
+        _assetCount = await currentAlbum!.assetCountAsync;
+        assetCountNotifier.value = _assetCount;
+        assetCountNotifier.notifyListeners();
+        notifyListeners();
+      } else {
+        assetCountNotifier.value = _assetCount;
+        assetCountNotifier.notifyListeners();
+        notifyListeners();
+      }
     });
   }
 }
