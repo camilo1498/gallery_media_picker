@@ -148,6 +148,7 @@ class GalleryGridViewState extends State<GalleryGridView> {
   Widget _buildScrollItem(
       BuildContext context, int index, GalleryMediaPickerController provider) {
     /// load cache images
+    print(cacheMap.length);
     final asset = cacheMap[index];
     if (asset != null) {
       return ThumbnailWidget(

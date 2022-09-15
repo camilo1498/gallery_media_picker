@@ -230,10 +230,7 @@ class _ExampleState extends State<Example> {
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              width: 40,
-                            ),
-
+                            const Spacer(),
                             /// share
                             GestureDetector(
                               onTap: () async {

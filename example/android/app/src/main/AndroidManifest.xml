@@ -1,7 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dev.camilo.flutter.gallery_photo_picker.example">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-   <application
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+
+    <application
         android:label="example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
