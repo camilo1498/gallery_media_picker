@@ -10,9 +10,9 @@ class CoverThumbnail extends StatefulWidget {
   final BoxFit thumbnailFit;
   const CoverThumbnail(
       {Key? key,
-        this.thumbnailQuality = 120,
-        this.thumbnailScale = 1.0,
-        this.thumbnailFit = BoxFit.cover})
+      this.thumbnailQuality = 120,
+      this.thumbnailScale = 1.0,
+      this.thumbnailFit = BoxFit.cover})
       : super(key: key);
 
   @override
@@ -40,18 +40,17 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return provider.pathList.isNotEmpty
         ? Image(
-      image: DecodeImage(provider.pathList[0],
-          thumbSize: widget.thumbnailQuality,
-          index: 0,
-          scale: widget.thumbnailScale),
-      fit: widget.thumbnailFit,
-      filterQuality: FilterQuality.high,
-    )
+            image: DecodeImage(provider.pathList[0],
+                thumbSize: widget.thumbnailQuality,
+                index: 0,
+                scale: widget.thumbnailScale),
+            fit: widget.thumbnailFit,
+            filterQuality: FilterQuality.high,
+          )
         : Container();
   }
 }
