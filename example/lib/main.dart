@@ -25,7 +25,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({Key key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
 }
 
 class Example extends StatefulWidget {
-  const Example({Key? key}) : super(key: key);
+  const Example({Key key}) : super(key: key);
 
   @override
   State<Example> createState() => _ExampleState();
@@ -99,10 +99,10 @@ class _ExampleState extends State<Example> {
                               if (data.type == 'image') {
                                 return Center(
                                   child: PhotoView.customChild(
-                                    child: Image.file(File(data.path!)),
                                     enablePanAlways: true,
                                     maxScale: 2.0,
                                     minScale: 1.0,
+                                    child: Image.file(File(data.path)),
                                   ),
                                 );
                               }
@@ -123,7 +123,7 @@ class _ExampleState extends State<Example> {
                                       controller: BetterVideoPlayerController(),
                                       dataSource: BetterVideoPlayerDataSource(
                                         BetterVideoPlayerDataSourceType.file,
-                                        data.path!,
+                                        data.path,
                                       ),
                                     ),
                                   );
@@ -144,7 +144,7 @@ class _ExampleState extends State<Example> {
                     thumbnailQuality: 200,
                     thumbnailBoxFix: BoxFit.cover,
                     singlePick: _singlePick,
-                    gridViewBackgroundColor: Colors.grey[900]!,
+                    gridViewBackgroundColor: Colors.grey[900],
                     imageBackgroundColor: Colors.black,
                     maxPickImages: 5,
                     appBarHeight: 60,
@@ -235,16 +235,16 @@ class _ExampleState extends State<Example> {
                             /// share
                             GestureDetector(
                               onTap: () async {
-                                List<String> _mediaPath = [];
+                                List<String> mediaPath = [];
                                 media.pickedFile.map((p) {
                                   setState(() {
-                                    _mediaPath.add(p.path!);
+                                    mediaPath.add(p.path);
                                   });
                                 }).toString();
-                                if (_mediaPath.isNotEmpty) {
-                                  await Share.shareFiles(_mediaPath);
+                                if (mediaPath.isNotEmpty) {
+                                  await Share.shareFiles(mediaPath);
                                 }
-                                _mediaPath.clear();
+                                mediaPath.clear();
                               },
                               child: Container(
                                 height: 30,
