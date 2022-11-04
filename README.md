@@ -19,7 +19,7 @@ Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_w
 <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_preset_view.gif" alt="showcase gif" title="preset view" width="200"/>
 
 ## Installation
-1) This package has only tested in android, add `gallery_media_picker: 0.0.4` in your `pubspec.yaml`
+1) This package has only tested in android, add `gallery_media_picker: 0.0.81` in your `pubspec.yaml`
 2) import `gallery_media_picker`
 ```dart
 import 'package:gallery_media_picker/gallery_media_picker.dart';

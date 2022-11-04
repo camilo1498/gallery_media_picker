@@ -8,7 +8,6 @@ import 'package:oktoast/oktoast.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class GalleryFunctions {
-
   static FeatureController<T> showDropDown<T>({
     required BuildContext context,
     required DropdownWidgetBuilder<T> builder,
@@ -36,16 +35,16 @@ class GalleryFunctions {
     }
 
     /// overlay widget
-    entry = OverlayEntry(builder: (context) => GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () => close(null),
-      child: OverlayDropDown(
-          height: height!,
-          close: close,
-          animationController: animationController,
-          builder: builder
-      ),
-    ));
+    entry = OverlayEntry(
+        builder: (context) => GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => close(null),
+              child: OverlayDropDown(
+                  height: height!,
+                  close: close,
+                  animationController: animationController,
+                  builder: builder),
+            ));
     Overlay.of(context)!.insert(entry);
     animationController.animateTo(1);
     return FeatureController(
@@ -55,13 +54,15 @@ class GalleryFunctions {
   }
 
   static onPickMax(GalleryMediaPickerController provider) {
-    provider.onPickMax.addListener(() => showToast("Already pick ${provider.max} items."));
+    provider.onPickMax
+        .addListener(() => showToast("Already pick ${provider.max} items."));
   }
 
   static getPermission(setState, GalleryMediaPickerController provider) async {
     /// request for device permission
     var result = await PhotoManager.requestPermissionExtend(
-        requestOption: const PermissionRequestOption(iosAccessLevel: IosAccessLevel.readWrite));
+        requestOption: const PermissionRequestOption(
+            iosAccessLevel: IosAccessLevel.readWrite));
     if (result.isAuth) {
       PhotoManager.startChangeNotify();
       PhotoManager.addChangeCallback((value) {
@@ -79,11 +80,9 @@ class GalleryFunctions {
   }
 
   static _refreshPathList(setState, GalleryMediaPickerController provider) {
-    PhotoManager.getAssetPathList(
-        type: RequestType.all)
-        .then((pathList) {
+    PhotoManager.getAssetPathList(type: RequestType.all).then((pathList) {
       /// don't delete setState
-      Future.delayed(Duration.zero, (){
+      Future.delayed(Duration.zero, () {
         setState(() {
           provider.resetPathList(pathList);
         });
@@ -96,9 +95,7 @@ class GalleryFunctions {
     var file = await asset.file;
     return file!.path;
   }
-
 }
-
 
 class FeatureController<T> {
   final Completer<T?> completer;

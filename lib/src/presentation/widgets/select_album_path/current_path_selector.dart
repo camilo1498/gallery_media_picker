@@ -54,7 +54,8 @@ class SelectedPathDropdownButton extends StatelessWidget {
           Expanded(
             child: DropDown<AssetPathEntity>(
               relativeKey: dropdownRelativeKey!,
-              child: ((context) => buildButton(context, arrowDownNotifier))(context),
+              child: ((context) =>
+                  buildButton(context, arrowDownNotifier))(context),
               dropdownWidgetBuilder: (BuildContext context, close) {
                 /// change path button
                 return ChangePathWidget(
@@ -103,6 +104,7 @@ class SelectedPathDropdownButton extends StatelessWidget {
     if (provider.pathList.isEmpty || provider.currentAlbum == null) {
       return Container();
     }
+
     /// return decorated container without data
     if (provider.currentAlbum == null) {
       return Container(

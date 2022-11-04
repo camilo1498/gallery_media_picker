@@ -82,33 +82,34 @@ class GalleryMediaPicker extends StatefulWidget {
 
   /// image quality thumbnail
   final int? thumbnailQuality;
-  const GalleryMediaPicker({
-    Key? key,
-    this.maxPickImages = 2,
-    this.singlePick = true,
-    this.appBarColor = Colors.black,
-    this.albumBackGroundColor,
-    this.albumDividerColor,
-    this.albumTextColor = Colors.white,
-    this.appBarIconColor,
-    this.appBarTextColor = Colors.white,
-    this.crossAxisCount,
-    this.gridViewBackgroundColor = Colors.black54,
-    this.childAspectRatio,
-    this.appBarLeadingWidget,
-    this.appBarHeight = 100,
-    this.imageBackgroundColor = Colors.white,
-    this.gridPadding,
-    this.gridViewController,
-    this.gridViewPhysics,
-    this.pathList,
-    this.selectedBackgroundColor = Colors.black,
-    this.selectedCheckColor = Colors.white,
-    this.thumbnailBoxFix = BoxFit.cover,
-    this.selectedCheckBackgroundColor = Colors.white,
-    this.onlyImages = false,
-    this.onlyVideos = false,
-    this.thumbnailQuality}) : super(key: key);
+  const GalleryMediaPicker(
+      {Key? key,
+      this.maxPickImages = 2,
+      this.singlePick = true,
+      this.appBarColor = Colors.black,
+      this.albumBackGroundColor,
+      this.albumDividerColor,
+      this.albumTextColor = Colors.white,
+      this.appBarIconColor,
+      this.appBarTextColor = Colors.white,
+      this.crossAxisCount,
+      this.gridViewBackgroundColor = Colors.black54,
+      this.childAspectRatio,
+      this.appBarLeadingWidget,
+      this.appBarHeight = 100,
+      this.imageBackgroundColor = Colors.white,
+      this.gridPadding,
+      this.gridViewController,
+      this.gridViewPhysics,
+      this.pathList,
+      this.selectedBackgroundColor = Colors.black,
+      this.selectedCheckColor = Colors.white,
+      this.thumbnailBoxFix = BoxFit.cover,
+      this.selectedCheckBackgroundColor = Colors.white,
+      this.onlyImages = false,
+      this.onlyVideos = false,
+      this.thumbnailQuality})
+      : super(key: key);
 
   @override
   State<GalleryMediaPicker> createState() => _GalleryMediaPickerState();
@@ -149,91 +150,96 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
     provider.singlePickMode = widget.singlePick;
     return OKToast(
       child: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (overscroll) {
-          overscroll.disallowIndicator();
-          return false;
-        },
-        child: Column(
-          children: [
-            /// album drop down
-            Center(
-              child: Container(
-                color: widget.appBarColor,
-                alignment: Alignment.bottomLeft,
-                height: widget.appBarHeight,
-                child: SelectedPathDropdownButton(
-                  dropdownRelativeKey: GlobalKey(),
-                  provider: provider,
-                  appBarColor: widget.appBarColor,
-                  appBarIconColor: widget.appBarIconColor ?? const Color(0xFFB2B2B2),
-                  appBarTextColor: widget.appBarTextColor,
-                  albumTextColor: widget.albumTextColor,
-                  albumDividerColor: widget.albumDividerColor ?? const Color(0xFF484848),
-                  albumBackGroundColor: widget.albumBackGroundColor ?? const Color(0xFF333333),
-                  appBarLeadingWidget: widget.appBarLeadingWidget,
+          onNotification: (overscroll) {
+            overscroll.disallowIndicator();
+            return false;
+          },
+          child: Column(
+            children: [
+              /// album drop down
+              Center(
+                child: Container(
+                  color: widget.appBarColor,
+                  alignment: Alignment.bottomLeft,
+                  height: widget.appBarHeight,
+                  child: SelectedPathDropdownButton(
+                    dropdownRelativeKey: GlobalKey(),
+                    provider: provider,
+                    appBarColor: widget.appBarColor,
+                    appBarIconColor:
+                        widget.appBarIconColor ?? const Color(0xFFB2B2B2),
+                    appBarTextColor: widget.appBarTextColor,
+                    albumTextColor: widget.albumTextColor,
+                    albumDividerColor:
+                        widget.albumDividerColor ?? const Color(0xFF484848),
+                    albumBackGroundColor:
+                        widget.albumBackGroundColor ?? const Color(0xFF333333),
+                    appBarLeadingWidget: widget.appBarLeadingWidget,
+                  ),
                 ),
               ),
-            ),
 
-            /// grid view
-            Expanded(
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                child: provider != null
-                    ? AnimatedBuilder(
-                  animation: provider.currentAlbumNotifier,
-                  builder: (BuildContext context, child) => GalleryGridView(
-                    path: provider.currentAlbum,
-                    thumbnailQuality: widget.thumbnailQuality ?? 200,
-                    provider: provider,
-                    padding: widget.gridPadding,
-                    childAspectRatio: widget.childAspectRatio ?? 0.5,
-                    crossAxisCount: widget.crossAxisCount ?? 3,
-                    gridViewBackgroundColor: widget.gridViewBackgroundColor,
-                    gridViewController: widget.gridViewController,
-                    gridViewPhysics: widget.gridViewPhysics,
-                    imageBackgroundColor: widget.imageBackgroundColor,
-                    selectedBackgroundColor: widget.selectedBackgroundColor,
-                    selectedCheckColor: widget.selectedCheckColor,
-                    thumbnailBoxFix: widget.thumbnailBoxFix,
-                    selectedCheckBackgroundColor: widget.selectedCheckBackgroundColor,
-                    onAssetItemClick: (asset, index) async {
-                      provider.pickEntity(asset);
-                      GalleryFunctions.getFile(asset).then((value) async{
-                        /// add metadata to map list
-                        provider.pickPath(
-                            PickedAssetModel(
-                              id: asset.id,
-                              path: value,
-                              type: asset.typeInt == 1 ? 'image' : 'video',
-                              videoDuration: asset.videoDuration,
-                              createDateTime: asset.createDateTime,
-                              latitude: asset.latitude,
-                              longitude: asset.longitude,
-                              thumbnail: await asset.thumbnailData,
-                              height: asset.height,
-                              width: asset.width,
-                              orientationHeight: asset.orientatedHeight,
-                              orientationWidth: asset.orientatedWidth,
-                              orientationSize: asset.orientatedSize,
-                              file: await asset.file,
-                              modifiedDateTime: asset.modifiedDateTime,
-                              title: asset.title,
-                              size: asset.size,
-                            )
-                        );
-                        widget.pathList!(provider.pickedFile);
-                      });
-                    },
-                  ),
-                )
-                    : Container(),
-              ),
-            )
-          ],
-        )
-      ),
+              /// grid view
+              Expanded(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  child: provider != null
+                      ? AnimatedBuilder(
+                          animation: provider.currentAlbumNotifier,
+                          builder: (BuildContext context, child) =>
+                              GalleryGridView(
+                            path: provider.currentAlbum,
+                            thumbnailQuality: widget.thumbnailQuality ?? 200,
+                            provider: provider,
+                            padding: widget.gridPadding,
+                            childAspectRatio: widget.childAspectRatio ?? 0.5,
+                            crossAxisCount: widget.crossAxisCount ?? 3,
+                            gridViewBackgroundColor:
+                                widget.gridViewBackgroundColor,
+                            gridViewController: widget.gridViewController,
+                            gridViewPhysics: widget.gridViewPhysics,
+                            imageBackgroundColor: widget.imageBackgroundColor,
+                            selectedBackgroundColor:
+                                widget.selectedBackgroundColor,
+                            selectedCheckColor: widget.selectedCheckColor,
+                            thumbnailBoxFix: widget.thumbnailBoxFix,
+                            selectedCheckBackgroundColor:
+                                widget.selectedCheckBackgroundColor,
+                            onAssetItemClick: (asset, index) async {
+                              provider.pickEntity(asset);
+                              GalleryFunctions.getFile(asset)
+                                  .then((value) async {
+                                /// add metadata to map list
+                                provider.pickPath(PickedAssetModel(
+                                  id: asset.id,
+                                  path: value,
+                                  type: asset.typeInt == 1 ? 'image' : 'video',
+                                  videoDuration: asset.videoDuration,
+                                  createDateTime: asset.createDateTime,
+                                  latitude: asset.latitude,
+                                  longitude: asset.longitude,
+                                  thumbnail: await asset.thumbnailData,
+                                  height: asset.height,
+                                  width: asset.width,
+                                  orientationHeight: asset.orientatedHeight,
+                                  orientationWidth: asset.orientatedWidth,
+                                  orientationSize: asset.orientatedSize,
+                                  file: await asset.file,
+                                  modifiedDateTime: asset.modifiedDateTime,
+                                  title: asset.title,
+                                  size: asset.size,
+                                ));
+                                widget.pathList!(provider.pickedFile);
+                              });
+                            },
+                          ),
+                        )
+                      : Container(),
+                ),
+              )
+            ],
+          )),
     );
   }
 }

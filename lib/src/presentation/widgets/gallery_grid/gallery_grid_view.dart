@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/gallery_grid/thumbnail_widget.dart';
@@ -96,7 +98,6 @@ class GalleryGridViewState extends State<GalleryGridView> {
 
   @override
   Widget build(BuildContext context) {
-
     /// generate thumbnail grid view
     return widget.path != null
         ? NotificationListener<ScrollNotification>(
@@ -127,7 +128,8 @@ class GalleryGridViewState extends State<GalleryGridView> {
         : Container();
   }
 
-  Widget _buildItem(BuildContext context, index, GalleryMediaPickerController provider) {
+  Widget _buildItem(
+      BuildContext context, index, GalleryMediaPickerController provider) {
     return GestureDetector(
       /// on tap thumbnail
       onTap: () async {
