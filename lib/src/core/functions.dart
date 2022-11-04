@@ -83,8 +83,10 @@ class GalleryFunctions {
         type: RequestType.all)
         .then((pathList) {
       /// don't delete setState
-      setState(() {
-        provider.resetPathList(pathList);
+      Future.delayed(Duration.zero, (){
+        setState(() {
+          provider.resetPathList(pathList);
+        });
       });
     });
   }
