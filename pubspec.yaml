@@ -10,8 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  photo_manager: ^2.2.1
-  oktoast: ^3.3.0
+  photo_manager: ^2.5.2
+  oktoast: ^3.3.1
 
 dev_dependencies:
   flutter_test:
