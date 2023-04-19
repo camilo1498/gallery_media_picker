@@ -20,8 +20,9 @@ Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_w
 <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/screenshots/demo_preset_view.gif" alt="showcase gif" title="preset view" width="200"/>
 
 ## Installation
-1) This package has only tested in android, add `gallery_media_picker: 0.0.81` in your `pubspec.yaml`
+1) This package has only tested in android, add `gallery_media_picker: 0.1.0 in your `pubspec.yaml`
 2) import `gallery_media_picker`
+
 ```dart
 import 'package:gallery_media_picker/gallery_media_picker.dart';
 ```
@@ -50,10 +51,10 @@ add this config in your `info.plist` file
 ## How to use
 Create a `GalleryMediaPicker()` widget:
 ```dart
-Material(
-    child: GalleryMediaPicker(
+Scaffold(
+    body: GalleryMediaPicker(
         /// required params
-        pathList: (path) { /// => (type List<PickedAssetModel>) return a list map with selected media metadata
+        pathList: (List<PickedAssetModel> paths) { /// => (typeList<PickedAssetModel>) return a list map with selected media metadata
           /// returned data model
           //PickedAssetModel(
           //   'id': String,
@@ -74,35 +75,36 @@ Material(
           //   'title': String,
           //   'size': Size,
           // )
-        }, 
-        
+        },
+
         /// optional params
-        maxPickImages: , /// (type int)
-        singlePick: , /// (type bool)
-        appBarColor: , /// (type Color)
-        albumBackGroundColor: , /// (type Color)
-        albumDividerColor: , /// (type Color)
-        albumTextColor: , /// (type Color)
-        appBarIconColor, /// (type Color)
-        appBarTextColor: , /// (type Color)
-        crossAxisCount, /// /// (type int)
-        gridViewBackgroundColor: , /// (type Color)
-        childAspectRatio, /// (type double)
-        appBarLeadingWidget, /// (type Widget)
-        appBarHeight: , /// (type double)
-        imageBackgroundColor: , /// (type Color)
-        gridPadding: /// (type EdgeInset)
-        gridViewControlle:, /// (type ScrollController)
-        gridViewPhysics: /// (type ScrollPhysics)
-        selectedBackgroundColor: /// (type Color)
-        selectedCheckColor: , /// (type Color)
-        thumbnailBoxFix: , /// (type BoxFit)
-        selectedCheckBackgroundColor: , /// (type Color)
-        onlyImages: , /// (type bool)
-        onlyVideos: , /// (type bool)
-        thumbnailQuality: , /// (type int) optional param, you can set the gallery thumbnail quality (higher is better but reduce performance)
-)
-    );
+        mediaPickerParams: MediaPickerParamsModel(
+            maxPickImages: , /// (type int)
+            singlePick: , /// (type bool)
+            appBarColor: , /// (type Color)
+            albumBackGroundColor: , /// (type Color)
+            albumDividerColor: , /// (type Color)
+            albumTextColor: , /// (type Color)
+            appBarIconColor, /// (type Color)
+            appBarTextColor: , /// (type Color)
+            crossAxisCount, /// /// (type int)
+            gridViewBackgroundColor: , /// (type Color)
+            childAspectRatio, /// (type double)
+            appBarLeadingWidget, /// (type Widget)
+            appBarHeight: , /// (type double)
+            imageBackgroundColor: , /// (type Color)
+            gridPadding: /// (type EdgeInset)
+            gridViewControlle:, /// (type ScrollController)
+            gridViewPhysics: /// (type ScrollPhysics)
+            selectedBackgroundColor: /// (type Color)
+            selectedCheckColor: , /// (type Color)
+            thumbnailBoxFix: , /// (type BoxFit)
+            selectedCheckBackgroundColor: , /// (type Color)
+            onlyImages: , /// (type bool)
+            onlyVideos: , /// (type bool)
+            thumbnailQuality: , /// (type int) optional param, you can set the gallery thumbnail quality (higher is better but reduce performance)
+        )
+));
 ```
 
 ## Example
@@ -117,12 +119,10 @@ class Example extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Material(
-        child: GalleryMediaPicker(
-            pathList: (pathList){}
+    return Scaffold(
+      body: GalleryMediaPicker(
+            pathList: (List<PickedAssetModel> paths){}
         ),
-      ),
     );
   }
 }

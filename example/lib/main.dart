@@ -264,7 +264,7 @@ class _ExampleState extends State<Example> {
                         ),
                       ),
                     ),
-                    pathList: (paths) {
+                    pathList: (List<PickedAssetModel> paths) {
                       setState(() {
                         /// for this example i used provider, you can choose the state management that you prefer
                         media.pickedFile = paths;
