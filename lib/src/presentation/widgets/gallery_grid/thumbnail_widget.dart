@@ -1,5 +1,7 @@
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/gallery_media_picker.dart';
 import 'package:gallery_media_picker/src/core/decode_image.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -8,39 +10,21 @@ class ThumbnailWidget extends StatelessWidget {
   /// asset entity
   final AssetEntity asset;
 
-  /// image quality thumbnail
-  final int thumbnailQuality;
-
-  /// background image color
-  final Color imageBackgroundColor;
+  /// thumbnail index
+  final int index;
 
   /// image provider
   final GalleryMediaPickerController provider;
 
-  /// selected background color
-  final Color selectedBackgroundColor;
+  /// params model
+  final MediaPickerParamsModel mediaPickerParams;
 
-  /// selected check color
-  final Color selectedCheckColor;
-
-  /// selected Check Background Color
-  final Color selectedCheckBackgroundColor;
-
-  final int index;
-
-  /// thumbnail box fit
-  final BoxFit thumbnailBoxFix;
   const ThumbnailWidget(
       {Key? key,
+      required this.index,
       required this.asset,
       required this.provider,
-      required this.index,
-      this.thumbnailQuality = 200,
-      this.imageBackgroundColor = Colors.white,
-      this.selectedBackgroundColor = Colors.white,
-      this.selectedCheckColor = Colors.white,
-      this.thumbnailBoxFix = BoxFit.cover,
-      this.selectedCheckBackgroundColor = Colors.white})
+      required this.mediaPickerParams})
       : super(key: key);
 
   @override
@@ -50,7 +34,8 @@ class ThumbnailWidget extends StatelessWidget {
       children: [
         /// background gradient from image
         Container(
-          decoration: BoxDecoration(color: imageBackgroundColor),
+          decoration:
+              BoxDecoration(color: mediaPickerParams.imageBackgroundColor),
         ),
 
         /// thumbnail image
@@ -65,16 +50,16 @@ class ThumbnailWidget extends StatelessWidget {
                   image: DecodeImage(
                       provider.pathList[
                           provider.pathList.indexOf(provider.currentAlbum!)],
-                      thumbSize: thumbnailQuality,
+                      thumbSize: mediaPickerParams.thumbnailQuality,
                       index: index),
                   gaplessPlayback: true,
-                  fit: thumbnailBoxFix,
+                  fit: mediaPickerParams.thumbnailBoxFix,
                   filterQuality: FilterQuality.high,
                 ),
               );
             } else {
               return Container(
-                color: imageBackgroundColor,
+                color: mediaPickerParams.imageBackgroundColor,
               );
             }
           },
@@ -90,7 +75,8 @@ class ThumbnailWidget extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 decoration: BoxDecoration(
                   color: picked
-                      ? selectedBackgroundColor.withOpacity(0.3)
+                      ? mediaPickerParams.selectedBackgroundColor
+                          .withOpacity(0.3)
                       : Colors.transparent,
                 ),
               );
@@ -115,14 +101,16 @@ class ThumbnailWidget extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: picked
-                            ? selectedCheckBackgroundColor.withOpacity(0.6)
+                            ? mediaPickerParams.selectedCheckBackgroundColor
+                                .withOpacity(0.6)
                             : Colors.transparent,
-                        border:
-                            Border.all(width: 1.5, color: selectedCheckColor),
+                        border: Border.all(
+                            width: 1.5,
+                            color: mediaPickerParams.selectedCheckColor),
                       ),
                       child: Icon(
                         Icons.check,
-                        color: selectedCheckColor,
+                        color: mediaPickerParams.selectedCheckColor,
                         size: 14,
                       ),
                     ),

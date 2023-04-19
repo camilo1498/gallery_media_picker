@@ -1,5 +1,6 @@
 Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_widget) package and has the same concept as image_picker but with a more attractive interface to choose an image or video from the device gallery, whether it is Android or iOS.
 
+### Flutter 3.3.2
 ## Features
 
 [✔] pick image
@@ -29,22 +30,22 @@ import 'package:gallery_media_picker/gallery_media_picker.dart';
 
 1) update kotlin version to `1.6.0` and `classpath 'com.android.tools.build:gradle:7.0.4'` in your `build.gradle`
 2) in `android` set the `minSdkVersion` to `25` in your `build.gradle`
-3) 
-    #### Android
-    add uses-permission `AndroidMAnifest.xml` file
-    ```xml
-        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    ```
-    #### ios
-    add this config in your `info.plist` file 
-    ```xml
-        <key>NSPhotoLibraryUsageDescription</key>
-        <string>Privacy - Photo Library Usage Description</string>
-        <key>NSMotionUsageDescription</key>
-        <string>Motion usage description</string>
-        <key>NSPhotoLibraryAddUsageDescription</key>
-        <string>NSPhotoLibraryAddUsageDescription</string>
-    ```
+3)
+#### Android
+add uses-permission `AndroidMAnifest.xml` file
+ ```xml
+     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+ ```
+#### ios
+add this config in your `info.plist` file
+ ```xml
+     <key>NSPhotoLibraryUsageDescription</key>
+     <string>Privacy - Photo Library Usage Description</string>
+     <key>NSMotionUsageDescription</key>
+     <string>Motion usage description</string>
+     <key>NSPhotoLibraryAddUsageDescription</key>
+     <string>NSPhotoLibraryAddUsageDescription</string>
+ ```
 
 ## How to use
 Create a `GalleryMediaPicker()` widget:
@@ -52,9 +53,9 @@ Create a `GalleryMediaPicker()` widget:
 Material(
     child: GalleryMediaPicker(
         /// required params
-        pathList: (List<Map<String,dynamic>> path) { /// => (type List<Map<String,dynamic>>) return a list map with selected media metadata
-          /// returned metadata
-          //Map {
+        pathList: (path) { /// => (type List<PickedAssetModel>) return a list map with selected media metadata
+          /// returned data model
+          //PickedAssetModel(
           //   'id': String,
           //   'path': String,
           //   'type': String,
@@ -72,7 +73,7 @@ Material(
           //   'modifiedDateTime': DateTime,
           //   'title': String,
           //   'size': Size,
-          // }
+          // )
         }, 
         
         /// optional params

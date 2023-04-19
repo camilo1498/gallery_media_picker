@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/src/data/models/gallery_params_model.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/select_album_path/change_path_widget.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/select_album_path/dropdown.dart';
@@ -8,39 +9,11 @@ class SelectedPathDropdownButton extends StatelessWidget {
   /// picker provider
   final GalleryMediaPickerController provider;
 
-  /// global key
-  final GlobalKey? dropdownRelativeKey;
-  final Color appBarColor;
-
-  /// appBar TextColor
-  final Color appBarTextColor;
-
-  /// appBar icon Color
-  final Color appBarIconColor;
-
-  /// album background color
-  final Color albumBackGroundColor;
-
-  /// album text color
-  final Color albumTextColor;
-
-  /// album divider color
-  final Color albumDividerColor;
-
-  /// appBar leading widget
-  final Widget? appBarLeadingWidget;
+  /// params model
+  final MediaPickerParamsModel mediaPickerParams;
 
   const SelectedPathDropdownButton(
-      {Key? key,
-      required this.provider,
-      required this.dropdownRelativeKey,
-      required this.appBarTextColor,
-      required this.appBarIconColor,
-      required this.appBarColor,
-      required this.albumBackGroundColor,
-      required this.albumDividerColor,
-      required this.albumTextColor,
-      this.appBarLeadingWidget})
+      {Key? key, required this.provider, required this.mediaPickerParams})
       : super(key: key);
 
   @override
@@ -53,7 +26,7 @@ class SelectedPathDropdownButton extends StatelessWidget {
           /// show drop down
           Expanded(
             child: DropDown<AssetPathEntity>(
-              relativeKey: dropdownRelativeKey!,
+              relativeKey: GlobalKey(),
               child: ((context) =>
                   buildButton(context, arrowDownNotifier))(context),
               dropdownWidgetBuilder: (BuildContext context, close) {
@@ -61,15 +34,16 @@ class SelectedPathDropdownButton extends StatelessWidget {
                 return ChangePathWidget(
                   provider: provider,
                   close: close,
-                  albumBackGroundColor: albumBackGroundColor,
-                  albumDividerColor: albumDividerColor,
-                  albumTextColor: albumTextColor,
+                  albumBackGroundColor: mediaPickerParams.albumBackGroundColor,
+                  albumDividerColor: mediaPickerParams.albumDividerColor,
+                  albumTextColor: mediaPickerParams.albumTextColor,
                 );
               },
               onResult: (AssetPathEntity? value) {
                 /// save selected album
                 if (value != null) {
                   provider.currentAlbum = value;
+                  //provider.setAssetCount();
                 }
               },
               onShow: (value) {
@@ -83,7 +57,7 @@ class SelectedPathDropdownButton extends StatelessWidget {
           Container(
             width: MediaQuery.of(context).size.width / 2,
             alignment: Alignment.bottomLeft,
-            child: appBarLeadingWidget ?? Container(),
+            child: mediaPickerParams.appBarLeadingWidget ?? Container(),
           )
         ],
       ),
@@ -127,7 +101,7 @@ class SelectedPathDropdownButton extends StatelessWidget {
                 provider.currentAlbum!.name,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    color: appBarTextColor,
+                    color: mediaPickerParams.appBarTextColor,
                     fontSize: 18,
                     letterSpacing: 0.8,
                     fontWeight: FontWeight.w500),
@@ -149,7 +123,7 @@ class SelectedPathDropdownButton extends StatelessWidget {
                 },
                 child: Icon(
                   Icons.keyboard_arrow_down,
-                  color: appBarIconColor,
+                  color: mediaPickerParams.appBarIconColor,
                 ),
               ),
             ),

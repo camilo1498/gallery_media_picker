@@ -132,4 +132,24 @@ class GalleryMediaPickerController extends ChangeNotifier
   int pickIndex(AssetEntity entity) {
     return picked.indexOf(entity);
   }
+
+  /// get assets album count
+  int _assetCount = 0;
+  get assetCount => _assetCount;
+  final assetCountNotifier = ValueNotifier<int>(0);
+
+  setAssetCount() async {
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (currentAlbum != null) {
+        _assetCount = await currentAlbum!.assetCountAsync;
+        assetCountNotifier.value = _assetCount;
+        assetCountNotifier.notifyListeners();
+        notifyListeners();
+      } else {
+        assetCountNotifier.value = _assetCount;
+        assetCountNotifier.notifyListeners();
+        notifyListeners();
+      }
+    });
+  }
 }

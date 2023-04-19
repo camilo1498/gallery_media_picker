@@ -64,6 +64,8 @@ class GalleryFunctions {
         requestOption: const PermissionRequestOption(
             iosAccessLevel: IosAccessLevel.readWrite));
     if (result.isAuth) {
+      /// load "recent" album
+      provider.setAssetCount();
       PhotoManager.startChangeNotify();
       PhotoManager.addChangeCallback((value) {
         _refreshPathList(setState, provider);

@@ -3,42 +3,42 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 class PickedAssetModel {
-  String? id;
-  String? path;
-  String? type;
-  Duration? videoDuration;
-  DateTime? createDateTime;
+  String id;
+  String path;
+  String type;
+  Duration videoDuration;
+  DateTime createDateTime;
   double? latitude;
   double? longitude;
   Uint8List? thumbnail;
-  int? height;
-  int? width;
-  int? orientationHeight;
-  int? orientationWidth;
-  Size? orientationSize;
+  int height;
+  int width;
+  int orientationHeight;
+  int orientationWidth;
+  Size orientationSize;
   File? file;
-  DateTime? modifiedDateTime;
+  DateTime modifiedDateTime;
   String? title;
-  Size? size;
+  Size size;
 
   PickedAssetModel({
-    this.id,
-    this.path,
-    this.type,
-    this.videoDuration,
-    this.createDateTime,
+    required this.id,
+    required this.path,
+    required this.type,
+    required this.videoDuration,
+    required this.createDateTime,
     this.latitude,
     this.longitude,
     this.thumbnail,
-    this.height,
-    this.width,
-    this.orientationHeight,
-    this.orientationWidth,
-    this.orientationSize,
+    required this.height,
+    required this.width,
+    required this.orientationHeight,
+    required this.orientationWidth,
+    required this.orientationSize,
     this.file,
-    this.modifiedDateTime,
+    required this.modifiedDateTime,
     this.title,
-    this.size,
+    required this.size,
   });
 
   factory PickedAssetModel.fromJson(Map<String, dynamic> json) =>
@@ -68,7 +68,7 @@ class PickedAssetModel {
         "type": type,
         "videoDuration": videoDuration,
         "createDateTime":
-            "${createDateTime!.year.toString().padLeft(4, '0')}-${createDateTime!.month.toString().padLeft(2, '0')}-${createDateTime!.day.toString().padLeft(2, '0')}",
+            "${createDateTime.year.toString().padLeft(4, '0')}-${createDateTime.month.toString().padLeft(2, '0')}-${createDateTime.day.toString().padLeft(2, '0')}",
         "latitude": latitude,
         "longitude": longitude,
         "thumbnail": thumbnail,
@@ -79,7 +79,7 @@ class PickedAssetModel {
         "orientationSize": orientationSize,
         "file": file,
         "modifiedDateTime":
-            "${modifiedDateTime!.year.toString().padLeft(4, '0')}-${modifiedDateTime!.month.toString().padLeft(2, '0')}-${modifiedDateTime!.day.toString().padLeft(2, '0')}",
+            "${modifiedDateTime.year.toString().padLeft(4, '0')}-${modifiedDateTime.month.toString().padLeft(2, '0')}-${modifiedDateTime.day.toString().padLeft(2, '0')}",
         "title": title,
         "size": size,
       };

@@ -1,5 +1,8 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/core/functions.dart';
+import 'package:gallery_media_picker/src/data/models/gallery_params_model.dart';
 import 'package:gallery_media_picker/src/data/models/picked_asset_model.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/gallery_grid/gallery_grid_view.dart';
@@ -8,108 +11,17 @@ import 'package:oktoast/oktoast.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class GalleryMediaPicker extends StatefulWidget {
-  /// maximum images allowed (default 2)
-  final int maxPickImages;
-
-  /// picker mode
-  final bool singlePick;
+  /// params model
+  final MediaPickerParamsModel mediaPickerParams;
 
   /// return all selected paths
-  final Function(List<PickedAssetModel> path)? pathList;
+  final Function(List<PickedAssetModel> path) pathList;
 
-  /// dropdown appbar color
-  final Color appBarColor;
-
-  /// appBar TextColor
-  final Color appBarTextColor;
-
-  /// appBar icon Color
-  final Color? appBarIconColor;
-
-  /// gridView background color
-  final Color gridViewBackgroundColor;
-
-  /// grid image backGround color
-  final Color imageBackgroundColor;
-
-  /// album background color
-  final Color? albumBackGroundColor;
-
-  /// album text color
-  final Color albumTextColor;
-
-  /// album divider color
-  final Color? albumDividerColor;
-
-  /// gallery gridview crossAxisCount
-  final int? crossAxisCount;
-
-  /// gallery gridview aspect ratio
-  final double? childAspectRatio;
-
-  /// appBar leading widget
-  final Widget? appBarLeadingWidget;
-
-  /// appBar height
-  final double appBarHeight;
-
-  /// gridView Padding
-  final EdgeInsets? gridPadding;
-
-  /// gridView physics
-  final ScrollPhysics? gridViewPhysics;
-
-  /// gridView controller
-  final ScrollController? gridViewController;
-
-  /// selected background color
-  final Color selectedBackgroundColor;
-
-  /// selected check color
-  final Color selectedCheckColor;
-
-  /// thumbnail box fit
-  final BoxFit thumbnailBoxFix;
-
-  /// selected Check Background Color
-  final Color selectedCheckBackgroundColor;
-
-  /// load video
-  final bool onlyVideos;
-
-  /// load images
-  final bool onlyImages;
-
-  /// image quality thumbnail
-  final int? thumbnailQuality;
-  const GalleryMediaPicker(
-      {Key? key,
-      this.maxPickImages = 2,
-      this.singlePick = true,
-      this.appBarColor = Colors.black,
-      this.albumBackGroundColor,
-      this.albumDividerColor,
-      this.albumTextColor = Colors.white,
-      this.appBarIconColor,
-      this.appBarTextColor = Colors.white,
-      this.crossAxisCount,
-      this.gridViewBackgroundColor = Colors.black54,
-      this.childAspectRatio,
-      this.appBarLeadingWidget,
-      this.appBarHeight = 100,
-      this.imageBackgroundColor = Colors.white,
-      this.gridPadding,
-      this.gridViewController,
-      this.gridViewPhysics,
-      this.pathList,
-      this.selectedBackgroundColor = Colors.black,
-      this.selectedCheckColor = Colors.white,
-      this.thumbnailBoxFix = BoxFit.cover,
-      this.selectedCheckBackgroundColor = Colors.white,
-      this.onlyImages = false,
-      this.onlyVideos = false,
-      this.thumbnailQuality})
-      : super(key: key);
+  const GalleryMediaPicker({
+    Key? key,
+    required this.mediaPickerParams,
+    required this.pathList,
+  }) : super(key: key);
 
   @override
   State<GalleryMediaPicker> createState() => _GalleryMediaPickerState();
@@ -117,7 +29,7 @@ class GalleryMediaPicker extends StatefulWidget {
 
 class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   /// create object of PickerDataProvider
-  final provider = GalleryMediaPickerController();
+  final GalleryMediaPickerController provider = GalleryMediaPickerController();
 
   @override
   void initState() {
@@ -135,7 +47,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   void dispose() {
     if (mounted) {
       /// clear all controller list
-      //provider.onPickMax.removeListener(GalleryFunctions.onPickMax(provider));
+      provider.onPickMax.removeListener(GalleryFunctions.onPickMax(provider));
       provider.pickedFile.clear();
       provider.picked.clear();
       provider.pathList.clear();
@@ -146,8 +58,9 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
 
   @override
   Widget build(BuildContext context) {
-    provider.max = widget.maxPickImages;
-    provider.singlePickMode = widget.singlePick;
+    provider.max = widget.mediaPickerParams.maxPickImages;
+    provider.singlePickMode = widget.mediaPickerParams.singlePick;
+
     return OKToast(
       child: NotificationListener<OverscrollIndicatorNotification>(
           onNotification: (overscroll) {
@@ -159,22 +72,12 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
               /// album drop down
               Center(
                 child: Container(
-                  color: widget.appBarColor,
+                  color: widget.mediaPickerParams.appBarColor,
                   alignment: Alignment.bottomLeft,
-                  height: widget.appBarHeight,
+                  height: widget.mediaPickerParams.appBarHeight,
                   child: SelectedPathDropdownButton(
-                    dropdownRelativeKey: GlobalKey(),
                     provider: provider,
-                    appBarColor: widget.appBarColor,
-                    appBarIconColor:
-                        widget.appBarIconColor ?? const Color(0xFFB2B2B2),
-                    appBarTextColor: widget.appBarTextColor,
-                    albumTextColor: widget.albumTextColor,
-                    albumDividerColor:
-                        widget.albumDividerColor ?? const Color(0xFF484848),
-                    albumBackGroundColor:
-                        widget.albumBackGroundColor ?? const Color(0xFF333333),
-                    appBarLeadingWidget: widget.appBarLeadingWidget,
+                    mediaPickerParams: widget.mediaPickerParams,
                   ),
                 ),
               ),
@@ -189,23 +92,9 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                           animation: provider.currentAlbumNotifier,
                           builder: (BuildContext context, child) =>
                               GalleryGridView(
-                            path: provider.currentAlbum,
-                            thumbnailQuality: widget.thumbnailQuality ?? 200,
                             provider: provider,
-                            padding: widget.gridPadding,
-                            childAspectRatio: widget.childAspectRatio ?? 0.5,
-                            crossAxisCount: widget.crossAxisCount ?? 3,
-                            gridViewBackgroundColor:
-                                widget.gridViewBackgroundColor,
-                            gridViewController: widget.gridViewController,
-                            gridViewPhysics: widget.gridViewPhysics,
-                            imageBackgroundColor: widget.imageBackgroundColor,
-                            selectedBackgroundColor:
-                                widget.selectedBackgroundColor,
-                            selectedCheckColor: widget.selectedCheckColor,
-                            thumbnailBoxFix: widget.thumbnailBoxFix,
-                            selectedCheckBackgroundColor:
-                                widget.selectedCheckBackgroundColor,
+                            path: provider.currentAlbum,
+                            mediaPickerParams: widget.mediaPickerParams,
                             onAssetItemClick: (asset, index) async {
                               provider.pickEntity(asset);
                               GalleryFunctions.getFile(asset)
@@ -230,7 +119,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                                   title: asset.title,
                                   size: asset.size,
                                 ));
-                                widget.pathList!(provider.pickedFile);
+                                widget.pathList(provider.pickedFile);
                               });
                             },
                           ),

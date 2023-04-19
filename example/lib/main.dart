@@ -25,7 +25,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({Key key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
 }
 
 class Example extends StatefulWidget {
-  const Example({Key? key}) : super(key: key);
+  const Example({Key key}) : super(key: key);
 
   @override
   State<Example> createState() => _ExampleState();
@@ -99,10 +99,10 @@ class _ExampleState extends State<Example> {
                               if (data.type == 'image') {
                                 return Center(
                                   child: PhotoView.customChild(
-                                    child: Image.file(File(data.path!)),
                                     enablePanAlways: true,
                                     maxScale: 2.0,
                                     minScale: 1.0,
+                                    child: Image.file(File(data.path)),
                                   ),
                                 );
                               }
@@ -123,7 +123,7 @@ class _ExampleState extends State<Example> {
                                       controller: BetterVideoPlayerController(),
                                       dataSource: BetterVideoPlayerDataSource(
                                         BetterVideoPlayerDataSourceType.file,
-                                        data.path!,
+                                        data.path,
                                       ),
                                     ),
                                   );
@@ -139,138 +139,137 @@ class _ExampleState extends State<Example> {
                 /// gallery media picker
                 Expanded(
                   child: GalleryMediaPicker(
-                    childAspectRatio: 1,
-                    crossAxisCount: 3,
-                    thumbnailQuality: 100,
-                    thumbnailBoxFix: BoxFit.cover,
-                    singlePick: _singlePick,
-                    gridViewBackgroundColor: Colors.grey[900]!,
-                    imageBackgroundColor: Colors.black,
-                    maxPickImages: 5,
-                    appBarHeight: 60,
-                    selectedBackgroundColor: Colors.black,
-                    selectedCheckColor: Colors.black87,
-                    selectedCheckBackgroundColor: Colors.white10,
+                    mediaPickerParams: MediaPickerParamsModel(
+                      appBarHeight: 60,
+                      maxPickImages: 5,
+                      crossAxisCount: 3,
+                      childAspectRatio: 1,
+                      thumbnailQuality: 200,
+                      singlePick: _singlePick,
+                      thumbnailBoxFix: BoxFit.cover,
+                      imageBackgroundColor: Colors.black,
+                      selectedCheckColor: Colors.black87,
+                      selectedBackgroundColor: Colors.black,
+                      gridViewBackgroundColor: Colors.grey[900],
+                      selectedCheckBackgroundColor: Colors.white10,
+                      appBarLeadingWidget: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 15, bottom: 12),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              /// select multiple / single
+                              SizedBox(
+                                height: 30,
+                                child: Container(
+                                  alignment: Alignment.centerRight,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _singlePick = !_singlePick;
+                                          });
+                                          debugPrint(_singlePick.toString());
+                                        },
+                                        child: AnimatedContainer(
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                            border: Border.all(
+                                                color: Colors.blue, width: 1.5),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                const Text(
+                                                  'Select multiple',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      fontSize: 10),
+                                                ),
+                                                const SizedBox(
+                                                  width: 7,
+                                                ),
+                                                Transform.scale(
+                                                  scale: 1.5,
+                                                  child: Icon(
+                                                    _singlePick
+                                                        ? Icons
+                                                            .check_box_outline_blank
+                                                        : Icons
+                                                            .check_box_outlined,
+                                                    color: Colors.blue,
+                                                    size: 10,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
+
+                              /// share
+                              GestureDetector(
+                                onTap: () async {
+                                  List<String> mediaPath = [];
+                                  media.pickedFile.map((p) {
+                                    setState(() {
+                                      mediaPath.add(p.path);
+                                    });
+                                  }).toString();
+                                  if (mediaPath.isNotEmpty) {
+                                    await Share.shareFiles(mediaPath);
+                                  }
+                                  mediaPath.clear();
+                                },
+                                child: Container(
+                                  height: 30,
+                                  width: 30,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: Colors.blue, width: 1.5),
+                                  ),
+                                  child: Transform.scale(
+                                    scale: 2,
+                                    child: const Icon(
+                                      Icons.share_outlined,
+                                      color: Colors.blue,
+                                      size: 10,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                     pathList: (paths) {
                       setState(() {
                         /// for this example i used provider, you can choose the state management that you prefer
                         media.pickedFile = paths;
                       });
                     },
-
-                    /// select multiple image
-                    appBarLeadingWidget: Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 15, bottom: 12),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            /// select multiple / single
-                            SizedBox(
-                              height: 30,
-                              child: Container(
-                                alignment: Alignment.centerRight,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _singlePick = !_singlePick;
-                                        });
-                                        debugPrint(_singlePick.toString());
-                                      },
-                                      child: AnimatedContainer(
-                                        duration:
-                                            const Duration(milliseconds: 300),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                          border: Border.all(
-                                              color: Colors.blue, width: 1.5),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              const Text(
-                                                'Select multiple',
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 10),
-                                              ),
-                                              const SizedBox(
-                                                width: 7,
-                                              ),
-                                              Transform.scale(
-                                                scale: 1.5,
-                                                child: Icon(
-                                                  _singlePick
-                                                      ? Icons
-                                                          .check_box_outline_blank
-                                                      : Icons
-                                                          .check_box_outlined,
-                                                  color: Colors.blue,
-                                                  size: 10,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 40,
-                            ),
-
-                            /// share
-                            GestureDetector(
-                              onTap: () async {
-                                List<String> _mediaPath = [];
-                                media.pickedFile.map((p) {
-                                  setState(() {
-                                    _mediaPath.add(p.path!);
-                                  });
-                                }).toString();
-                                if (_mediaPath.isNotEmpty) {
-                                  await Share.shareFiles(_mediaPath);
-                                }
-                                _mediaPath.clear();
-                              },
-                              child: Container(
-                                height: 30,
-                                width: 30,
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                      color: Colors.blue, width: 1.5),
-                                ),
-                                child: Transform.scale(
-                                  scale: 2,
-                                  child: const Icon(
-                                    Icons.share_outlined,
-                                    color: Colors.blue,
-                                    size: 10,
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
                   ),
                 )
               ],
