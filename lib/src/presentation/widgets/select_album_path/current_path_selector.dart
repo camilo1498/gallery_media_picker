@@ -34,16 +34,13 @@ class SelectedPathDropdownButton extends StatelessWidget {
                 return ChangePathWidget(
                   provider: provider,
                   close: close,
-                  albumBackGroundColor: mediaPickerParams.albumBackGroundColor,
-                  albumDividerColor: mediaPickerParams.albumDividerColor,
-                  albumTextColor: mediaPickerParams.albumTextColor,
+                  mediaPickerParams: mediaPickerParams,
                 );
               },
               onResult: (AssetPathEntity? value) {
                 /// save selected album
                 if (value != null) {
                   provider.currentAlbum = value;
-                  //provider.setAssetCount();
                 }
               },
               onShow: (value) {

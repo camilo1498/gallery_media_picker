@@ -4,14 +4,14 @@ version: 0.0.9+2
 homepage: https://github.com/camilo1498/gallery_media_picker
 
 environment:
-  sdk: ">=2.18.0 <3.0.0"
+  sdk: ">=2.19.6 <3.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  photo_manager: ^2.2.1
-  oktoast: ^3.3.0
+  photo_manager: ^2.6.0
+  oktoast: ^3.3.1
 
 dev_dependencies:
   flutter_test:

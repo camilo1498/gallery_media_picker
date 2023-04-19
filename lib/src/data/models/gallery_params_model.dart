@@ -23,7 +23,7 @@ class MediaPickerParamsModel {
       this.selectedCheckColor = Colors.white,
       this.thumbnailBoxFix = BoxFit.cover,
       this.selectedCheckBackgroundColor = Colors.white,
-      this.onlyImages = false,
+      this.onlyImages = true,
       this.onlyVideos = false,
       this.thumbnailQuality = 200});
 

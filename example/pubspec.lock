@@ -219,10 +219,10 @@ packages:
     dependency: transitive
     description:
       name: oktoast
-      sha256: "944fe9bd46233dab466bd9fa59b6823e277ab056c33077bcb44ddc4be9559535"
+      sha256: fd5dd5c7dd02c41c56bdbdbc163351bd6cd59cba61c416daf255e35d1a86dce1
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.0"
+    version: "3.3.1"
   path:
     dependency: transitive
     description:
@@ -235,10 +235,10 @@ packages:
     dependency: transitive
     description:
       name: photo_manager
-      sha256: "5e19d996e6b49a72c14b1a55c03cd817d061b87f8e61646d8f9c5a2ede876c0d"
+      sha256: bdc4ab1fa9fb064d8ccfea6ab44119f55b220293d7ce2e19eb5a5f998db86c88
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0-dev.2"
+    version: "2.6.0"
   photo_view:
     dependency: "direct main"
     description:
@@ -533,5 +533,5 @@ packages:
     source: hosted
     version: "3.0.0"
 sdks:
-  dart: ">=2.18.0 <3.0.0"
+  dart: ">=2.19.6 <3.0.0"
   flutter: ">=3.0.0"

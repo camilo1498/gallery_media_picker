@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:gallery_media_picker/gallery_media_picker.dart';
 import 'package:gallery_media_picker/src/core/decode_image.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -15,16 +14,11 @@ class ThumbnailWidget extends StatelessWidget {
 
   /// image provider
   final GalleryMediaPickerController provider;
-
-  /// params model
-  final MediaPickerParamsModel mediaPickerParams;
-
   const ThumbnailWidget(
       {Key? key,
       required this.index,
       required this.asset,
-      required this.provider,
-      required this.mediaPickerParams})
+      required this.provider})
       : super(key: key);
 
   @override
@@ -35,35 +29,36 @@ class ThumbnailWidget extends StatelessWidget {
         /// background gradient from image
         Container(
           decoration:
-              BoxDecoration(color: mediaPickerParams.imageBackgroundColor),
+              BoxDecoration(color: provider.paramsModel.imageBackgroundColor),
         ),
 
         /// thumbnail image
-        FutureBuilder<Uint8List?>(
-          future: asset.thumbnailData,
-          builder: (_, data) {
-            if (data.hasData) {
-              return SizedBox(
-                width: double.infinity,
-                height: double.infinity,
-                child: Image(
-                  image: DecodeImage(
-                      provider.pathList[
-                          provider.pathList.indexOf(provider.currentAlbum!)],
-                      thumbSize: mediaPickerParams.thumbnailQuality,
-                      index: index),
-                  gaplessPlayback: true,
-                  fit: mediaPickerParams.thumbnailBoxFix,
-                  filterQuality: FilterQuality.high,
-                ),
-              );
-            } else {
-              return Container(
-                color: mediaPickerParams.imageBackgroundColor,
-              );
-            }
-          },
-        ),
+        if (asset.type == AssetType.image || asset.type == AssetType.video)
+          FutureBuilder<Uint8List?>(
+            future: asset.thumbnailData,
+            builder: (_, data) {
+              if (data.hasData) {
+                return SizedBox(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: Image(
+                    image: DecodeImage(
+                        provider.pathList[
+                            provider.pathList.indexOf(provider.currentAlbum!)],
+                        thumbSize: provider.paramsModel.thumbnailQuality,
+                        index: index),
+                    gaplessPlayback: true,
+                    fit: provider.paramsModel.thumbnailBoxFix,
+                    filterQuality: FilterQuality.high,
+                  ),
+                );
+              } else {
+                return Container(
+                  color: provider.paramsModel.imageBackgroundColor,
+                );
+              }
+            },
+          ),
 
         /// selected image color mask
         AnimatedBuilder(
@@ -75,7 +70,7 @@ class ThumbnailWidget extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 decoration: BoxDecoration(
                   color: picked
-                      ? mediaPickerParams.selectedBackgroundColor
+                      ? provider.paramsModel.selectedBackgroundColor
                           .withOpacity(0.3)
                       : Colors.transparent,
                 ),
@@ -101,16 +96,16 @@ class ThumbnailWidget extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: picked
-                            ? mediaPickerParams.selectedCheckBackgroundColor
+                            ? provider.paramsModel.selectedCheckBackgroundColor
                                 .withOpacity(0.6)
                             : Colors.transparent,
                         border: Border.all(
                             width: 1.5,
-                            color: mediaPickerParams.selectedCheckColor),
+                            color: provider.paramsModel.selectedCheckColor),
                       ),
                       child: Icon(
                         Icons.check,
-                        color: mediaPickerParams.selectedCheckColor,
+                        color: provider.paramsModel.selectedCheckColor,
                         size: 14,
                       ),
                     ),

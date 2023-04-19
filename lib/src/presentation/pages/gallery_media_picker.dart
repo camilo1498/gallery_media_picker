@@ -34,6 +34,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   @override
   void initState() {
     _getPermission();
+    provider.paramsModel = widget.mediaPickerParams;
     super.initState();
   }
 
@@ -94,7 +95,6 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                               GalleryGridView(
                             provider: provider,
                             path: provider.currentAlbum,
-                            mediaPickerParams: widget.mediaPickerParams,
                             onAssetItemClick: (asset, index) async {
                               provider.pickEntity(asset);
                               GalleryFunctions.getFile(asset)
@@ -119,6 +119,8 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                                   title: asset.title,
                                   size: asset.size,
                                 ));
+
+                                /// send selected media data
                                 widget.pathList(provider.pickedFile);
                               });
                             },

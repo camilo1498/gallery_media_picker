@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:gallery_media_picker/src/data/models/gallery_params_model.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/gallery_grid/thumbnail_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -18,14 +17,10 @@ class GalleryGridView extends StatefulWidget {
   /// picker data provider
   final GalleryMediaPickerController provider;
 
-  /// params model
-  final MediaPickerParamsModel mediaPickerParams;
-
   const GalleryGridView({
     Key? key,
     required this.path,
     required this.provider,
-    required this.mediaPickerParams,
     this.onAssetItemClick,
   }) : super(key: key);
 
@@ -58,19 +53,20 @@ class GalleryGridViewState extends State<GalleryGridView> {
             child: AnimatedBuilder(
               animation: widget.provider.assetCountNotifier,
               builder: (_, __) => Container(
-                color: widget.mediaPickerParams.gridViewBackgroundColor,
+                color: widget.provider.paramsModel.gridViewBackgroundColor,
                 child: GridView.builder(
                   key: ValueKey(widget.path),
                   shrinkWrap: true,
-                  padding: widget.mediaPickerParams.gridPadding ??
+                  padding: widget.provider.paramsModel.gridPadding ??
                       const EdgeInsets.all(0),
-                  physics: widget.mediaPickerParams.gridViewPhysics ??
+                  physics: widget.provider.paramsModel.gridViewPhysics ??
                       const ScrollPhysics(),
-                  controller: widget.mediaPickerParams.gridViewController ??
+                  controller: widget.provider.paramsModel.gridViewController ??
                       ScrollController(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    childAspectRatio: widget.mediaPickerParams.childAspectRatio,
-                    crossAxisCount: widget.mediaPickerParams.crossAxisCount,
+                    childAspectRatio:
+                        widget.provider.paramsModel.childAspectRatio,
+                    crossAxisCount: widget.provider.paramsModel.crossAxisCount,
                     mainAxisSpacing: 2.5,
                     crossAxisSpacing: 2.5,
                   ),
@@ -93,12 +89,14 @@ class GalleryGridViewState extends State<GalleryGridView> {
       /// on tap thumbnail
       onTap: () async {
         var asset = cacheMap[index];
-        if (asset == null) {
+        if (asset != null &&
+            asset.type != AssetType.audio &&
+            asset.type != AssetType.other) {
           asset = (await widget.path!
               .getAssetListRange(start: index, end: index + 1))[0];
           cacheMap[index] = asset;
+          widget.onAssetItemClick?.call(asset, index);
         }
-        widget.onAssetItemClick?.call(asset, index);
       },
 
       /// render thumbnail
@@ -115,7 +113,6 @@ class GalleryGridViewState extends State<GalleryGridView> {
         asset: asset,
         provider: provider,
         index: index,
-        mediaPickerParams: widget.mediaPickerParams,
       );
     } else {
       /// read the assets from selected album
@@ -126,7 +123,7 @@ class GalleryGridViewState extends State<GalleryGridView> {
             return Container(
               width: double.infinity,
               height: double.infinity,
-              color: widget.mediaPickerParams.gridViewBackgroundColor,
+              color: widget.provider.paramsModel.gridViewBackgroundColor,
             );
           }
           final asset = snapshot.data![0];
@@ -137,7 +134,6 @@ class GalleryGridViewState extends State<GalleryGridView> {
             asset: asset,
             index: index,
             provider: provider,
-            mediaPickerParams: widget.mediaPickerParams,
           );
         },
       );
@@ -165,5 +161,17 @@ class GalleryGridViewState extends State<GalleryGridView> {
         setState(() {});
       }
     }
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+
+    return other != this;
   }
 }
