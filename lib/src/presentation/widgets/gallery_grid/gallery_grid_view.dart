@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/src/data/models/gallery_params_model.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/gallery_grid/thumbnail_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -9,70 +10,22 @@ class GalleryGridView extends StatefulWidget {
   /// asset album
   final AssetPathEntity? path;
 
-  /// load if scrolling is false
-  final bool loadWhenScrolling;
-
   /// on tap thumbnail
   final OnAssetItemClick? onAssetItemClick;
 
   /// picker data provider
   final GalleryMediaPickerController provider;
 
-  /// gallery gridview crossAxisCount
-  final int crossAxisCount;
+  /// params model
+  final MediaPickerParamsModel mediaPickerParams;
 
-  /// gallery gridview aspect ratio
-  final double childAspectRatio;
-
-  /// gridView background color
-  final Color gridViewBackgroundColor;
-
-  /// gridView Padding
-  final EdgeInsets? padding;
-
-  /// gridView physics
-  final ScrollPhysics? gridViewPhysics;
-
-  /// gridView controller
-  final ScrollController? gridViewController;
-
-  /// selected background color
-  final Color selectedBackgroundColor;
-
-  /// selected check color
-  final Color selectedCheckColor;
-
-  /// selected Check Background Color
-  final Color selectedCheckBackgroundColor;
-
-  /// background image color
-  final Color imageBackgroundColor;
-
-  /// thumbnail box fit
-  final BoxFit thumbnailBoxFix;
-
-  /// image quality thumbnail
-  final int? thumbnailQuality;
-
-  const GalleryGridView(
-      {Key? key,
-      required this.path,
-      required this.provider,
-      this.onAssetItemClick,
-      this.loadWhenScrolling = false,
-      this.childAspectRatio = 0.5,
-      this.gridViewBackgroundColor = Colors.white,
-      this.crossAxisCount = 3,
-      this.padding,
-      this.gridViewController,
-      this.gridViewPhysics,
-      this.selectedBackgroundColor = Colors.black,
-      this.selectedCheckColor = Colors.white,
-      this.imageBackgroundColor = Colors.white,
-      this.thumbnailBoxFix = BoxFit.cover,
-      this.selectedCheckBackgroundColor = Colors.white,
-      this.thumbnailQuality = 200})
-      : super(key: key);
+  const GalleryGridView({
+    Key? key,
+    required this.path,
+    required this.provider,
+    required this.mediaPickerParams,
+    this.onAssetItemClick,
+  }) : super(key: key);
 
   @override
   GalleryGridViewState createState() => GalleryGridViewState();
@@ -103,16 +56,19 @@ class GalleryGridViewState extends State<GalleryGridView> {
             child: AnimatedBuilder(
               animation: widget.provider.assetCountNotifier,
               builder: (_, __) => Container(
-                color: widget.gridViewBackgroundColor,
+                color: widget.mediaPickerParams.gridViewBackgroundColor,
                 child: GridView.builder(
                   key: ValueKey(widget.path),
                   shrinkWrap: true,
-                  padding: widget.padding ?? const EdgeInsets.all(0),
-                  physics: widget.gridViewPhysics ?? const ScrollPhysics(),
-                  controller: widget.gridViewController ?? ScrollController(),
+                  padding: widget.mediaPickerParams.gridPadding ??
+                      const EdgeInsets.all(0),
+                  physics: widget.mediaPickerParams.gridViewPhysics ??
+                      const ScrollPhysics(),
+                  controller: widget.mediaPickerParams.gridViewController ??
+                      ScrollController(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    childAspectRatio: widget.childAspectRatio,
-                    crossAxisCount: widget.crossAxisCount,
+                    childAspectRatio: widget.mediaPickerParams.childAspectRatio,
+                    crossAxisCount: widget.mediaPickerParams.crossAxisCount,
                     mainAxisSpacing: 2.5,
                     crossAxisSpacing: 2.5,
                   ),
@@ -157,12 +113,7 @@ class GalleryGridViewState extends State<GalleryGridView> {
         asset: asset,
         provider: provider,
         index: index,
-        thumbnailQuality: widget.thumbnailQuality!,
-        selectedBackgroundColor: widget.selectedBackgroundColor,
-        selectedCheckColor: widget.selectedCheckColor,
-        imageBackgroundColor: widget.imageBackgroundColor,
-        thumbnailBoxFix: widget.thumbnailBoxFix,
-        selectedCheckBackgroundColor: widget.selectedCheckBackgroundColor,
+        mediaPickerParams: widget.mediaPickerParams,
       );
     } else {
       /// read the assets from selected album
@@ -173,7 +124,7 @@ class GalleryGridViewState extends State<GalleryGridView> {
             return Container(
               width: double.infinity,
               height: double.infinity,
-              color: widget.gridViewBackgroundColor,
+              color: widget.mediaPickerParams.gridViewBackgroundColor,
             );
           }
           final asset = snapshot.data![0];
@@ -184,12 +135,7 @@ class GalleryGridViewState extends State<GalleryGridView> {
             asset: asset,
             index: index,
             provider: provider,
-            thumbnailQuality: widget.thumbnailQuality!,
-            selectedBackgroundColor: widget.selectedBackgroundColor,
-            selectedCheckColor: widget.selectedCheckColor,
-            imageBackgroundColor: widget.imageBackgroundColor,
-            thumbnailBoxFix: widget.thumbnailBoxFix,
-            selectedCheckBackgroundColor: widget.selectedCheckBackgroundColor,
+            mediaPickerParams: widget.mediaPickerParams,
           );
         },
       );
