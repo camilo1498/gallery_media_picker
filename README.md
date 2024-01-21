@@ -1,3 +1,5 @@
+## I won't be giving support or any update for a while beacuse i don't have time to spend in this project.
+
 Gallery Photo Picker is based in [photo_widget](https://pub.dev/packages/photo_widget) package and has the same concept as image_picker but with a more attractive interface to choose an image or video from the device gallery, whether it is Android or iOS.
 
 ### Flutter 3.7.11
