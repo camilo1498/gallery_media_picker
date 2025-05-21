@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 void main() {
-  Paint.enableDithering = true;
+  // Paint.enableDithering = true;
   WidgetsFlutterBinding.ensureInitialized();
   Provider.debugCheckInvalidValueType = null;
   SystemChrome.setPreferredOrientations(
@@ -20,12 +20,12 @@ void main() {
   ));
   runApp(MultiProvider(
     providers: [ChangeNotifierProvider(create: (_) => PickerDataProvider())],
-    child: const MyApp(),
+    child: MyApp(),
   ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -35,13 +35,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const Example(),
+      home: Example(),
     );
   }
 }
 
 class Example extends StatefulWidget {
-  const Example({Key key}) : super(key: key);
+  const Example({super.key});
 
   @override
   State<Example> createState() => _ExampleState();
@@ -150,7 +150,7 @@ class _ExampleState extends State<Example> {
                       imageBackgroundColor: Colors.black,
                       selectedCheckColor: Colors.black87,
                       selectedBackgroundColor: Colors.black,
-                      gridViewBackgroundColor: Colors.grey[900],
+                      gridViewBackgroundColor: Colors.grey[900]!,
                       selectedCheckBackgroundColor: Colors.white10,
                       appBarLeadingWidget: Align(
                         alignment: Alignment.bottomRight,
@@ -236,7 +236,12 @@ class _ExampleState extends State<Example> {
                                     });
                                   }).toString();
                                   if (mediaPath.isNotEmpty) {
-                                    await Share.shareFiles(mediaPath);
+                                    var files =
+                                        mediaPath.map((e) => XFile(e)).toList();
+                                    await SharePlus.instance.share(ShareParams(
+                                        files: files,
+                                        text: 'Share',
+                                        subject: 'Share'));
                                   }
                                   mediaPath.clear();
                                 },
