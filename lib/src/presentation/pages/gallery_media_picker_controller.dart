@@ -5,8 +5,8 @@ import 'package:photo_manager/photo_manager.dart';
 
 mixin PhotoDataController on ChangeNotifier {
   /// save params model
-  MediaPickerParamsModel? _paramsModel;
-  MediaPickerParamsModel get paramsModel => _paramsModel!;
+  late MediaPickerParamsModel _paramsModel;
+  MediaPickerParamsModel get paramsModel => _paramsModel;
   set paramsModel(MediaPickerParamsModel model) {
     _paramsModel = model;
     notifyListeners();
@@ -48,8 +48,7 @@ mixin PhotoDataController on ChangeNotifier {
     int Function(
       AssetPathEntity a,
       AssetPathEntity b,
-    )
-        sortBy = _defaultSort,
+    ) sortBy = _defaultSort,
   }) {
     list.sort(sortBy);
     pathList.clear();
