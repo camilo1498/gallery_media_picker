@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:gallery_media_picker/src/data/enum/picked_asset_type_enum.dart';
+
 class PickedAssetModel {
   PickedAssetModel({
     required this.id,
@@ -28,7 +30,6 @@ class PickedAssetModel {
   final File? file;
   final int height;
   final String path;
-  final String type;
   final String? title;
   final double? latitude;
   final double? longitude;
@@ -38,5 +39,6 @@ class PickedAssetModel {
   final int orientationHeight;
   final Duration videoDuration;
   final DateTime createDateTime;
+  final PickedAssetTypeEnum type;
   final DateTime modifiedDateTime;
 }

@@ -129,7 +129,7 @@ class _ExampleState extends State<Example> {
     return PageView(
       children:
           pickedFiles.map((data) {
-            if (data.type == 'image') {
+            if (data.type == PickedAssetTypeEnum.image) {
               return Center(
                 child: PhotoView.customChild(
                   enablePanAlways: true,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/src/data/enum/gallery_media_type_enum.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/select_album_path/dropdown.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/select_album_path/overlay_drop_down.dart';
@@ -87,9 +88,10 @@ class GalleryFunctions {
     if (provider.paramsModel == null) return;
     PhotoManager.getAssetPathList(
       type:
-          provider.paramsModel!.onlyVideos
+          provider.paramsModel?.mediaType == GalleryMediaTypeEnum.onlyVideos
               ? RequestType.video
-              : (provider.paramsModel?.onlyImages ?? true)
+              : provider.paramsModel?.mediaType ==
+                  GalleryMediaTypeEnum.onlyImages
               ? RequestType.image
               : RequestType.all,
     ).then((pathList) {

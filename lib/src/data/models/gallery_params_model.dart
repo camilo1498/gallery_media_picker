@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/src/data/enum/gallery_media_type_enum.dart';
 
 class MediaPickerParamsModel {
   const MediaPickerParamsModel({
@@ -23,8 +24,7 @@ class MediaPickerParamsModel {
     this.selectedCheckColor = Colors.white,
     this.thumbnailBoxFix = BoxFit.cover,
     this.selectedCheckBackgroundColor = Colors.white,
-    this.onlyImages = true,
-    this.onlyVideos = false,
+    this.mediaType = GalleryMediaTypeEnum.all,
     this.thumbnailQuality = 200,
   });
   final int maxPickImages;
@@ -48,7 +48,6 @@ class MediaPickerParamsModel {
   final Color selectedCheckColor;
   final BoxFit thumbnailBoxFix;
   final Color selectedCheckBackgroundColor;
-  final bool onlyImages;
-  final bool onlyVideos;
+  final GalleryMediaTypeEnum mediaType;
   final int thumbnailQuality;
 }

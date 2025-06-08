@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/gallery_media_picker.dart';
 import 'package:gallery_media_picker/src/core/functions.dart';
-import 'package:gallery_media_picker/src/data/models/gallery_params_model.dart';
-import 'package:gallery_media_picker/src/data/models/picked_asset_model.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/gallery_grid/gallery_grid_view.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/select_album_path/current_path_selector.dart';
@@ -103,7 +102,10 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
     final pickedModel = PickedAssetModel(
       id: asset.id,
       path: path,
-      type: asset.typeInt == 1 ? 'image' : 'video',
+      type:
+          asset.typeInt == 1
+              ? PickedAssetTypeEnum.image
+              : PickedAssetTypeEnum.video,
       videoDuration: asset.videoDuration,
       createDateTime: asset.createDateTime,
       latitude: asset.latitude,
