@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/gallery_media_picker.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
+import 'package:gallery_media_picker/src/presentation/widgets/select_album_path/dropdown.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class ChangePathWidget extends StatefulWidget {
@@ -9,28 +10,27 @@ class ChangePathWidget extends StatefulWidget {
   final MediaPickerParamsModel mediaPickerParams;
 
   const ChangePathWidget({
-    Key? key,
+    super.key,
     required this.provider,
     required this.close,
     required this.mediaPickerParams,
-  }) : super(key: key);
+  });
 
   @override
   ChangePathWidgetState createState() => ChangePathWidgetState();
 }
 
 class ChangePathWidgetState extends State<ChangePathWidget> {
-  late final ScrollController controller;
   static const double itemHeight = 65;
-
-  GalleryMediaPickerController get provider => widget.provider;
-
+  late final ScrollController controller;
   late final TextStyle albumTextStyle;
 
   @override
   void initState() {
     super.initState();
-    final index = provider.pathList.indexOf(provider.currentAlbum!);
+    final index = widget.provider.pathList.indexOf(
+      widget.provider.currentAlbum!,
+    );
     controller = ScrollController(initialScrollOffset: itemHeight * index);
     albumTextStyle = TextStyle(
       color: widget.mediaPickerParams.albumTextColor,
@@ -59,7 +59,7 @@ class ChangePathWidgetState extends State<ChangePathWidget> {
           context: context,
           child: ListView.builder(
             controller: controller,
-            itemCount: provider.pathList.length,
+            itemCount: widget.provider.pathList.length,
             itemBuilder: _buildItem,
           ),
         ),
@@ -68,7 +68,7 @@ class ChangePathWidgetState extends State<ChangePathWidget> {
   }
 
   Widget _buildItem(BuildContext context, int index) {
-    final item = provider.pathList[index];
+    final item = widget.provider.pathList[index];
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => widget.close.call(item),

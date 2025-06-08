@@ -3,23 +3,23 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 class PickedAssetModel {
-  String id;
-  String path;
-  String type;
-  Duration videoDuration;
-  DateTime createDateTime;
-  double? latitude;
-  double? longitude;
-  Uint8List? thumbnail;
-  int height;
-  int width;
-  int orientationHeight;
-  int orientationWidth;
-  Size orientationSize;
-  File? file;
-  DateTime modifiedDateTime;
-  String? title;
-  Size size;
+  final String id;
+  final String path;
+  final String type;
+  final Duration videoDuration;
+  final DateTime createDateTime;
+  final double? latitude;
+  final double? longitude;
+  final Uint8List? thumbnail;
+  final int height;
+  final int width;
+  final int orientationHeight;
+  final int orientationWidth;
+  final Size orientationSize;
+  final File? file;
+  final DateTime modifiedDateTime;
+  final String? title;
+  final Size size;
 
   PickedAssetModel({
     required this.id,
@@ -63,24 +63,22 @@ class PickedAssetModel {
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "path": path,
-        "type": type,
-        "videoDuration": videoDuration,
-        "createDateTime":
-            "${createDateTime.year.toString().padLeft(4, '0')}-${createDateTime.month.toString().padLeft(2, '0')}-${createDateTime.day.toString().padLeft(2, '0')}",
-        "latitude": latitude,
-        "longitude": longitude,
-        "thumbnail": thumbnail,
-        "height": height,
-        "width": width,
-        "orientationHeight": orientationHeight,
-        "orientationWidth": orientationWidth,
-        "orientationSize": orientationSize,
-        "file": file,
-        "modifiedDateTime":
-            "${modifiedDateTime.year.toString().padLeft(4, '0')}-${modifiedDateTime.month.toString().padLeft(2, '0')}-${modifiedDateTime.day.toString().padLeft(2, '0')}",
-        "title": title,
-        "size": size,
-      };
+    "id": id,
+    "path": path,
+    "type": type,
+    "videoDuration": videoDuration,
+    "createDateTime": createDateTime.toIso8601String(),
+    "latitude": latitude,
+    "longitude": longitude,
+    "thumbnail": thumbnail,
+    "height": height,
+    "width": width,
+    "orientationHeight": orientationHeight,
+    "orientationWidth": orientationWidth,
+    "orientationSize": orientationSize,
+    "file": file,
+    "modifiedDateTime": modifiedDateTime.toIso8601String(),
+    "title": title,
+    "size": size,
+  };
 }

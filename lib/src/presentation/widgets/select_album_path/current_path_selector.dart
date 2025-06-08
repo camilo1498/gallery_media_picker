@@ -10,10 +10,10 @@ class SelectedPathDropdownButton extends StatefulWidget {
   final MediaPickerParamsModel mediaPickerParams;
 
   const SelectedPathDropdownButton({
-    Key? key,
+    super.key,
     required this.provider,
     required this.mediaPickerParams,
-  }) : super(key: key);
+  });
 
   @override
   _SelectedPathDropdownButtonState createState() =>
@@ -41,9 +41,7 @@ class _SelectedPathDropdownButtonState
               Expanded(
                 child: DropDown<AssetPathEntity>(
                   relativeKey: dropDownKey,
-                  child: _buildButton(
-                    context,
-                  ), // Solo pasar el Widget directamente
+                  child: _buildButton(context),
                   dropdownWidgetBuilder:
                       (context, close) => ChangePathWidget(
                         provider: widget.provider,
@@ -73,13 +71,7 @@ class _SelectedPathDropdownButtonState
   }
 
   Widget _buildButton(BuildContext context) {
-    final decoration = BoxDecoration(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(35),
-    );
-
     final currentAlbum = widget.provider.currentAlbum;
-
     if (widget.provider.pathList.isEmpty || currentAlbum == null) {
       return const SizedBox.shrink();
     }
@@ -92,7 +84,10 @@ class _SelectedPathDropdownButtonState
     );
 
     return Container(
-      decoration: decoration,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(35),
+      ),
       padding: const EdgeInsets.only(left: 15, bottom: 15),
       alignment: Alignment.bottomLeft,
       child: Row(

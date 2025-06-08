@@ -7,7 +7,6 @@ import 'package:oktoast/oktoast.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class GalleryFunctions {
-  /// Muestra un dropdown personalizado en un overlay con animación.
   static FeatureController<T> showDropDown<T>({
     required BuildContext context,
     required DropdownWidgetBuilder<T> builder,
@@ -54,14 +53,12 @@ class GalleryFunctions {
     return FeatureController(completer, close);
   }
 
-  /// Muestra un toast si se alcanza el número máximo de ítems seleccionados.
   static void onPickMax(GalleryMediaPickerController provider) {
     provider.onPickMax.addListener(() {
       showToast("You have already picked ${provider.max} items.");
     });
   }
 
-  /// Solicita permisos y carga los álbumes si se autorizan.
   static Future<void> getPermission(
     void Function(VoidCallback fn) setState,
     GalleryMediaPickerController provider,
@@ -75,9 +72,9 @@ class GalleryFunctions {
     if (result.isAuth) {
       provider.setAssetCount();
       PhotoManager.startChangeNotify();
-      PhotoManager.addChangeCallback((_) {
-        _refreshPathList(setState, provider);
-      });
+      PhotoManager.addChangeCallback(
+        (_) => _refreshPathList(setState, provider),
+      );
 
       if (provider.pathList.isEmpty) {
         _refreshPathList(setState, provider);
@@ -87,28 +84,22 @@ class GalleryFunctions {
     }
   }
 
-  /// Refresca la lista de álbumes disponibles.
   static void _refreshPathList(
     void Function(VoidCallback fn) setState,
     GalleryMediaPickerController provider,
   ) {
     PhotoManager.getAssetPathList(
       type:
-          provider.paramsModel.onlyVideos
+          (provider.paramsModel?.onlyVideos == true)
               ? RequestType.video
-              : provider.paramsModel.onlyImages
+              : (provider.paramsModel?.onlyImages ?? true)
               ? RequestType.image
               : RequestType.all,
     ).then((pathList) {
-      Future.microtask(() {
-        setState(() {
-          provider.resetPathList(pathList);
-        });
-      });
+      Future.microtask(() => setState(() => provider.resetPathList(pathList)));
     });
   }
 
-  /// Obtiene el path de un archivo [AssetEntity].
   static Future<String> getFile(AssetEntity asset) async {
     final file = await asset.file;
     if (file == null) throw Exception('Asset file is null');
@@ -116,7 +107,6 @@ class GalleryFunctions {
   }
 }
 
-/// Controlador para manejar el cierre del dropdown de selección de álbumes.
 class FeatureController<T> {
   final Completer<T?> completer;
   final ValueSetter<T?> close;

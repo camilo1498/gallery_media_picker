@@ -8,19 +8,17 @@ class OverlayDropDown<T> extends StatelessWidget {
   final DropdownWidgetBuilder<T> builder;
 
   const OverlayDropDown({
-    Key? key,
+    super.key,
     required this.height,
     required this.close,
     required this.animationController,
     required this.builder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
-    final double screenHeight = size.height;
-    final double screenWidth = size.width;
-    final double topPadding = screenHeight - height;
+    final size = MediaQuery.of(context).size;
+    final topPadding = size.height - height;
 
     return Padding(
       padding: EdgeInsets.only(top: topPadding),
@@ -30,25 +28,20 @@ class OverlayDropDown<T> extends StatelessWidget {
           builder:
               (ctx) => Stack(
                 children: [
-                  // Transparent full screen GestureDetector to close overlay on tap outside
                   GestureDetector(
                     onTap: () => close(null),
                     child: Container(
                       color: Colors.transparent,
                       height: height * animationController.value,
-                      width: screenWidth,
+                      width: size.width,
                     ),
                   ),
-
-                  // Dropdown content area
                   SizedBox(
                     height: height * animationController.value,
-                    width: screenWidth * 0.5,
+                    width: size.width * 0.5,
                     child: AnimatedBuilder(
                       animation: animationController,
-                      builder: (context, _) {
-                        return builder(ctx, close);
-                      },
+                      builder: (context, _) => builder(ctx, close),
                     ),
                   ),
                 ],

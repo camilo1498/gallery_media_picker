@@ -10,11 +10,11 @@ class CoverThumbnail extends StatefulWidget {
   final BoxFit thumbnailFit;
 
   const CoverThumbnail({
-    Key? key,
+    super.key,
     this.thumbnailQuality = 120,
     this.thumbnailScale = 1.0,
     this.thumbnailFit = BoxFit.cover,
-  }) : super(key: key);
+  });
 
   @override
   State<CoverThumbnail> createState() => _CoverThumbnailState();
@@ -26,14 +26,17 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
   @override
   void initState() {
     super.initState();
-    GalleryFunctions.getPermission((callback) {
+    _requestPermission();
+  }
+
+  Future<void> _requestPermission() async {
+    await GalleryFunctions.getPermission((callback) {
       if (mounted) setState(callback);
     }, _provider);
   }
 
   @override
   void dispose() {
-    // Solo limpiar si el widget está montado.
     if (mounted) {
       _provider.pickedFile.clear();
       _provider.picked.clear();
@@ -45,9 +48,7 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    if (_provider.pathList.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (_provider.pathList.isEmpty) return const SizedBox.shrink();
 
     return Image(
       image: DecodeImage(

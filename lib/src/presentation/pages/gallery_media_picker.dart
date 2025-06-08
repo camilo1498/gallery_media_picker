@@ -13,10 +13,10 @@ class GalleryMediaPicker extends StatefulWidget {
   final ValueChanged<List<PickedAssetModel>> pathList;
 
   const GalleryMediaPicker({
-    Key? key,
+    super.key,
     required this.mediaPickerParams,
     required this.pathList,
-  }) : super(key: key);
+  });
 
   @override
   State<GalleryMediaPicker> createState() => _GalleryMediaPickerState();
@@ -57,17 +57,30 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
     provider.singlePickMode = widget.mediaPickerParams.singlePick;
 
     return OKToast(
-      child: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (overscroll) {
-          overscroll.disallowIndicator();
-          return false;
-        },
-        child: Column(
-          children: [
-            _buildAlbumSelector(),
-            Expanded(child: _buildGalleryGrid()),
-          ],
-        ),
+      child: Column(
+        children: [
+          _buildAlbumSelector(),
+          Expanded(
+            child: RepaintBoundary(
+              child: NotificationListener<OverscrollIndicatorNotification>(
+                onNotification: (overscroll) {
+                  overscroll.disallowIndicator();
+                  return false;
+                },
+                child: AnimatedBuilder(
+                  animation: provider.currentAlbumNotifier,
+                  builder: (_, __) {
+                    return GalleryGridView(
+                      provider: provider,
+                      path: provider.currentAlbum,
+                      onAssetItemClick: _onAssetItemClick,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -81,20 +94,6 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
         provider: provider,
         mediaPickerParams: widget.mediaPickerParams,
       ),
-    );
-  }
-
-  Widget _buildGalleryGrid() {
-    return AnimatedBuilder(
-      animation: provider.currentAlbumNotifier,
-      builder: (_, __) {
-        final album = provider.currentAlbum;
-        return GalleryGridView(
-          provider: provider,
-          path: album,
-          onAssetItemClick: _onAssetItemClick,
-        );
-      },
     );
   }
 

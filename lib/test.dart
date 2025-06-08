@@ -3,25 +3,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-/// Un [ImageProvider] personalizado que decodifica una miniatura
-/// de una entidad de tipo [AssetPathEntity] usando `photo_manager`.
 class DecodeImage extends ImageProvider<DecodeImage> {
-  /// Álbum o entidad que contiene los assets (imágenes/videos).
   final AssetPathEntity entity;
-
-  /// Escala de la imagen.
   final double scale;
-
-  /// Tamaño de la miniatura (ancho y alto).
   final int thumbSize;
-
-  /// Índice del asset dentro del álbum.
   final int index;
 
   const DecodeImage(
       this.entity, {
         this.scale = 1.0,
-        this.thumbSize = 120,
+        this.thumbSize = 200,
         this.index = 0,
       });
 
@@ -35,6 +26,12 @@ class DecodeImage extends ImageProvider<DecodeImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      chunkEvents: Stream<ImageChunkEvent>.empty(),
+      informationCollector:
+          () => [
+        DiagnosticsProperty<AssetPathEntity>('AssetPath', key.entity),
+        DiagnosticsProperty<int>('Index', key.index),
+      ],
     );
   }
 
@@ -42,31 +39,45 @@ class DecodeImage extends ImageProvider<DecodeImage> {
       DecodeImage key,
       ImageDecoderCallback decode,
       ) async {
-    assert(key == this);
-
-    final assetList = await key.entity.getAssetListRange(
-      start: index,
-      end: index + 1,
-    );
-
-    if (assetList.isEmpty) {
-      throw StateError("No assets found at index $index.");
-    }
-
-    final asset = assetList.first;
-    final thumbData = await asset.thumbnailDataWithSize(
-      ThumbnailSize(thumbSize, thumbSize),
-    );
-
-    if (thumbData == null) {
-      throw StateError(
-        "Unable to load thumbnail data for asset at index $index.",
+    try {
+      final assetList = await key.entity.getAssetListRange(
+        start: key.index,
+        end: key.index + 1,
       );
-    }
 
-    final buffer = await ui.ImmutableBuffer.fromUint8List(thumbData);
-    return decode(buffer);
+      if (assetList.isEmpty) {
+        throw StateError('No asset found at index ${key.index}');
+      }
+
+      final thumbData = await assetList.first.thumbnailDataWithSize(
+        ThumbnailSize(key.thumbSize, key.thumbSize),
+        quality: 85,
+      );
+
+      if (thumbData == null) {
+        throw StateError('Failed to load thumbnail data');
+      }
+
+      final buffer = await ui.ImmutableBuffer.fromUint8List(thumbData);
+      return decode(buffer);
+    } catch (e) {
+      debugPrint('Error loading image: $e');
+      rethrow;
+    }
   }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is DecodeImage &&
+            runtimeType == other.runtimeType &&
+            entity == other.entity &&
+            index == other.index &&
+            thumbSize == other.thumbSize;
+  }
+
+  @override
+  int get hashCode => Object.hash(entity, index, thumbSize);
 }
 
 
@@ -79,7 +90,6 @@ import 'package:oktoast/oktoast.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class GalleryFunctions {
-  /// Muestra un dropdown personalizado en un overlay con animación.
   static FeatureController<T> showDropDown<T>({
     required BuildContext context,
     required DropdownWidgetBuilder<T> builder,
@@ -126,14 +136,12 @@ class GalleryFunctions {
     return FeatureController(completer, close);
   }
 
-  /// Muestra un toast si se alcanza el número máximo de ítems seleccionados.
   static void onPickMax(GalleryMediaPickerController provider) {
     provider.onPickMax.addListener(() {
       showToast("You have already picked ${provider.max} items.");
     });
   }
 
-  /// Solicita permisos y carga los álbumes si se autorizan.
   static Future<void> getPermission(
       void Function(VoidCallback fn) setState,
       GalleryMediaPickerController provider,
@@ -147,9 +155,9 @@ class GalleryFunctions {
     if (result.isAuth) {
       provider.setAssetCount();
       PhotoManager.startChangeNotify();
-      PhotoManager.addChangeCallback((_) {
-        _refreshPathList(setState, provider);
-      });
+      PhotoManager.addChangeCallback(
+            (_) => _refreshPathList(setState, provider),
+      );
 
       if (provider.pathList.isEmpty) {
         _refreshPathList(setState, provider);
@@ -159,28 +167,22 @@ class GalleryFunctions {
     }
   }
 
-  /// Refresca la lista de álbumes disponibles.
   static void _refreshPathList(
       void Function(VoidCallback fn) setState,
       GalleryMediaPickerController provider,
       ) {
     PhotoManager.getAssetPathList(
       type:
-      provider.paramsModel.onlyVideos
+      (provider.paramsModel?.onlyVideos == true)
           ? RequestType.video
-          : provider.paramsModel.onlyImages
+          : (provider.paramsModel?.onlyImages ?? true)
           ? RequestType.image
           : RequestType.all,
     ).then((pathList) {
-      Future.microtask(() {
-        setState(() {
-          provider.resetPathList(pathList);
-        });
-      });
+      Future.microtask(() => setState(() => provider.resetPathList(pathList)));
     });
   }
 
-  /// Obtiene el path de un archivo [AssetEntity].
   static Future<String> getFile(AssetEntity asset) async {
     final file = await asset.file;
     if (file == null) throw Exception('Asset file is null');
@@ -188,7 +190,6 @@ class GalleryFunctions {
   }
 }
 
-/// Controlador para manejar el cierre del dropdown de selección de álbumes.
 class FeatureController<T> {
   final Completer<T?> completer;
   final ValueSetter<T?> close;
@@ -197,108 +198,60 @@ class FeatureController<T> {
 
   Future<T?> get closed => completer.future;
 }
-
-
 import 'package:flutter/material.dart';
 
 class MediaPickerParamsModel {
-  MediaPickerParamsModel(
-      {this.maxPickImages = 2,
-        this.singlePick = true,
-        this.appBarColor = Colors.black,
-        this.albumBackGroundColor = Colors.black,
-        this.albumDividerColor = Colors.white,
-        this.albumTextColor = Colors.white,
-        this.appBarIconColor,
-        this.appBarTextColor = Colors.white,
-        this.crossAxisCount = 3,
-        this.gridViewBackgroundColor = Colors.black54,
-        this.childAspectRatio = 0.5,
-        this.appBarLeadingWidget,
-        this.appBarHeight = 100,
-        this.imageBackgroundColor = Colors.white,
-        this.gridPadding,
-        this.gridViewController,
-        this.gridViewPhysics,
-        this.selectedBackgroundColor = Colors.white,
-        this.selectedCheckColor = Colors.white,
-        this.thumbnailBoxFix = BoxFit.cover,
-        this.selectedCheckBackgroundColor = Colors.white,
-        this.onlyImages = true,
-        this.onlyVideos = false,
-        this.thumbnailQuality = 200});
-
-  /// maximum images allowed (default 2)
   final int maxPickImages;
-
-  /// picker mode
   final bool singlePick;
-
-  /// dropdown appbar color
   final Color appBarColor;
-
-  /// appBar TextColor
-  final Color appBarTextColor;
-
-  /// appBar icon Color
-  final Color? appBarIconColor;
-
-  /// gridView background color
-  final Color gridViewBackgroundColor;
-
-  /// grid image backGround color
-  final Color imageBackgroundColor;
-
-  /// album background color
   final Color albumBackGroundColor;
-
-  /// album text color
-  final Color albumTextColor;
-
-  /// album divider color
   final Color albumDividerColor;
-
-  /// gallery gridview crossAxisCount
+  final Color albumTextColor;
+  final Color? appBarIconColor;
+  final Color appBarTextColor;
   final int crossAxisCount;
-
-  /// gallery gridview aspect ratio
+  final Color gridViewBackgroundColor;
   final double childAspectRatio;
-
-  /// appBar leading widget
   final Widget? appBarLeadingWidget;
-
-  /// appBar height
   final double appBarHeight;
-
-  /// gridView Padding
+  final Color imageBackgroundColor;
   final EdgeInsets? gridPadding;
-
-  /// gridView physics
   final ScrollPhysics? gridViewPhysics;
-
-  /// gridView controller
   final ScrollController? gridViewController;
-
-  /// selected background color
   final Color selectedBackgroundColor;
-
-  /// selected check color
   final Color selectedCheckColor;
-
-  /// thumbnail box fit
   final BoxFit thumbnailBoxFix;
-
-  /// selected Check Background Color
   final Color selectedCheckBackgroundColor;
-
-  /// load video
-  final bool onlyVideos;
-
-  /// load images
   final bool onlyImages;
-
-  /// image quality thumbnail
+  final bool onlyVideos;
   final int thumbnailQuality;
+
+  const MediaPickerParamsModel({
+    this.maxPickImages = 2,
+    this.singlePick = true,
+    this.appBarColor = Colors.black,
+    this.albumBackGroundColor = Colors.black,
+    this.albumDividerColor = Colors.white,
+    this.albumTextColor = Colors.white,
+    this.appBarIconColor,
+    this.appBarTextColor = Colors.white,
+    this.crossAxisCount = 3,
+    this.gridViewBackgroundColor = Colors.black54,
+    this.childAspectRatio = 0.5,
+    this.appBarLeadingWidget,
+    this.appBarHeight = 100,
+    this.imageBackgroundColor = Colors.white,
+    this.gridPadding,
+    this.gridViewPhysics,
+    this.gridViewController,
+    this.selectedBackgroundColor = Colors.white,
+    this.selectedCheckColor = Colors.white,
+    this.thumbnailBoxFix = BoxFit.cover,
+    this.selectedCheckBackgroundColor = Colors.white,
+    this.onlyImages = true,
+    this.onlyVideos = false,
+    this.thumbnailQuality = 200,
+  });
 }
 
 
@@ -307,23 +260,23 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 class PickedAssetModel {
-  String id;
-  String path;
-  String type;
-  Duration videoDuration;
-  DateTime createDateTime;
-  double? latitude;
-  double? longitude;
-  Uint8List? thumbnail;
-  int height;
-  int width;
-  int orientationHeight;
-  int orientationWidth;
-  Size orientationSize;
-  File? file;
-  DateTime modifiedDateTime;
-  String? title;
-  Size size;
+  final String id;
+  final String path;
+  final String type;
+  final Duration videoDuration;
+  final DateTime createDateTime;
+  final double? latitude;
+  final double? longitude;
+  final Uint8List? thumbnail;
+  final int height;
+  final int width;
+  final int orientationHeight;
+  final int orientationWidth;
+  final Size orientationSize;
+  final File? file;
+  final DateTime modifiedDateTime;
+  final String? title;
+  final Size size;
 
   PickedAssetModel({
     required this.id,
@@ -371,8 +324,7 @@ class PickedAssetModel {
     "path": path,
     "type": type,
     "videoDuration": videoDuration,
-    "createDateTime":
-    "${createDateTime.year.toString().padLeft(4, '0')}-${createDateTime.month.toString().padLeft(2, '0')}-${createDateTime.day.toString().padLeft(2, '0')}",
+    "createDateTime": createDateTime.toIso8601String(),
     "latitude": latitude,
     "longitude": longitude,
     "thumbnail": thumbnail,
@@ -382,8 +334,7 @@ class PickedAssetModel {
     "orientationWidth": orientationWidth,
     "orientationSize": orientationSize,
     "file": file,
-    "modifiedDateTime":
-    "${modifiedDateTime.year.toString().padLeft(4, '0')}-${modifiedDateTime.month.toString().padLeft(2, '0')}-${modifiedDateTime.day.toString().padLeft(2, '0')}",
+    "modifiedDateTime": modifiedDateTime.toIso8601String(),
     "title": title,
     "size": size,
   };
@@ -405,10 +356,10 @@ class GalleryMediaPicker extends StatefulWidget {
   final ValueChanged<List<PickedAssetModel>> pathList;
 
   const GalleryMediaPicker({
-    Key? key,
+    super.key,
     required this.mediaPickerParams,
     required this.pathList,
-  }) : super(key: key);
+  });
 
   @override
   State<GalleryMediaPicker> createState() => _GalleryMediaPickerState();
@@ -449,17 +400,30 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
     provider.singlePickMode = widget.mediaPickerParams.singlePick;
 
     return OKToast(
-      child: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (overscroll) {
-          overscroll.disallowIndicator();
-          return false;
-        },
-        child: Column(
-          children: [
-            _buildAlbumSelector(),
-            Expanded(child: _buildGalleryGrid()),
-          ],
-        ),
+      child: Column(
+        children: [
+          _buildAlbumSelector(),
+          Expanded(
+            child: RepaintBoundary(
+              child: NotificationListener<OverscrollIndicatorNotification>(
+                onNotification: (overscroll) {
+                  overscroll.disallowIndicator();
+                  return false;
+                },
+                child: AnimatedBuilder(
+                  animation: provider.currentAlbumNotifier,
+                  builder: (_, __) {
+                    return GalleryGridView(
+                      provider: provider,
+                      path: provider.currentAlbum,
+                      onAssetItemClick: _onAssetItemClick,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -473,20 +437,6 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
         provider: provider,
         mediaPickerParams: widget.mediaPickerParams,
       ),
-    );
-  }
-
-  Widget _buildGalleryGrid() {
-    return AnimatedBuilder(
-      animation: provider.currentAlbumNotifier,
-      builder: (_, __) {
-        final album = provider.currentAlbum;
-        return GalleryGridView(
-          provider: provider,
-          path: album,
-          onAssetItemClick: _onAssetItemClick,
-        );
-      },
     );
   }
 
@@ -520,8 +470,11 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
 }
 
 
-class GalleryMediaPickerController extends ChangeNotifier
-    with PhotoDataController {
+import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/gallery_media_picker.dart';
+import 'package:photo_manager/photo_manager.dart';
+
+class GalleryMediaPickerController extends ChangeNotifier {
   final maxNotifier = ValueNotifier<int>(0);
   int get max => maxNotifier.value;
   set max(int value) => maxNotifier.value = value;
@@ -541,8 +494,34 @@ class GalleryMediaPickerController extends ChangeNotifier
   final pickedNotifier = ValueNotifier<List<AssetEntity>>([]);
   final List<AssetEntity> picked = [];
 
+  final pickedFileNotifier = ValueNotifier<List<PickedAssetModel>>([]);
+  final List<PickedAssetModel> pickedFile = [];
+
+  final currentAlbumNotifier = ValueNotifier<AssetPathEntity?>(null);
+  AssetPathEntity? get currentAlbum => currentAlbumNotifier.value;
+  set currentAlbum(AssetPathEntity? value) {
+    if (currentAlbumNotifier.value != value) {
+      currentAlbumNotifier.value = value;
+      setAssetCount();
+      notifyListeners();
+    }
+  }
+
+  final List<AssetPathEntity> pathList = [];
+
+  MediaPickerParamsModel? paramsModel;
+
+  void resetPathList(List<AssetPathEntity> newPathList) {
+    pathList.clear();
+    pathList.addAll(newPathList);
+    if (pathList.isNotEmpty && currentAlbum == null) {
+      currentAlbum = pathList.first;
+    }
+    notifyListeners();
+  }
+
   void pickEntity(AssetEntity entity) {
-    if (_singlePickMode) {
+    if (singlePickMode) {
       if (picked.contains(entity)) {
         picked.remove(entity);
       } else {
@@ -561,12 +540,10 @@ class GalleryMediaPickerController extends ChangeNotifier
         picked.add(entity);
       }
     }
-    pickedNotifier.value = List.unmodifiable(picked);
+    // Actualiza ambos notificadores
+    pickedNotifier.value = List.from(picked);
     notifyListeners();
   }
-
-  final pickedFileNotifier = ValueNotifier<List<PickedAssetModel>>([]);
-  final List<PickedAssetModel> pickedFile = [];
 
   void pickPath(PickedAssetModel path) {
     final exists = pickedFile.any((e) => e.id == path.id);
@@ -602,8 +579,8 @@ class GalleryMediaPickerController extends ChangeNotifier
 
   Future<void> setAssetCount() async {
     await Future.delayed(const Duration(seconds: 1));
-    if (_currentAlbum != null) {
-      _assetCount = await _currentAlbum!.assetCountAsync;
+    if (currentAlbum != null) {
+      _assetCount = await currentAlbum!.assetCountAsync;
     } else {
       _assetCount = 0;
     }
@@ -611,6 +588,7 @@ class GalleryMediaPickerController extends ChangeNotifier
     notifyListeners();
   }
 }
+
 
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/core/decode_image.dart';
@@ -624,11 +602,11 @@ class CoverThumbnail extends StatefulWidget {
   final BoxFit thumbnailFit;
 
   const CoverThumbnail({
-    Key? key,
+    super.key,
     this.thumbnailQuality = 120,
     this.thumbnailScale = 1.0,
     this.thumbnailFit = BoxFit.cover,
-  }) : super(key: key);
+  });
 
   @override
   State<CoverThumbnail> createState() => _CoverThumbnailState();
@@ -640,14 +618,17 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
   @override
   void initState() {
     super.initState();
-    GalleryFunctions.getPermission((callback) {
+    _requestPermission();
+  }
+
+  Future<void> _requestPermission() async {
+    await GalleryFunctions.getPermission((callback) {
       if (mounted) setState(callback);
     }, _provider);
   }
 
   @override
   void dispose() {
-    // Solo limpiar si el widget está montado.
     if (mounted) {
       _provider.pickedFile.clear();
       _provider.picked.clear();
@@ -659,9 +640,7 @@ class _CoverThumbnailState extends State<CoverThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    if (_provider.pathList.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (_provider.pathList.isEmpty) return const SizedBox.shrink();
 
     return Image(
       image: DecodeImage(
@@ -686,151 +665,125 @@ typedef OnAssetItemClick = void Function(AssetEntity entity, int index);
 
 class GalleryGridView extends StatefulWidget {
   final AssetPathEntity? path;
-  final OnAssetItemClick? onAssetItemClick;
+  final OnAssetItemClick? onAssetItemClick; // Parámetro añadido
   final GalleryMediaPickerController provider;
 
   const GalleryGridView({
     Key? key,
     required this.path,
     required this.provider,
-    this.onAssetItemClick,
+    this.onAssetItemClick, // Parámetro añadido
   }) : super(key: key);
 
   @override
-  GalleryGridViewState createState() => GalleryGridViewState();
+  State<GalleryGridView> createState() => _GalleryGridViewState();
 }
 
-class GalleryGridViewState extends State<GalleryGridView> {
-  final Map<int, AssetEntity> _cacheMap = {};
-  final ValueNotifier<bool> _scrolling = ValueNotifier(false);
+class _GalleryGridViewState extends State<GalleryGridView> {
+  final Map<int, AssetEntity> _assetCache = {};
+  final ScrollController _scrollController = ScrollController();
 
   @override
-  void didUpdateWidget(covariant GalleryGridView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.path != widget.path) {
-      _cacheMap.clear();
-      _scrolling.value = false;
-      if (mounted) setState(() {});
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+    _preloadInitialAssets();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      _preloadMoreAssets();
     }
+  }
+
+  Future<void> _preloadInitialAssets() async {
+    if (widget.path == null) return;
+
+    final assets = await widget.path!.getAssetListRange(start: 0, end: 20);
+    for (var i = 0; i < assets.length; i++) {
+      _assetCache[i] = assets[i];
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _preloadMoreAssets() async {
+    if (widget.path == null) return;
+
+    final start = _assetCache.length;
+    final assets = await widget.path!.getAssetListRange(
+      start: start,
+      end: start + 20,
+    );
+    for (var i = 0; i < assets.length; i++) {
+      _assetCache[start + i] = assets[i];
+    }
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.path == null) return const SizedBox.shrink();
-
-    return NotificationListener<ScrollNotification>(
-      onNotification: _onScroll,
-      child: AnimatedBuilder(
-        animation: widget.provider.assetCountNotifier,
-        builder:
-            (_, __) => Container(
-          color: widget.provider.paramsModel.gridViewBackgroundColor,
-          child: GridView.builder(
-            key: ValueKey(widget.path),
-            shrinkWrap: true,
-            padding:
-            widget.provider.paramsModel.gridPadding ?? EdgeInsets.zero,
-            physics:
-            widget.provider.paramsModel.gridViewPhysics ??
-                const ScrollPhysics(),
-            controller:
-            widget.provider.paramsModel.gridViewController ??
-                ScrollController(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: widget.provider.paramsModel.crossAxisCount,
-              childAspectRatio:
-              widget.provider.paramsModel.childAspectRatio,
-              mainAxisSpacing: 2.5,
-              crossAxisSpacing: 2.5,
-            ),
-            itemCount: widget.provider.assetCount,
-            addRepaintBoundaries: true,
-            itemBuilder: (context, index) => _buildItem(context, index),
+    return ValueListenableBuilder<int>(
+      valueListenable: widget.provider.assetCountNotifier,
+      builder: (_, count, __) {
+        return GridView.builder(
+          controller: _scrollController,
+          itemCount: count,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: widget.provider.paramsModel!.crossAxisCount,
+            childAspectRatio: widget.provider.paramsModel!.childAspectRatio,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildItem(BuildContext context, int index) {
-    return GestureDetector(
-      onTap: () async {
-        AssetEntity? asset = _cacheMap[index];
-        if (asset == null ||
-            asset.type == AssetType.audio ||
-            asset.type == AssetType.other)
-          return;
-
-        // Refetch asset for fresh data
-        final assetList = await widget.path!.getAssetListRange(
-          start: index,
-          end: index + 1,
+          itemBuilder: (context, index) {
+            return _buildGridItem(index);
+          },
         );
-        if (assetList.isEmpty) return;
-
-        asset = assetList.first;
-        _cacheMap[index] = asset;
-        widget.onAssetItemClick?.call(asset, index);
       },
-      child: _buildScrollItem(context, index),
     );
   }
 
-  Widget _buildScrollItem(BuildContext context, int index) {
-    final cachedAsset = _cacheMap[index];
-    if (cachedAsset != null) {
-      return ThumbnailWidget(
-        asset: cachedAsset,
-        provider: widget.provider,
-        index: index,
+  Widget _buildGridItem(int index) {
+    if (_assetCache.containsKey(index)) {
+      return GestureDetector(
+        onTap: () => widget.onAssetItemClick?.call(_assetCache[index]!, index),
+        child: ThumbnailWidget(
+          asset: _assetCache[index]!,
+          index: index,
+          provider: widget.provider,
+        ),
       );
     }
 
     return FutureBuilder<List<AssetEntity>>(
       future: widget.path!.getAssetListRange(start: index, end: index + 1),
-      builder: (ctx, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Container(
-            color: widget.provider.paramsModel.gridViewBackgroundColor,
-            width: double.infinity,
-            height: double.infinity,
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          _assetCache[index] = snapshot.data!.first;
+          return GestureDetector(
+            onTap:
+                () =>
+                widget.onAssetItemClick?.call(snapshot.data!.first, index),
+            child: ThumbnailWidget(
+              asset: snapshot.data!.first,
+              index: index,
+              provider: widget.provider,
+            ),
           );
         }
-
-        final asset = snapshot.data!.first;
-        _cacheMap[index] = asset;
-
-        return ThumbnailWidget(
-          asset: asset,
-          index: index,
-          provider: widget.provider,
-        );
+        return Container(color: Colors.grey[200]);
       },
     );
   }
-
-  bool _onScroll(ScrollNotification notification) {
-    if (notification is ScrollStartNotification) {
-      _scrolling.value = true;
-    } else if (notification is ScrollEndNotification) {
-      _scrolling.value = false;
-    }
-    return false;
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is GalleryGridViewState && runtimeType == other.runtimeType;
-
-  @override
-  int get hashCode => runtimeType.hashCode;
 }
 
 
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:gallery_media_picker/gallery_media_picker.dart';
 import 'package:gallery_media_picker/src/core/decode_image.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -841,153 +794,101 @@ class ThumbnailWidget extends StatelessWidget {
   final GalleryMediaPickerController provider;
 
   const ThumbnailWidget({
-    Key? key,
+    super.key,
     required this.index,
     required this.asset,
     required this.provider,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final currentAlbumIndex = provider.pathList.indexOf(provider.currentAlbum!);
+    final params = provider.paramsModel!;
+    final isSelected = provider.picked.contains(asset);
 
     return Stack(
-      alignment: Alignment.center,
+      fit: StackFit.expand,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: provider.paramsModel.imageBackgroundColor,
-          ),
-        ),
-
-        // Imagen del thumbnail usando DecodeImage directamente
-        if (asset.type == AssetType.image || asset.type == AssetType.video)
-          Image(
-            image: DecodeImage(
-              provider.pathList[currentAlbumIndex],
-              thumbSize: provider.paramsModel.thumbnailQuality,
-              index: index,
-            ),
-            gaplessPlayback: true,
-            fit: provider.paramsModel.thumbnailBoxFix,
-            filterQuality: FilterQuality.high,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-
-        // Máscara semitransparente para selección
-        AnimatedBuilder(
-          animation: provider,
-          builder: (_, __) {
-            final pickIndex = provider.pickIndex(asset);
-            final picked = pickIndex >= 0;
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              decoration: BoxDecoration(
-                color:
-                picked
-                    ? provider.paramsModel.selectedBackgroundColor
-                    .withOpacity(0.3)
-                    : Colors.transparent,
-              ),
-            );
-          },
-        ),
-
-        // Check de selección en la esquina superior derecha
-        Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 5, top: 5),
-            child: AnimatedBuilder(
-              animation: provider,
-              builder: (_, __) {
-                final pickIndex = provider.pickIndex(asset);
-                final picked = pickIndex >= 0;
-                return AnimatedOpacity(
-                  duration: const Duration(milliseconds: 200),
-                  opacity: picked ? 1 : 0,
-                  child: Container(
-                    height: 20,
-                    width: 20,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color:
-                      picked
-                          ? provider
-                          .paramsModel
-                          .selectedCheckBackgroundColor
-                          .withOpacity(0.6)
-                          : Colors.transparent,
-                      border: Border.all(
-                        width: 1.5,
-                        color: provider.paramsModel.selectedCheckColor,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.check,
-                      color: provider.paramsModel.selectedCheckColor,
-                      size: 14,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-
-        // Duración del video en esquina inferior derecha
-        if (asset.type == AssetType.video)
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 5, bottom: 5),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white, width: 1),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.play_circle_fill,
-                      color: Colors.white,
-                      size: 10,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      _parseDuration(asset.videoDuration.inSeconds),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        _buildThumbnailImage(params),
+        _buildSelectionOverlay(params, isSelected),
+        if (isSelected) _buildCheckmark(params),
+        if (asset.type == AssetType.video) _buildVideoDuration(),
       ],
     );
   }
-}
 
-/// Convierte segundos a formato mm:ss
-String _parseDuration(int seconds) {
-  final duration = Duration(seconds: seconds);
-  final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-  final secs = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-  return '$minutes:$secs';
+  Widget _buildThumbnailImage(MediaPickerParamsModel params) {
+    return Image(
+      image: DecodeImage(
+        provider.currentAlbum!,
+        thumbSize: params.thumbnailQuality,
+        index: index,
+      ),
+      fit: params.thumbnailBoxFix,
+      gaplessPlayback: true,
+    );
+  }
+
+  Widget _buildSelectionOverlay(
+      MediaPickerParamsModel params,
+      bool isSelected,
+      ) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      color:
+      isSelected
+          ? params.selectedBackgroundColor.withValues(alpha: 0.3)
+          : Colors.transparent,
+    );
+  }
+
+  Widget _buildCheckmark(MediaPickerParamsModel params) {
+    return Positioned(
+      top: 8,
+      right: 8,
+      child: Container(
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          color: params.selectedCheckBackgroundColor,
+          shape: BoxShape.circle,
+          border: Border.all(color: params.selectedCheckColor, width: 1.5),
+        ),
+        child: Icon(Icons.check, size: 16, color: params.selectedCheckColor),
+      ),
+    );
+  }
+
+  Widget _buildVideoDuration() {
+    return Positioned(
+      bottom: 8,
+      right: 8,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          _formatDuration(asset.videoDuration),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDuration(Duration d) =>
+      '${d.inMinutes.remainder(60).toString().padLeft(2, '0')}'
+          ':${d.inSeconds.remainder(60).toString().padLeft(2, '0')}';
 }
 
 
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/gallery_media_picker.dart';
 import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker_controller.dart';
+import 'package:gallery_media_picker/src/presentation/widgets/select_album_path/dropdown.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class ChangePathWidget extends StatefulWidget {
@@ -996,28 +897,27 @@ class ChangePathWidget extends StatefulWidget {
   final MediaPickerParamsModel mediaPickerParams;
 
   const ChangePathWidget({
-    Key? key,
+    super.key,
     required this.provider,
     required this.close,
     required this.mediaPickerParams,
-  }) : super(key: key);
+  });
 
   @override
   ChangePathWidgetState createState() => ChangePathWidgetState();
 }
 
 class ChangePathWidgetState extends State<ChangePathWidget> {
-  late final ScrollController controller;
   static const double itemHeight = 65;
-
-  GalleryMediaPickerController get provider => widget.provider;
-
+  late final ScrollController controller;
   late final TextStyle albumTextStyle;
 
   @override
   void initState() {
     super.initState();
-    final index = provider.pathList.indexOf(provider.currentAlbum!);
+    final index = widget.provider.pathList.indexOf(
+      widget.provider.currentAlbum!,
+    );
     controller = ScrollController(initialScrollOffset: itemHeight * index);
     albumTextStyle = TextStyle(
       color: widget.mediaPickerParams.albumTextColor,
@@ -1046,7 +946,7 @@ class ChangePathWidgetState extends State<ChangePathWidget> {
           context: context,
           child: ListView.builder(
             controller: controller,
-            itemCount: provider.pathList.length,
+            itemCount: widget.provider.pathList.length,
             itemBuilder: _buildItem,
           ),
         ),
@@ -1055,7 +955,7 @@ class ChangePathWidgetState extends State<ChangePathWidget> {
   }
 
   Widget _buildItem(BuildContext context, int index) {
-    final item = provider.pathList[index];
+    final item = widget.provider.pathList[index];
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => widget.close.call(item),
@@ -1105,10 +1005,10 @@ class SelectedPathDropdownButton extends StatefulWidget {
   final MediaPickerParamsModel mediaPickerParams;
 
   const SelectedPathDropdownButton({
-    Key? key,
+    super.key,
     required this.provider,
     required this.mediaPickerParams,
-  }) : super(key: key);
+  });
 
   @override
   _SelectedPathDropdownButtonState createState() =>
@@ -1136,9 +1036,7 @@ class _SelectedPathDropdownButtonState
           Expanded(
             child: DropDown<AssetPathEntity>(
               relativeKey: dropDownKey,
-              child: _buildButton(
-                context,
-              ), // Solo pasar el Widget directamente
+              child: _buildButton(context),
               dropdownWidgetBuilder:
                   (context, close) => ChangePathWidget(
                 provider: widget.provider,
@@ -1168,13 +1066,7 @@ class _SelectedPathDropdownButtonState
   }
 
   Widget _buildButton(BuildContext context) {
-    final decoration = BoxDecoration(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(35),
-    );
-
     final currentAlbum = widget.provider.currentAlbum;
-
     if (widget.provider.pathList.isEmpty || currentAlbum == null) {
       return const SizedBox.shrink();
     }
@@ -1187,7 +1079,10 @@ class _SelectedPathDropdownButtonState
     );
 
     return Container(
-      decoration: decoration,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(35),
+      ),
       padding: const EdgeInsets.only(left: 15, bottom: 15),
       alignment: Alignment.bottomLeft,
       child: Row(
@@ -1240,13 +1135,13 @@ class DropDown<T> extends StatefulWidget {
   final GlobalKey? relativeKey;
 
   const DropDown({
-    Key? key,
+    super.key,
     required this.child,
     required this.dropdownWidgetBuilder,
     this.onResult,
     this.onShow,
     this.relativeKey,
-  }) : super(key: key);
+  });
 
   @override
   DropDownState<T> createState() => DropDownState<T>();
@@ -1277,9 +1172,7 @@ class DropDownState<T> extends State<DropDown<T>>
         controller = GalleryFunctions.showDropDown<T>(
           context: context,
           height: dialogHeight,
-          builder: (_, close) {
-            return widget.dropdownWidgetBuilder(context, close);
-          },
+          builder: (_, close) => widget.dropdownWidgetBuilder(context, close),
           tickerProvider: this,
         );
 
@@ -1303,19 +1196,17 @@ class OverlayDropDown<T> extends StatelessWidget {
   final DropdownWidgetBuilder<T> builder;
 
   const OverlayDropDown({
-    Key? key,
+    super.key,
     required this.height,
     required this.close,
     required this.animationController,
     required this.builder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
-    final double screenHeight = size.height;
-    final double screenWidth = size.width;
-    final double topPadding = screenHeight - height;
+    final size = MediaQuery.of(context).size;
+    final topPadding = size.height - height;
 
     return Padding(
       padding: EdgeInsets.only(top: topPadding),
@@ -1325,25 +1216,20 @@ class OverlayDropDown<T> extends StatelessWidget {
           builder:
               (ctx) => Stack(
             children: [
-              // Transparent full screen GestureDetector to close overlay on tap outside
               GestureDetector(
                 onTap: () => close(null),
                 child: Container(
                   color: Colors.transparent,
                   height: height * animationController.value,
-                  width: screenWidth,
+                  width: size.width,
                 ),
               ),
-
-              // Dropdown content area
               SizedBox(
                 height: height * animationController.value,
-                width: screenWidth * 0.5,
+                width: size.width * 0.5,
                 child: AnimatedBuilder(
                   animation: animationController,
-                  builder: (context, _) {
-                    return builder(ctx, close);
-                  },
+                  builder: (context, _) => builder(ctx, close),
                 ),
               ),
             ],

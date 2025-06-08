@@ -7,143 +7,118 @@ typedef OnAssetItemClick = void Function(AssetEntity entity, int index);
 
 class GalleryGridView extends StatefulWidget {
   final AssetPathEntity? path;
-  final OnAssetItemClick? onAssetItemClick;
+  final OnAssetItemClick? onAssetItemClick; // Parámetro añadido
   final GalleryMediaPickerController provider;
 
   const GalleryGridView({
     Key? key,
     required this.path,
     required this.provider,
-    this.onAssetItemClick,
+    this.onAssetItemClick, // Parámetro añadido
   }) : super(key: key);
 
   @override
-  GalleryGridViewState createState() => GalleryGridViewState();
+  State<GalleryGridView> createState() => _GalleryGridViewState();
 }
 
-class GalleryGridViewState extends State<GalleryGridView> {
-  final Map<int, AssetEntity> _cacheMap = {};
-  final ValueNotifier<bool> _scrolling = ValueNotifier(false);
+class _GalleryGridViewState extends State<GalleryGridView> {
+  final Map<int, AssetEntity> _assetCache = {};
+  final ScrollController _scrollController = ScrollController();
 
   @override
-  void didUpdateWidget(covariant GalleryGridView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.path != widget.path) {
-      _cacheMap.clear();
-      _scrolling.value = false;
-      if (mounted) setState(() {});
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+    _preloadInitialAssets();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      _preloadMoreAssets();
     }
+  }
+
+  Future<void> _preloadInitialAssets() async {
+    if (widget.path == null) return;
+
+    final assets = await widget.path!.getAssetListRange(start: 0, end: 20);
+    for (var i = 0; i < assets.length; i++) {
+      _assetCache[i] = assets[i];
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _preloadMoreAssets() async {
+    if (widget.path == null) return;
+
+    final start = _assetCache.length;
+    final assets = await widget.path!.getAssetListRange(
+      start: start,
+      end: start + 20,
+    );
+    for (var i = 0; i < assets.length; i++) {
+      _assetCache[start + i] = assets[i];
+    }
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.path == null) return const SizedBox.shrink();
-
-    return NotificationListener<ScrollNotification>(
-      onNotification: _onScroll,
-      child: AnimatedBuilder(
-        animation: widget.provider.assetCountNotifier,
-        builder:
-            (_, __) => Container(
-              color: widget.provider.paramsModel.gridViewBackgroundColor,
-              child: GridView.builder(
-                key: ValueKey(widget.path),
-                shrinkWrap: true,
-                padding:
-                    widget.provider.paramsModel.gridPadding ?? EdgeInsets.zero,
-                physics:
-                    widget.provider.paramsModel.gridViewPhysics ??
-                    const ScrollPhysics(),
-                controller:
-                    widget.provider.paramsModel.gridViewController ??
-                    ScrollController(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: widget.provider.paramsModel.crossAxisCount,
-                  childAspectRatio:
-                      widget.provider.paramsModel.childAspectRatio,
-                  mainAxisSpacing: 2.5,
-                  crossAxisSpacing: 2.5,
-                ),
-                itemCount: widget.provider.assetCount,
-                addRepaintBoundaries: true,
-                itemBuilder: (context, index) => _buildItem(context, index),
-              ),
-            ),
-      ),
-    );
-  }
-
-  Widget _buildItem(BuildContext context, int index) {
-    return GestureDetector(
-      onTap: () async {
-        AssetEntity? asset = _cacheMap[index];
-        if (asset == null ||
-            asset.type == AssetType.audio ||
-            asset.type == AssetType.other)
-          return;
-
-        // Refetch asset for fresh data
-        final assetList = await widget.path!.getAssetListRange(
-          start: index,
-          end: index + 1,
+    return ValueListenableBuilder<int>(
+      valueListenable: widget.provider.assetCountNotifier,
+      builder: (_, count, __) {
+        return GridView.builder(
+          controller: _scrollController,
+          itemCount: count,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: widget.provider.paramsModel!.crossAxisCount,
+            childAspectRatio: widget.provider.paramsModel!.childAspectRatio,
+          ),
+          itemBuilder: (context, index) {
+            return _buildGridItem(index);
+          },
         );
-        if (assetList.isEmpty) return;
-
-        asset = assetList.first;
-        _cacheMap[index] = asset;
-        widget.onAssetItemClick?.call(asset, index);
       },
-      child: _buildScrollItem(context, index),
     );
   }
 
-  Widget _buildScrollItem(BuildContext context, int index) {
-    final cachedAsset = _cacheMap[index];
-    if (cachedAsset != null) {
-      return ThumbnailWidget(
-        asset: cachedAsset,
-        provider: widget.provider,
-        index: index,
+  Widget _buildGridItem(int index) {
+    if (_assetCache.containsKey(index)) {
+      return GestureDetector(
+        onTap: () => widget.onAssetItemClick?.call(_assetCache[index]!, index),
+        child: ThumbnailWidget(
+          asset: _assetCache[index]!,
+          index: index,
+          provider: widget.provider,
+        ),
       );
     }
 
     return FutureBuilder<List<AssetEntity>>(
       future: widget.path!.getAssetListRange(start: index, end: index + 1),
-      builder: (ctx, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Container(
-            color: widget.provider.paramsModel.gridViewBackgroundColor,
-            width: double.infinity,
-            height: double.infinity,
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          _assetCache[index] = snapshot.data!.first;
+          return GestureDetector(
+            onTap:
+                () =>
+                    widget.onAssetItemClick?.call(snapshot.data!.first, index),
+            child: ThumbnailWidget(
+              asset: snapshot.data!.first,
+              index: index,
+              provider: widget.provider,
+            ),
           );
         }
-
-        final asset = snapshot.data!.first;
-        _cacheMap[index] = asset;
-
-        return ThumbnailWidget(
-          asset: asset,
-          index: index,
-          provider: widget.provider,
-        );
+        return Container(color: Colors.grey[200]);
       },
     );
   }
-
-  bool _onScroll(ScrollNotification notification) {
-    if (notification is ScrollStartNotification) {
-      _scrolling.value = true;
-    } else if (notification is ScrollEndNotification) {
-      _scrolling.value = false;
-    }
-    return false;
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GalleryGridViewState && runtimeType == other.runtimeType;
-
-  @override
-  int get hashCode => runtimeType.hashCode;
 }
