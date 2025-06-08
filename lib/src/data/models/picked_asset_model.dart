@@ -3,82 +3,40 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 class PickedAssetModel {
-  final String id;
-  final String path;
-  final String type;
-  final Duration videoDuration;
-  final DateTime createDateTime;
-  final double? latitude;
-  final double? longitude;
-  final Uint8List? thumbnail;
-  final int height;
-  final int width;
-  final int orientationHeight;
-  final int orientationWidth;
-  final Size orientationSize;
-  final File? file;
-  final DateTime modifiedDateTime;
-  final String? title;
-  final Size size;
-
   PickedAssetModel({
     required this.id,
     required this.path,
     required this.type,
+    required this.size,
+    required this.width,
+    required this.height,
     required this.videoDuration,
     required this.createDateTime,
+    required this.orientationSize,
+    required this.orientationWidth,
+    required this.modifiedDateTime,
+    required this.orientationHeight,
+    this.file,
+    this.title,
     this.latitude,
     this.longitude,
     this.thumbnail,
-    required this.height,
-    required this.width,
-    required this.orientationHeight,
-    required this.orientationWidth,
-    required this.orientationSize,
-    this.file,
-    required this.modifiedDateTime,
-    this.title,
-    required this.size,
   });
-
-  factory PickedAssetModel.fromJson(Map<String, dynamic> json) =>
-      PickedAssetModel(
-        id: json["id"],
-        path: json["path"],
-        type: json["type"],
-        videoDuration: json["videoDuration"],
-        createDateTime: DateTime.parse(json["createDateTime"]),
-        latitude: json["latitude"],
-        longitude: json["longitude"],
-        thumbnail: json["thumbnail"],
-        height: json["height"],
-        width: json["width"],
-        orientationHeight: json["orientationHeight"],
-        orientationWidth: json["orientationWidth"],
-        orientationSize: json["orientationSize"],
-        file: json["file"],
-        modifiedDateTime: DateTime.parse(json["modifiedDateTime"]),
-        title: json["title"],
-        size: json["size"],
-      );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "path": path,
-    "type": type,
-    "videoDuration": videoDuration,
-    "createDateTime": createDateTime.toIso8601String(),
-    "latitude": latitude,
-    "longitude": longitude,
-    "thumbnail": thumbnail,
-    "height": height,
-    "width": width,
-    "orientationHeight": orientationHeight,
-    "orientationWidth": orientationWidth,
-    "orientationSize": orientationSize,
-    "file": file,
-    "modifiedDateTime": modifiedDateTime.toIso8601String(),
-    "title": title,
-    "size": size,
-  };
+  final String id;
+  final int width;
+  final Size size;
+  final File? file;
+  final int height;
+  final String path;
+  final String type;
+  final String? title;
+  final double? latitude;
+  final double? longitude;
+  final Uint8List? thumbnail;
+  final int orientationWidth;
+  final Size orientationSize;
+  final int orientationHeight;
+  final Duration videoDuration;
+  final DateTime createDateTime;
+  final DateTime modifiedDateTime;
 }

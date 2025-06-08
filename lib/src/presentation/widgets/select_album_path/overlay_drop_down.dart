@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/src/presentation/widgets/select_album_path/dropdown.dart';
 
 class OverlayDropDown<T> extends StatelessWidget {
+  const OverlayDropDown({
+    required this.close,
+    required this.height,
+    required this.builder,
+    required this.animationController,
+    super.key,
+  });
   final double height;
   final ValueChanged<T?> close;
-  final AnimationController animationController;
   final DropdownWidgetBuilder<T> builder;
-
-  const OverlayDropDown({
-    super.key,
-    required this.height,
-    required this.close,
-    required this.animationController,
-    required this.builder,
-  });
+  final AnimationController animationController;
 
   @override
   Widget build(BuildContext context) {

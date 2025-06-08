@@ -1,63 +1,78 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_media_picker/src/core/functions.dart';
 
 typedef DropdownWidgetBuilder<T> =
-    Widget Function(BuildContext context, ValueSetter<T> close);
+    Widget Function(BuildContext context, void Function(T?) onClose);
 
 class DropDown<T> extends StatefulWidget {
-  final Widget child;
-  final DropdownWidgetBuilder<T> dropdownWidgetBuilder;
-  final ValueChanged<T?>? onResult;
-  final ValueChanged<bool>? onShow;
-  final GlobalKey? relativeKey;
-
   const DropDown({
-    super.key,
     required this.child,
-    required this.dropdownWidgetBuilder,
-    this.onResult,
-    this.onShow,
-    this.relativeKey,
+    required this.dropdownBuilder,
+    required this.animationController,
+    super.key,
   });
+  final Widget child;
+  final Widget Function(void Function(T?) onClose) dropdownBuilder;
+  final AnimationController animationController;
 
   @override
   DropDownState<T> createState() => DropDownState<T>();
 }
 
-class DropDownState<T> extends State<DropDown<T>>
-    with TickerProviderStateMixin {
-  FeatureController<T?>? controller;
+class DropDownState<T> extends State<DropDown<T>> {
+  OverlayEntry? _overlayEntry;
+  bool _isOpen = false;
+
+  void toggleDropdown() {
+    if (_isOpen) {
+      _closeDropdown(null);
+    } else {
+      _openDropdown();
+    }
+  }
+
+  void _openDropdown() {
+    final overlay = Overlay.of(context);
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final position = renderBox?.localToGlobal(Offset.zero);
+
+    _overlayEntry = OverlayEntry(
+      builder:
+          (context) => Stack(
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _closeDropdown(null),
+              ),
+              Positioned(
+                left: position?.dx,
+                top: (position?.dy ?? 0) + (renderBox?.size.height ?? 0),
+                child: Material(child: widget.dropdownBuilder(_closeDropdown)),
+              ),
+            ],
+          ),
+    );
+
+    overlay.insert(_overlayEntry!);
+    widget.animationController.forward();
+    setState(() => _isOpen = true);
+  }
+
+  void _closeDropdown(T? value) {
+    widget.animationController.reverse().then((_) {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+      setState(() => _isOpen = false);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: widget.child,
-      onTap: () async {
-        if (controller != null) {
-          controller!.close(null);
-          return;
-        }
+    return widget.child;
+  }
 
-        final height = MediaQuery.of(context).size.height;
-        final ctx = widget.relativeKey?.currentContext ?? context;
-        final box = ctx.findRenderObject() as RenderBox;
-        final offsetStart = box.localToGlobal(Offset.zero);
-        final dialogHeight = height - (offsetStart.dy + box.paintBounds.bottom);
-
-        widget.onShow?.call(true);
-
-        controller = GalleryFunctions.showDropDown<T>(
-          context: context,
-          height: dialogHeight,
-          builder: (_, close) => widget.dropdownWidgetBuilder(context, close),
-          tickerProvider: this,
-        );
-
-        final result = await controller!.closed;
-        controller = null;
-        widget.onResult?.call(result);
-        widget.onShow?.call(false);
-      },
-    );
+  @override
+  void dispose() {
+    _overlayEntry?.remove();
+    super.dispose();
   }
 }

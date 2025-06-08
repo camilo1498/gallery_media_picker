@@ -1,4 +1,35 @@
-include: package:flutter_lints/flutter.yaml
+# The very_good_analysis package is a superset of the flutter_lints package.
+include: package:very_good_analysis/analysis_options.yaml
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+analyzer:
+  exclude:
+    - build/**
+    - lib/**.freezed.dart
+    - lib/**.g.dart
+    - lib/core/configs/app_pco_icons_icons.dart
+
+linter:
+  rules:
+    # This rule is disabled because the package imports are relative to files
+    # for files from the same feature.
+    always_use_package_imports: false
+
+    # This rule is disabled because the json parsing is currently supported on
+    # dynamic calls to map objects
+    avoid_dynamic_calls: false
+
+    # This rule is disabled because it is too strict for the TODO's. Also, the
+    # rule conflicts with the highlighting of the TODO's in the IDE.
+    flutter_style_todos: false
+
+    # This rule is enabled because 80 characters is a good standard for
+    # readability.
+    lines_longer_than_80_chars: true
+
+    # This rule is disabled because the public member API docs are not required
+    # in the majority of the cases.
+    public_member_api_docs: false
+
+    # This rule is disabled because some abstract classes, such as certain
+    # repositories, contain only one member, which is an acceptable design.
+    one_member_abstracts: false

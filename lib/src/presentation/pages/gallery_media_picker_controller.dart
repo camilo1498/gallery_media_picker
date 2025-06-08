@@ -40,8 +40,9 @@ class GalleryMediaPickerController extends ChangeNotifier {
   MediaPickerParamsModel? paramsModel;
 
   void resetPathList(List<AssetPathEntity> newPathList) {
-    pathList.clear();
-    pathList.addAll(newPathList);
+    pathList
+      ..clear()
+      ..addAll(newPathList);
     if (pathList.isNotEmpty && currentAlbum == null) {
       currentAlbum = pathList.first;
     }
@@ -106,7 +107,7 @@ class GalleryMediaPickerController extends ChangeNotifier {
   final assetCountNotifier = ValueNotifier<int>(0);
 
   Future<void> setAssetCount() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<dynamic>.delayed(const Duration(seconds: 1));
     if (currentAlbum != null) {
       _assetCount = await currentAlbum!.assetCountAsync;
     } else {

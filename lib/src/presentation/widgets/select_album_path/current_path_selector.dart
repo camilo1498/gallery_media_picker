@@ -6,28 +6,37 @@ import 'package:gallery_media_picker/src/presentation/widgets/select_album_path/
 import 'package:photo_manager/photo_manager.dart';
 
 class SelectedPathDropdownButton extends StatefulWidget {
+  const SelectedPathDropdownButton({
+    required this.provider,
+    required this.mediaPickerParams,
+    super.key,
+  });
+
   final GalleryMediaPickerController provider;
   final MediaPickerParamsModel mediaPickerParams;
 
-  const SelectedPathDropdownButton({
-    super.key,
-    required this.provider,
-    required this.mediaPickerParams,
-  });
-
   @override
-  _SelectedPathDropdownButtonState createState() =>
+  State<SelectedPathDropdownButton> createState() =>
       _SelectedPathDropdownButtonState();
 }
 
-class _SelectedPathDropdownButtonState
-    extends State<SelectedPathDropdownButton> {
-  final ValueNotifier<bool> arrowDownNotifier = ValueNotifier(false);
-  final GlobalKey dropDownKey = GlobalKey();
+class _SelectedPathDropdownButtonState extends State<SelectedPathDropdownButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+  final GlobalKey<DropDownState<AssetPathEntity>> _dropdownKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
 
   @override
   void dispose() {
-    arrowDownNotifier.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -35,91 +44,77 @@ class _SelectedPathDropdownButtonState
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: widget.provider.currentAlbumNotifier,
-      builder:
-          (_, __) => Row(
-            children: [
-              Expanded(
-                child: DropDown<AssetPathEntity>(
-                  relativeKey: dropDownKey,
-                  child: _buildButton(context),
-                  dropdownWidgetBuilder:
-                      (context, close) => ChangePathWidget(
-                        provider: widget.provider,
-                        close: close,
-                        mediaPickerParams: widget.mediaPickerParams,
-                      ),
-                  onResult: (value) {
-                    if (value != null) {
-                      widget.provider.currentAlbum = value;
-                    }
-                  },
-                  onShow: (value) {
-                    arrowDownNotifier.value = value;
-                  },
-                ),
+      builder: (context, _) {
+        final currentAlbum = widget.provider.currentAlbum;
+        if (currentAlbum == null || widget.provider.pathList.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Row(
+          children: [
+            Expanded(
+              child: DropDown<AssetPathEntity>(
+                key: _dropdownKey,
+                animationController: _animationController,
+                dropdownBuilder:
+                    (onClose) => ChangePathWidget(
+                      provider: widget.provider,
+                      close: onClose,
+                      mediaPickerParams: widget.mediaPickerParams,
+                    ),
+                child: _buildDropdownButton(currentAlbum),
               ),
-              Container(
-                width: MediaQuery.of(context).size.width / 2,
-                alignment: Alignment.bottomLeft,
-                child:
-                    widget.mediaPickerParams.appBarLeadingWidget ??
-                    const SizedBox.shrink(),
-              ),
-            ],
-          ),
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width / 2,
+              alignment: Alignment.bottomLeft,
+              child:
+                  widget.mediaPickerParams.appBarLeadingWidget ??
+                  const SizedBox.shrink(),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildButton(BuildContext context) {
-    final currentAlbum = widget.provider.currentAlbum;
-    if (widget.provider.pathList.isEmpty || currentAlbum == null) {
-      return const SizedBox.shrink();
-    }
-
-    final textStyle = TextStyle(
-      color: widget.mediaPickerParams.appBarTextColor,
-      fontSize: 18,
-      letterSpacing: 0.8,
-      fontWeight: FontWeight.w500,
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(35),
-      ),
-      padding: const EdgeInsets.only(left: 15, bottom: 15),
-      alignment: Alignment.bottomLeft,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.28,
-            child: Text(
-              currentAlbum.name,
-              overflow: TextOverflow.ellipsis,
-              style: textStyle,
-            ),
-          ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.only(right: 5),
-            child: AnimatedBuilder(
-              animation: arrowDownNotifier,
-              builder: (context, child) {
-                return AnimatedRotation(
-                  duration: const Duration(milliseconds: 300),
-                  turns: arrowDownNotifier.value ? 0.5 : 0,
-                  child: child,
-                );
-              },
-              child: Icon(
-                Icons.keyboard_arrow_down,
-                color: widget.mediaPickerParams.appBarIconColor,
+  Widget _buildDropdownButton(AssetPathEntity currentAlbum) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _dropdownKey.currentState?.toggleDropdown(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.4,
+                ),
+                child: Text(
+                  currentAlbum.name,
+                  style: TextStyle(
+                    color: widget.mediaPickerParams.appBarTextColor,
+                    fontSize: 16,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              RotationTransition(
+                turns: Tween(
+                  begin: 0.0,
+                  end: 0.5,
+                ).animate(_animationController),
+                child: Icon(
+                  Icons.arrow_drop_down,
+                  color: widget.mediaPickerParams.appBarIconColor,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -1,6 +1,32 @@
 import 'package:flutter/material.dart';
 
 class MediaPickerParamsModel {
+  const MediaPickerParamsModel({
+    this.maxPickImages = 2,
+    this.singlePick = true,
+    this.appBarColor = Colors.black,
+    this.albumBackGroundColor = Colors.black,
+    this.albumDividerColor = Colors.white,
+    this.albumTextColor = Colors.white,
+    this.appBarIconColor = Colors.white,
+    this.appBarTextColor = Colors.white,
+    this.crossAxisCount = 3,
+    this.gridViewBackgroundColor = Colors.black54,
+    this.childAspectRatio = 0.5,
+    this.appBarLeadingWidget,
+    this.appBarHeight = 100,
+    this.imageBackgroundColor = Colors.white,
+    this.gridPadding,
+    this.gridViewPhysics,
+    this.gridViewController,
+    this.selectedBackgroundColor = Colors.white,
+    this.selectedCheckColor = Colors.white,
+    this.thumbnailBoxFix = BoxFit.cover,
+    this.selectedCheckBackgroundColor = Colors.white,
+    this.onlyImages = true,
+    this.onlyVideos = false,
+    this.thumbnailQuality = 200,
+  });
   final int maxPickImages;
   final bool singlePick;
   final Color appBarColor;
@@ -25,31 +51,4 @@ class MediaPickerParamsModel {
   final bool onlyImages;
   final bool onlyVideos;
   final int thumbnailQuality;
-
-  const MediaPickerParamsModel({
-    this.maxPickImages = 2,
-    this.singlePick = true,
-    this.appBarColor = Colors.black,
-    this.albumBackGroundColor = Colors.black,
-    this.albumDividerColor = Colors.white,
-    this.albumTextColor = Colors.white,
-    this.appBarIconColor,
-    this.appBarTextColor = Colors.white,
-    this.crossAxisCount = 3,
-    this.gridViewBackgroundColor = Colors.black54,
-    this.childAspectRatio = 0.5,
-    this.appBarLeadingWidget,
-    this.appBarHeight = 100,
-    this.imageBackgroundColor = Colors.white,
-    this.gridPadding,
-    this.gridViewPhysics,
-    this.gridViewController,
-    this.selectedBackgroundColor = Colors.white,
-    this.selectedCheckColor = Colors.white,
-    this.thumbnailBoxFix = BoxFit.cover,
-    this.selectedCheckBackgroundColor = Colors.white,
-    this.onlyImages = true,
-    this.onlyVideos = false,
-    this.thumbnailQuality = 200,
-  });
 }

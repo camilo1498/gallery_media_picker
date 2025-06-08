@@ -9,14 +9,13 @@ import 'package:oktoast/oktoast.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class GalleryMediaPicker extends StatefulWidget {
-  final MediaPickerParamsModel mediaPickerParams;
-  final ValueChanged<List<PickedAssetModel>> pathList;
-
   const GalleryMediaPicker({
-    super.key,
     required this.mediaPickerParams,
     required this.pathList,
+    super.key,
   });
+  final MediaPickerParamsModel mediaPickerParams;
+  final ValueChanged<List<PickedAssetModel>> pathList;
 
   @override
   State<GalleryMediaPicker> createState() => _GalleryMediaPickerState();
@@ -38,7 +37,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
   }
 
   void _onPickMaxReached() {
-    showToast("You have already picked ${provider.max} items.");
+    showToast('You have already picked ${provider.max} items.');
   }
 
   @override
@@ -69,11 +68,11 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                 },
                 child: AnimatedBuilder(
                   animation: provider.currentAlbumNotifier,
-                  builder: (_, __) {
+                  builder: (_, _) {
                     return GalleryGridView(
                       provider: provider,
                       path: provider.currentAlbum,
-                      onAssetItemClick: _onAssetItemClick,
+                      onAssetTap: _onAssetItemClick,
                     );
                   },
                 ),

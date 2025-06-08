@@ -23,12 +23,12 @@ class GalleryFunctions {
     var isClosed = false;
     OverlayEntry? entry;
 
-    void close(T? value) async {
+    Future<void> close(T? value) async {
       if (isClosed) return;
       isClosed = true;
 
       await animationController.reverse();
-      await Future.delayed(const Duration(milliseconds: 16));
+      await Future<dynamic>.delayed(const Duration(milliseconds: 16));
       completer.complete(value);
       entry?.remove();
     }
@@ -55,7 +55,7 @@ class GalleryFunctions {
 
   static void onPickMax(GalleryMediaPickerController provider) {
     provider.onPickMax.addListener(() {
-      showToast("You have already picked ${provider.max} items.");
+      showToast('You have already picked ${provider.max} items.');
     });
   }
 
@@ -63,15 +63,11 @@ class GalleryFunctions {
     void Function(VoidCallback fn) setState,
     GalleryMediaPickerController provider,
   ) async {
-    final result = await PhotoManager.requestPermissionExtend(
-      requestOption: const PermissionRequestOption(
-        iosAccessLevel: IosAccessLevel.readWrite,
-      ),
-    );
+    final result = await PhotoManager.requestPermissionExtend();
 
     if (result.isAuth) {
-      provider.setAssetCount();
-      PhotoManager.startChangeNotify();
+      await provider.setAssetCount();
+      await PhotoManager.startChangeNotify();
       PhotoManager.addChangeCallback(
         (_) => _refreshPathList(setState, provider),
       );
@@ -80,7 +76,7 @@ class GalleryFunctions {
         _refreshPathList(setState, provider);
       }
     } else {
-      PhotoManager.openSetting();
+      await PhotoManager.openSetting();
     }
   }
 
@@ -88,9 +84,10 @@ class GalleryFunctions {
     void Function(VoidCallback fn) setState,
     GalleryMediaPickerController provider,
   ) {
+    if (provider.paramsModel == null) return;
     PhotoManager.getAssetPathList(
       type:
-          (provider.paramsModel?.onlyVideos == true)
+          provider.paramsModel!.onlyVideos
               ? RequestType.video
               : (provider.paramsModel?.onlyImages ?? true)
               ? RequestType.image
@@ -108,10 +105,9 @@ class GalleryFunctions {
 }
 
 class FeatureController<T> {
+  FeatureController(this.completer, this.close);
   final Completer<T?> completer;
   final ValueSetter<T?> close;
-
-  FeatureController(this.completer, this.close);
 
   Future<T?> get closed => completer.future;
 }

@@ -3,33 +3,31 @@ import 'package:gallery_media_picker/src/presentation/pages/gallery_media_picker
 import 'package:gallery_media_picker/src/presentation/widgets/gallery_grid/thumbnail_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-typedef OnAssetItemClick = void Function(AssetEntity entity, int index);
-
 class GalleryGridView extends StatefulWidget {
-  final AssetPathEntity? path;
-  final OnAssetItemClick? onAssetItemClick; // Parámetro añadido
-  final GalleryMediaPickerController provider;
-
   const GalleryGridView({
-    Key? key,
     required this.path,
     required this.provider,
-    this.onAssetItemClick, // Parámetro añadido
-  }) : super(key: key);
+    super.key,
+    this.onAssetTap,
+  });
+  final AssetPathEntity? path;
+  final GalleryMediaPickerController provider;
+  final void Function(AssetEntity, int)? onAssetTap;
 
   @override
   State<GalleryGridView> createState() => _GalleryGridViewState();
 }
 
 class _GalleryGridViewState extends State<GalleryGridView> {
-  final Map<int, AssetEntity> _assetCache = {};
-  final ScrollController _scrollController = ScrollController();
+  final _assetCache = <int, AssetEntity>{};
+  final _scrollController = ScrollController();
+  final _preloadAmount = 20;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
-    _preloadInitialAssets();
+    _scrollController.addListener(_handleScroll);
+    _preloadAssets(0, _preloadAmount);
   }
 
   @override
@@ -38,31 +36,16 @@ class _GalleryGridViewState extends State<GalleryGridView> {
     super.dispose();
   }
 
-  void _scrollListener() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
-      _preloadMoreAssets();
+  void _handleScroll() {
+    if (_scrollController.position.extentAfter < 500) {
+      _preloadAssets(_assetCache.length, _assetCache.length + _preloadAmount);
     }
   }
 
-  Future<void> _preloadInitialAssets() async {
+  Future<void> _preloadAssets(int start, int end) async {
     if (widget.path == null) return;
 
-    final assets = await widget.path!.getAssetListRange(start: 0, end: 20);
-    for (var i = 0; i < assets.length; i++) {
-      _assetCache[i] = assets[i];
-    }
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _preloadMoreAssets() async {
-    if (widget.path == null) return;
-
-    final start = _assetCache.length;
-    final assets = await widget.path!.getAssetListRange(
-      start: start,
-      end: start + 20,
-    );
+    final assets = await widget.path!.getAssetListRange(start: start, end: end);
     for (var i = 0; i < assets.length; i++) {
       _assetCache[start + i] = assets[i];
     }
@@ -73,45 +56,49 @@ class _GalleryGridViewState extends State<GalleryGridView> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
       valueListenable: widget.provider.assetCountNotifier,
-      builder: (_, count, __) {
+      builder: (_, count, _) {
         return GridView.builder(
           controller: _scrollController,
           itemCount: count,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: widget.provider.paramsModel!.crossAxisCount,
-            childAspectRatio: widget.provider.paramsModel!.childAspectRatio,
-          ),
-          itemBuilder: (context, index) {
-            return _buildGridItem(index);
-          },
+          gridDelegate: _buildGridDelegate(),
+          itemBuilder: (_, index) => _buildGridItem(index),
         );
       },
     );
   }
 
+  SliverGridDelegateWithFixedCrossAxisCount _buildGridDelegate() {
+    final params = widget.provider.paramsModel!;
+    return SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: params.crossAxisCount,
+      childAspectRatio: params.childAspectRatio,
+      mainAxisSpacing: 1.5,
+      crossAxisSpacing: 1.5,
+    );
+  }
+
   Widget _buildGridItem(int index) {
-    if (_assetCache.containsKey(index)) {
+    final asset = _assetCache[index];
+    if (asset != null) {
       return GestureDetector(
-        onTap: () => widget.onAssetItemClick?.call(_assetCache[index]!, index),
+        onTap: () => widget.onAssetTap?.call(asset, index),
         child: ThumbnailWidget(
-          asset: _assetCache[index]!,
+          asset: asset,
           index: index,
           provider: widget.provider,
         ),
       );
     }
 
-    return FutureBuilder<List<AssetEntity>>(
-      future: widget.path!.getAssetListRange(start: index, end: index + 1),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          _assetCache[index] = snapshot.data!.first;
+    return FutureBuilder<AssetEntity>(
+      future: _loadAsset(index),
+      builder: (_, snapshot) {
+        if (snapshot.hasData) {
+          _assetCache[index] = snapshot.data!;
           return GestureDetector(
-            onTap:
-                () =>
-                    widget.onAssetItemClick?.call(snapshot.data!.first, index),
+            onTap: () => widget.onAssetTap?.call(snapshot.data!, index),
             child: ThumbnailWidget(
-              asset: snapshot.data!.first,
+              asset: snapshot.data!,
               index: index,
               provider: widget.provider,
             ),
@@ -120,5 +107,16 @@ class _GalleryGridViewState extends State<GalleryGridView> {
         return Container(color: Colors.grey[200]);
       },
     );
+  }
+
+  Future<AssetEntity> _loadAsset(int index) async {
+    final assets = await widget.path!.getAssetListRange(
+      start: index,
+      end: index + 1,
+    );
+    if (assets.isEmpty) {
+      throw Exception('No asset found at index $index');
+    }
+    return _assetCache[index] = assets.first;
   }
 }
