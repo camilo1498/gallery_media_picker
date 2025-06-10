@@ -67,10 +67,10 @@ class _ExampleState extends State<Example> {
                           ? _buildEmptyState()
                           : _buildMediaPreview(media.pickedFiles),
                 ),
-
                 // Gallery media picker
                 Expanded(
                   child: GalleryMediaPicker(
+                    appBarLeadingWidget: _buildAppBarControls(),
                     mediaPickerParams: MediaPickerParamsModel(
                       appBarHeight: 60,
                       maxPickImages: 5,
@@ -82,9 +82,9 @@ class _ExampleState extends State<Example> {
                       imageBackgroundColor: Colors.black,
                       selectedCheckColor: Colors.black87,
                       selectedBackgroundColor: Colors.black,
+                      appBarColor: Colors.yellow,
                       gridViewBackgroundColor: Colors.grey[900]!,
                       selectedCheckBackgroundColor: Colors.white10,
-                      appBarLeadingWidget: _buildAppBarControls(),
                     ),
                     pathList: (List<PickedAssetModel> paths) {
                       media.setPickedFiles(paths);
