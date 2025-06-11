@@ -168,11 +168,9 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
         return AnimatedTapWidget(
           onTap: () => provider.pickEntity(asset),
           child: ThumbnailWidget(
-            index: index,
             asset: asset,
-            params: provider.paramsModel!,
-            currentAlbum: provider.currentAlbum.value!,
             isSelected: isSelected,
+            params: provider.paramsModel!,
           ),
         );
       },

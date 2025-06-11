@@ -3,31 +3,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-/// An [ImageProvider] that decodes a thumbnail image from an [AssetPathEntity]
-/// (e.g., an album) using the `photo_manager` package.
-///
-/// This class is useful for displaying images in a grid without having to
-/// manually manage thumbnail loading and decoding.
+/// An [ImageProvider] that decodes a thumbnail image from an [AssetEntity]
+/// using the `photo_manager` package.
 @immutable
 class DecodeImage extends ImageProvider<DecodeImage> {
   /// Creates an instance of [DecodeImage].
   ///
-  /// [entity] refers to the album or folder of media assets.
-  /// [index] is the index of the asset to display.
+  /// [asset] is the media asset to load the thumbnail for.
   /// [scale] is the image scale (e.g., for high-DPI screens).
   /// [thumbSize] sets the dimensions for the thumbnail (width and height).
-  const DecodeImage(
-    this.entity, {
-    this.index = 0,
+  const DecodeImage({
+    required this.asset,
     this.scale = 1.0,
     this.thumbSize = 200,
   });
 
-  /// The album or folder of media assets.
-  final AssetPathEntity entity;
-
-  /// Index of the asset in the album.
-  final int index;
+  /// The media asset to load.
+  final AssetEntity asset;
 
   /// Image scale (used for high-DPI displays).
   final double scale;
@@ -44,7 +36,7 @@ class DecodeImage extends ImageProvider<DecodeImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
-      debugLabel: 'GalleryThumbnail(${key.entity.name} - ${key.index})',
+      debugLabel: 'GalleryThumbnail(${key.asset.id})',
     );
   }
 
@@ -54,10 +46,7 @@ class DecodeImage extends ImageProvider<DecodeImage> {
     ImageDecoderCallback decode,
   ) async {
     try {
-      final asset = await _loadAsset(key.entity, key.index);
-      if (asset == null) return _errorCodec(decode);
-
-      final thumbData = await asset.thumbnailDataWithSize(
+      final thumbData = await key.asset.thumbnailDataWithSize(
         ThumbnailSize(key.thumbSize, key.thumbSize),
         quality: 80,
       );
@@ -72,12 +61,6 @@ class DecodeImage extends ImageProvider<DecodeImage> {
     }
   }
 
-  /// Retrieves a single asset from the specified album.
-  Future<AssetEntity?> _loadAsset(AssetPathEntity entity, int index) async {
-    final assets = await entity.getAssetListRange(start: index, end: index + 1);
-    return assets.isNotEmpty ? assets.first : null;
-  }
-
   /// Fallback method to provide a blank placeholder image if loading fails.
   Future<ui.Codec> _errorCodec(ImageDecoderCallback decode) async {
     final bytes = await _createPlaceholderBytes();
@@ -89,6 +72,12 @@ class DecodeImage extends ImageProvider<DecodeImage> {
   Future<Uint8List> _createPlaceholderBytes() async {
     const size = 10;
     final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint()..color = Colors.transparent;
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble()),
+      paint,
+    );
     final image = await recorder.endRecording().toImage(size, size);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
@@ -99,10 +88,9 @@ class DecodeImage extends ImageProvider<DecodeImage> {
       identical(this, other) ||
       other is DecodeImage &&
           runtimeType == other.runtimeType &&
-          entity == other.entity &&
-          index == other.index &&
+          asset == other.asset &&
           thumbSize == other.thumbSize;
 
   @override
-  int get hashCode => Object.hash(entity, index, thumbSize);
+  int get hashCode => Object.hash(asset, thumbSize);
 }
