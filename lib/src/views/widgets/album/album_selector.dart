@@ -69,13 +69,12 @@ class _AlbumSelectorState extends State<_AlbumSelector>
 
     // Create the overlay with the dropdown content.
     _overlayEntry = OverlayEntry(
-      builder:
-          (context) => _AlbumDropdownOverlay(
-            offset: offset,
-            height: height,
-            animation: _heightFactorAnimation,
-            onClose: _closeDropdown,
-          ),
+      builder: (context) => _AlbumDropdownOverlay(
+        offset: offset,
+        height: height,
+        animation: _heightFactorAnimation,
+        onClose: _closeDropdown,
+      ),
     );
 
     // Insert the overlay into the overlay stack.
@@ -118,7 +117,7 @@ class _AlbumSelectorState extends State<_AlbumSelector>
         height: params.appBarHeight,
         child: ValueListenableBuilder<AssetPathEntity?>(
           valueListenable: provider.currentAlbum,
-          builder: (_, album, _) {
+          builder: (_, album, __) {
             if (album == null) return const SizedBox.shrink();
 
             // Main tappable dropdown widget shown in the app bar.

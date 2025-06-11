@@ -167,7 +167,7 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
                 },
                 child: ValueListenableBuilder<AssetPathEntity?>(
                   valueListenable: provider.currentAlbum,
-                  builder: (_, album, _) => const _GalleryGridViewWidget(),
+                  builder: (_, album, __) => const _GalleryGridViewWidget(),
                 ),
               ),
             ),

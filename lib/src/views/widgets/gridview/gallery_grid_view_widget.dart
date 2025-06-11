@@ -114,7 +114,7 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AssetPathEntity?>(
       valueListenable: provider.currentAlbum,
-      builder: (_, album, _) {
+      builder: (_, album, __) {
         if (album == null) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -159,11 +159,9 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
     // Fallback to async load if not already cached.
     return FutureBuilder<AssetEntity>(
       future: _loadAsset(index, album),
-      builder:
-          (_, snapshot) =>
-              snapshot.hasData
-                  ? _buildAssetWidget(snapshot.data!, index)
-                  : Container(color: Colors.grey[100]),
+      builder: (_, snapshot) => snapshot.hasData
+          ? _buildAssetWidget(snapshot.data!, index)
+          : Container(color: Colors.grey[100]),
     );
   }
 
@@ -171,7 +169,7 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
   Widget _buildAssetWidget(AssetEntity asset, int index) {
     return ValueListenableBuilder<List<AssetEntity>>(
       valueListenable: provider.picked,
-      builder: (_, picked, _) {
+      builder: (_, picked, __) {
         final isSelected = picked.contains(asset);
 
         return AnimatedTapWidget(

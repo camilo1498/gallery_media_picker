@@ -56,79 +56,81 @@ class ThumbnailWidget extends StatelessWidget {
 
   // Builds the main thumbnail image using a fade-in effect.
   Widget _buildImage() => FadeInImage(
-    placeholderFit: BoxFit.cover,
-    fit: params.thumbnailBoxFix,
-    placeholder: MemoryImage(Utils.kTransparentImage),
-    fadeInDuration: const Duration(milliseconds: 200),
-    image: DecodeImage(asset: asset, thumbSize: params.thumbnailQuality.size),
-    imageErrorBuilder: (_, _, _) => const ColoredBox(color: Colors.black),
-    filterQuality: FilterQuality.high,
-    placeholderColor: params.thumbnailBgColor,
-  );
+        placeholderFit: BoxFit.cover,
+        fit: params.thumbnailBoxFix,
+        placeholder: MemoryImage(Utils.kTransparentImage),
+        fadeInDuration: const Duration(milliseconds: 200),
+        image:
+            DecodeImage(asset: asset, thumbSize: params.thumbnailQuality.size),
+        imageErrorBuilder: (_, __, ___) =>
+            const ColoredBox(color: Colors.black),
+        filterQuality: FilterQuality.high,
+        placeholderColor: params.thumbnailBgColor,
+      );
 
   // Builds the semi-transparent selection overlay.
   Widget _buildOverlay() => AnimatedContainer(
-    duration: const Duration(milliseconds: 200),
-    color: params.selectedAssetBgColor.withValues(alpha: 0.4),
-  );
+        duration: const Duration(milliseconds: 200),
+        color: params.selectedAssetBgColor.withValues(alpha: 0.4),
+      );
 
   // Builds the checkmark indicator when the asset is selected.
   Widget _buildCheckmark() => Positioned(
-    top: 8,
-    right: 8,
-    child: Container(
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: params.selectedCheckBgColor,
-        border: Border.all(color: params.selectedCheckColor, width: 1.5),
-      ),
-      child: Icon(Icons.check, size: 16, color: params.selectedCheckColor),
-    ),
-  );
+        top: 8,
+        right: 8,
+        child: Container(
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: params.selectedCheckBgColor,
+            border: Border.all(color: params.selectedCheckColor, width: 1.5),
+          ),
+          child: Icon(Icons.check, size: 16, color: params.selectedCheckColor),
+        ),
+      );
 
   // Builds the duration badge shown on videos.
   Widget _buildVideoDuration() => Positioned(
-    right: 6,
-    bottom: 6,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        color: Colors.black.withValues(alpha: 0.5),
-      ),
-      child: Text(
-        _formatDuration(asset.videoDuration),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.w500,
-          shadows: [Shadow(blurRadius: 1)],
+        right: 6,
+        bottom: 6,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            color: Colors.black.withValues(alpha: 0.5),
+          ),
+          child: Text(
+            _formatDuration(asset.videoDuration),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              shadows: [Shadow(blurRadius: 1)],
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 
   // Builds a small badge indicating the media is a GIF.
   Widget _buildGifBadge() => Positioned(
-    left: 6,
-    bottom: 6,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        color: Colors.black.withValues(alpha: 0.5),
-      ),
-      child: const Text(
-        'GIF',
-        style: TextStyle(
-          fontSize: 8,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+        left: 6,
+        bottom: 6,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            color: Colors.black.withValues(alpha: 0.5),
+          ),
+          child: const Text(
+            'GIF',
+            style: TextStyle(
+              fontSize: 8,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 
   // Formats a [Duration] into a human-readable string.
   //
