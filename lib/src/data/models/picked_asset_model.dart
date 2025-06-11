@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:gallery_media_picker/src/data/enum/picked_asset_type_enum.dart';
+import 'package:gallery_media_picker/gallery_media_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 /// A model representing a selected media asset (image or video) with
@@ -82,7 +82,7 @@ class PickedAssetModel {
   final DateTime modifiedDateTime;
 
   /// Type of the asset (image or video).
-  final PickedAssetTypeEnum type;
+  final PickedAssetType type;
 
   /// Creates a [PickedAssetModel] from an [AssetEntity] asynchronously.
   ///
@@ -93,8 +93,8 @@ class PickedAssetModel {
     final thumbnail = await entity.thumbnailData;
     final type =
         entity.type == AssetType.video
-            ? PickedAssetTypeEnum.video
-            : PickedAssetTypeEnum.image;
+            ? PickedAssetType.video
+            : PickedAssetType.image;
 
     return PickedAssetModel(
       file: file,

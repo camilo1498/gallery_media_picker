@@ -114,8 +114,8 @@ class _AlbumSelectorState extends State<_AlbumSelector>
       },
       child: Container(
         alignment: Alignment.bottomLeft,
-        color: params?.appBarColor,
-        height: params?.appBarHeight ?? 50,
+        color: params.appBarColor,
+        height: params.appBarHeight,
         child: ValueListenableBuilder<AssetPathEntity?>(
           valueListenable: provider.currentAlbum,
           builder: (_, album, _) {
@@ -126,8 +126,8 @@ class _AlbumSelectorState extends State<_AlbumSelector>
               name: album.name,
               isOpen: _isOpen,
               onTap: _toggleDropdown,
-              appBarIconColor: params?.appBarIconColor,
-              appBarTextColor: params?.appBarTextColor,
+              appBarIconColor: params.albumSelectIconColor,
+              appBarTextColor: params.albumSelectTextColor,
               appBarLeadingWidget: widget.appBarLeadingWidget,
             );
           },

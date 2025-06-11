@@ -38,33 +38,38 @@ class ThumbnailWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          _buildImage(),
-          if (isSelected) _buildOverlay(),
-          if (isSelected) _buildCheckmark(),
-          if (asset.type == AssetType.video) _buildVideoDuration(),
-          if (_isGif) _buildGifBadge(),
-        ],
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: params.thumbnailBgColor),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildImage(),
+            if (isSelected) _buildOverlay(),
+            if (isSelected) _buildCheckmark(),
+            if (asset.type == AssetType.video) _buildVideoDuration(),
+            if (_isGif) _buildGifBadge(),
+          ],
+        ),
       ),
     );
   }
 
   // Builds the main thumbnail image using a fade-in effect.
   Widget _buildImage() => FadeInImage(
-    placeholder: MemoryImage(Utils.kTransparentImage),
-    image: DecodeImage(asset: asset, thumbSize: params.thumbnailQuality),
-    fit: params.thumbnailBoxFix,
-    fadeInDuration: const Duration(milliseconds: 200),
     placeholderFit: BoxFit.cover,
-    imageErrorBuilder: (_, _, _) => const ColoredBox(color: Colors.grey),
+    fit: params.thumbnailBoxFix,
+    placeholder: MemoryImage(Utils.kTransparentImage),
+    fadeInDuration: const Duration(milliseconds: 200),
+    image: DecodeImage(asset: asset, thumbSize: params.thumbnailQuality.size),
+    imageErrorBuilder: (_, _, _) => const ColoredBox(color: Colors.black),
+    filterQuality: FilterQuality.high,
+    placeholderColor: params.thumbnailBgColor,
   );
 
   // Builds the semi-transparent selection overlay.
   Widget _buildOverlay() => AnimatedContainer(
     duration: const Duration(milliseconds: 200),
-    color: params.selectedBackgroundColor.withValues(alpha: 0.4),
+    color: params.selectedAssetBgColor.withValues(alpha: 0.4),
   );
 
   // Builds the checkmark indicator when the asset is selected.
@@ -74,8 +79,8 @@ class ThumbnailWidget extends StatelessWidget {
     child: Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: params.selectedCheckBackgroundColor,
         shape: BoxShape.circle,
+        color: params.selectedCheckBgColor,
         border: Border.all(color: params.selectedCheckColor, width: 1.5),
       ),
       child: Icon(Icons.check, size: 16, color: params.selectedCheckColor),
@@ -89,8 +94,8 @@ class ThumbnailWidget extends StatelessWidget {
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(4),
+        color: Colors.black.withValues(alpha: 0.5),
       ),
       child: Text(
         _formatDuration(asset.videoDuration),
@@ -106,19 +111,19 @@ class ThumbnailWidget extends StatelessWidget {
 
   // Builds a small badge indicating the media is a GIF.
   Widget _buildGifBadge() => Positioned(
-    bottom: 6,
     left: 6,
+    bottom: 6,
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(4),
+        color: Colors.black.withValues(alpha: 0.5),
       ),
       child: const Text(
         'GIF',
         style: TextStyle(
-          color: Colors.white,
           fontSize: 8,
+          color: Colors.white,
           fontWeight: FontWeight.bold,
         ),
       ),

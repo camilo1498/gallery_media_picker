@@ -21,7 +21,7 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
   final _assetCache = <int, AssetEntity>{};
 
   // Scroll controller to monitor scroll position for preloading logic.
-  final _scrollController = ScrollController();
+  late final ScrollController _scrollController;
 
   // Shortcut to access the singleton controller.
   MediaPickerController get provider => MediaPickerController.instance;
@@ -29,6 +29,9 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
   @override
   void initState() {
     super.initState();
+
+    _scrollController =
+        provider.paramsModel.gridViewController ?? ScrollController();
 
     // Attach scroll listener to trigger preloading when nearing the bottom.
     _scrollController
@@ -120,12 +123,18 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
         }
 
         // Build a scrollable grid of media thumbnails.
-        return GridView.builder(
-          controller: _scrollController,
-          itemCount: provider.assetCount.value,
-          physics: const BouncingScrollPhysics(),
-          gridDelegate: _buildGridDelegate(),
-          itemBuilder: (_, index) => _buildGridItem(index, album),
+        return Container(
+          decoration: BoxDecoration(
+            color: provider.paramsModel.gridViewBgColor,
+          ),
+          child: GridView.builder(
+            controller: _scrollController,
+            itemCount: provider.assetCount.value,
+            padding: provider.paramsModel.gridPadding,
+            physics: provider.paramsModel.gridViewPhysics,
+            gridDelegate: _buildGridDelegate(),
+            itemBuilder: (_, index) => _buildGridItem(index, album),
+          ),
         );
       },
     );
@@ -133,7 +142,7 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
 
   // Creates a grid delegate using the user's layout preferences.
   SliverGridDelegateWithFixedCrossAxisCount _buildGridDelegate() {
-    final params = provider.paramsModel!;
+    final params = provider.paramsModel;
     return SliverGridDelegateWithFixedCrossAxisCount(
       mainAxisSpacing: 1.5,
       crossAxisSpacing: 1.5,
@@ -170,7 +179,7 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
           child: ThumbnailWidget(
             asset: asset,
             isSelected: isSelected,
-            params: provider.paramsModel!,
+            params: provider.paramsModel,
           ),
         );
       },

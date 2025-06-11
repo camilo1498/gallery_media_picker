@@ -70,25 +70,36 @@ class _ExampleState extends State<Example> {
                 // Gallery media picker
                 Expanded(
                   child: GalleryMediaPicker(
-                    appBarLeadingWidget: _buildAppBarControls(),
-                    mediaPickerParams: MediaPickerParamsModel(
-                      appBarHeight: 60,
-                      maxPickImages: 5,
-                      crossAxisCount: 3,
-                      childAspectRatio: 1,
-                      thumbnailQuality: 200,
-                      singlePick: _singlePick,
-                      thumbnailBoxFix: BoxFit.cover,
-                      imageBackgroundColor: Colors.black,
-                      selectedCheckColor: Colors.black87,
-                      selectedBackgroundColor: Colors.black,
-                      appBarColor: Colors.yellow,
-                      gridViewBackgroundColor: Colors.grey[900]!,
-                      selectedCheckBackgroundColor: Colors.white10,
-                    ),
                     pathList: (List<PickedAssetModel> paths) {
                       media.setPickedFiles(paths);
                     },
+                    appBarLeadingWidget: _buildAppBarControls(),
+                    mediaPickerParams: MediaPickerParamsModel(
+                      appBarHeight: 50,
+                      maxPickImages: 2,
+                      crossAxisCount: 3,
+                      childAspectRatio: .5,
+                      singlePick: _singlePick,
+                      appBarColor: Colors.black,
+                      gridViewBgColor: Colors.red,
+                      albumTextColor: Colors.white,
+                      gridPadding: EdgeInsets.zero,
+                      thumbnailBgColor: Colors.cyan,
+                      thumbnailBoxFix: BoxFit.cover,
+                      selectedAlbumIcon: Icons.check,
+                      selectedCheckColor: Colors.black,
+                      albumSelectIconColor: Colors.blue,
+                      selectedCheckBgColor: Colors.blue,
+                      selectedAlbumBgColor: Colors.black,
+                      albumDropDownBgColor: Colors.green,
+                      albumSelectTextColor: Colors.orange,
+                      mediaType: GalleryMediaType.all,
+                      selectedAssetBgColor: Colors.orange,
+                      selectedAlbumTextColor: Colors.white,
+                      gridViewController: ScrollController(),
+                      thumbnailQuality: ThumbnailQuality.medium,
+                      gridViewPhysics: const BouncingScrollPhysics(),
+                    ),
                   ),
                 ),
               ],
@@ -129,7 +140,7 @@ class _ExampleState extends State<Example> {
     return PageView(
       children:
           pickedFiles.map((data) {
-            if (data.type == PickedAssetTypeEnum.image) {
+            if (data.type == PickedAssetType.image) {
               return Center(
                 child: PhotoView.customChild(
                   enablePanAlways: true,
@@ -213,7 +224,7 @@ class _ExampleState extends State<Example> {
             final mediaPaths = media.pickedFiles.map((p) => p.path).toList();
             if (mediaPaths.isNotEmpty) {
               final files = mediaPaths.map((e) => XFile(e)).toList();
-              await Share.shareXFiles(files, text: 'Share');
+              await SharePlus.instance.share(ShareParams(files: files));
             }
           },
           child: Container(

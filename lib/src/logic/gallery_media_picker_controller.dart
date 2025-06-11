@@ -60,7 +60,7 @@ class MediaPickerController extends ChangeNotifier {
   final List<AssetPathEntity> pathList = [];
 
   /// Picker UI and behavior parameters.
-  MediaPickerParamsModel? paramsModel;
+  MediaPickerParamsModel paramsModel = const MediaPickerParamsModel();
 
   // ================================
   // Getters

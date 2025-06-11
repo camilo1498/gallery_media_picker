@@ -54,9 +54,7 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                   width: MediaQuery.of(context).size.width / 2.2,
                   constraints: const BoxConstraints(maxHeight: 200),
                   decoration: BoxDecoration(
-                    color:
-                        provider.paramsModel?.albumBackGroundColor ??
-                        Colors.white,
+                    color: provider.paramsModel.albumDropDownBgColor,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
@@ -94,7 +92,9 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                   color:
                                       isSelected
-                                          ? Colors.white.withValues(alpha: .3)
+                                          ? provider
+                                              .paramsModel
+                                              .selectedAlbumBgColor
                                           : Colors.transparent,
                                 ),
                                 padding: const EdgeInsets.symmetric(
@@ -111,10 +111,13 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color:
-                                              provider
-                                                  .paramsModel
-                                                  ?.albumTextColor ??
-                                              Colors.black,
+                                              isSelected
+                                                  ? provider
+                                                      .paramsModel
+                                                      .selectedAlbumTextColor
+                                                  : provider
+                                                      .paramsModel
+                                                      .albumTextColor,
                                         ),
                                       ),
                                     ),
@@ -124,12 +127,12 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                                     // Checkmark icon if selected.
                                     if (isSelected)
                                       Icon(
-                                        Icons.check,
+                                        provider.paramsModel.selectedAlbumIcon,
+                                        size: 15,
                                         color:
                                             provider
                                                 .paramsModel
-                                                ?.albumTextColor ??
-                                            Colors.black,
+                                                .selectedAlbumTextColor,
                                       ),
                                   ],
                                 ),

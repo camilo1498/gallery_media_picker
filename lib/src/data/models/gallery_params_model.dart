@@ -14,27 +14,29 @@ class MediaPickerParamsModel {
   /// for layout, colors, limits, and behavior of the media picker.
   const MediaPickerParamsModel({
     this.gridPadding,
-    this.gridViewPhysics,
     this.singlePick = true,
     this.maxPickImages = 2,
+    this.appBarHeight = 50,
     this.gridViewController,
     this.crossAxisCount = 3,
-    this.appBarHeight = 100,
-    this.thumbnailQuality = 200,
     this.childAspectRatio = 0.5,
     this.appBarColor = Colors.black,
     this.albumTextColor = Colors.white,
-    this.appBarIconColor = Colors.white,
-    this.appBarTextColor = Colors.white,
     this.thumbnailBoxFix = BoxFit.cover,
-    this.albumDividerColor = Colors.white,
+    this.selectedAlbumIcon = Icons.check,
+    this.thumbnailBgColor = Colors.white,
+    this.gridViewBgColor = Colors.black54,
     this.selectedCheckColor = Colors.white,
-    this.imageBackgroundColor = Colors.white,
-    this.albumBackGroundColor = Colors.black,
-    this.mediaType = GalleryMediaTypeEnum.all,
-    this.selectedBackgroundColor = Colors.white,
-    this.gridViewBackgroundColor = Colors.black54,
-    this.selectedCheckBackgroundColor = Colors.white,
+    this.albumSelectIconColor = Colors.white,
+    this.albumSelectTextColor = Colors.white,
+    this.selectedAlbumBgColor = Colors.white,
+    this.selectedAssetBgColor = Colors.white,
+    this.albumDropDownBgColor = Colors.black,
+    this.mediaType = GalleryMediaType.all,
+    this.selectedAlbumTextColor = Colors.white,
+    this.selectedCheckBgColor = Colors.transparent,
+    this.thumbnailQuality = ThumbnailQuality.medium,
+    this.gridViewPhysics = const BouncingScrollPhysics(),
   });
 
   /// Whether only a single item can be picked.
@@ -52,109 +54,62 @@ class MediaPickerParamsModel {
   /// Height of the app bar in pixels.
   final double appBarHeight;
 
-  /// Quality of generated thumbnails (0–1000).
-  final int thumbnailQuality;
-
   /// Color of album title text.
   final Color albumTextColor;
 
-  /// Color of text in the app bar.
-  final Color appBarTextColor;
-
-  /// Color of icons in the app bar.
-  final Color? appBarIconColor;
+  /// Background color of the entire grid view.
+  final Color gridViewBgColor;
 
   /// How the thumbnails should be fit within their boxes.
   final BoxFit thumbnailBoxFix;
 
-  /// Color of the divider line in the album dropdown.
-  final Color albumDividerColor;
-
-  /// Aspect ratio of each grid item.
-  final double childAspectRatio;
+  /// Background color of media thumbnails.
+  final Color thumbnailBgColor;
 
   /// Padding applied to the entire grid view.
   final EdgeInsets? gridPadding;
 
+  /// Aspect ratio of each grid item.
+  final double childAspectRatio;
+
   /// Color of the checkmark icon used when an item is selected.
   final Color selectedCheckColor;
 
-  /// Background color of the album dropdown panel.
-  final Color albumBackGroundColor;
-
-  /// Background color of media thumbnails.
-  final Color imageBackgroundColor;
-
-  /// Background color of the entire grid view.
-  final Color gridViewBackgroundColor;
-
-  /// Background color shown when a thumbnail is selected.
-  final Color selectedBackgroundColor;
-
-  /// Scroll physics for the grid view.
-  final ScrollPhysics? gridViewPhysics;
-
-  /// Type of media to show (all, images, or videos).
-  final GalleryMediaTypeEnum mediaType;
+  /// Color of text in the app bar.
+  final Color albumSelectTextColor;
 
   /// Background color behind the selection checkmark.
-  final Color selectedCheckBackgroundColor;
+  final Color selectedCheckBgColor;
+
+  /// Color of icons in the app bar.
+  final Color? albumSelectIconColor;
+
+  /// Color of the background of the selected album dropdown.
+  final Color? selectedAlbumBgColor;
+
+  /// Background color of the album dropdown panel.
+  final Color albumDropDownBgColor;
+
+  /// Icon displayed in the app bar when an album is selected.
+  final IconData selectedAlbumIcon;
+
+  /// Background color shown when a thumbnail is selected.
+  final Color selectedAssetBgColor;
+
+  /// Color of the text in the selected album dropdown.
+  final Color selectedAlbumTextColor;
+
+  /// Scroll physics for the grid view.
+  final ScrollPhysics gridViewPhysics;
+
+  /// Type of media to show (all, images, or videos).
+  final GalleryMediaType mediaType;
+
+  /// Quality of generated thumbnails (0–1000).
+  final ThumbnailQuality thumbnailQuality;
 
   /// Scroll controller used to manage grid view scroll behavior.
   final ScrollController? gridViewController;
-
-  /// Returns a copy of this model with the given fields replaced.
-  MediaPickerParamsModel copyWith({
-    bool? singlePick,
-    int? maxPickImages,
-    Color? appBarColor,
-    int? crossAxisCount,
-    double? appBarHeight,
-    int? thumbnailQuality,
-    Color? albumTextColor,
-    Color? appBarTextColor,
-    Color? appBarIconColor,
-    BoxFit? thumbnailBoxFix,
-    Color? albumDividerColor,
-    double? childAspectRatio,
-    EdgeInsets? gridPadding,
-    Color? selectedCheckColor,
-    Color? albumBackGroundColor,
-    Color? imageBackgroundColor,
-    Widget? appBarLeadingWidget,
-    Color? gridViewBackgroundColor,
-    Color? selectedBackgroundColor,
-    ScrollPhysics? gridViewPhysics,
-    GalleryMediaTypeEnum? mediaType,
-    Color? selectedCheckBackgroundColor,
-    ScrollController? gridViewController,
-  }) => MediaPickerParamsModel(
-    mediaType: mediaType ?? this.mediaType,
-    singlePick: singlePick ?? this.singlePick,
-    gridPadding: gridPadding ?? this.gridPadding,
-    appBarColor: appBarColor ?? this.appBarColor,
-    appBarHeight: appBarHeight ?? this.appBarHeight,
-    maxPickImages: maxPickImages ?? this.maxPickImages,
-    crossAxisCount: crossAxisCount ?? this.crossAxisCount,
-    albumTextColor: albumTextColor ?? this.albumTextColor,
-    appBarTextColor: appBarTextColor ?? this.appBarTextColor,
-    appBarIconColor: appBarIconColor ?? this.appBarIconColor,
-    gridViewPhysics: gridViewPhysics ?? this.gridViewPhysics,
-    thumbnailBoxFix: thumbnailBoxFix ?? this.thumbnailBoxFix,
-    thumbnailQuality: thumbnailQuality ?? this.thumbnailQuality,
-    childAspectRatio: childAspectRatio ?? this.childAspectRatio,
-    albumDividerColor: albumDividerColor ?? this.albumDividerColor,
-    selectedCheckColor: selectedCheckColor ?? this.selectedCheckColor,
-    gridViewController: gridViewController ?? this.gridViewController,
-    albumBackGroundColor: albumBackGroundColor ?? this.albumBackGroundColor,
-    imageBackgroundColor: imageBackgroundColor ?? this.imageBackgroundColor,
-    gridViewBackgroundColor:
-        gridViewBackgroundColor ?? this.gridViewBackgroundColor,
-    selectedBackgroundColor:
-        selectedBackgroundColor ?? this.selectedBackgroundColor,
-    selectedCheckBackgroundColor:
-        selectedCheckBackgroundColor ?? this.selectedCheckBackgroundColor,
-  );
 
   @override
   bool operator ==(Object other) {
@@ -170,19 +125,21 @@ class MediaPickerParamsModel {
         other.crossAxisCount == crossAxisCount &&
         other.albumTextColor == albumTextColor &&
         other.gridViewPhysics == gridViewPhysics &&
-        other.appBarTextColor == appBarTextColor &&
-        other.appBarIconColor == appBarIconColor &&
+        other.gridViewBgColor == gridViewBgColor &&
         other.thumbnailBoxFix == thumbnailBoxFix &&
         other.thumbnailQuality == thumbnailQuality &&
         other.childAspectRatio == childAspectRatio &&
-        other.albumDividerColor == albumDividerColor &&
+        other.thumbnailBgColor == thumbnailBgColor &&
+        other.selectedAlbumIcon == selectedAlbumIcon &&
         other.selectedCheckColor == selectedCheckColor &&
         other.gridViewController == gridViewController &&
-        other.albumBackGroundColor == albumBackGroundColor &&
-        other.imageBackgroundColor == imageBackgroundColor &&
-        other.gridViewBackgroundColor == gridViewBackgroundColor &&
-        other.selectedBackgroundColor == selectedBackgroundColor &&
-        other.selectedCheckBackgroundColor == selectedCheckBackgroundColor;
+        other.albumSelectTextColor == albumSelectTextColor &&
+        other.albumSelectIconColor == albumSelectIconColor &&
+        other.selectedAlbumBgColor == selectedAlbumBgColor &&
+        other.albumDropDownBgColor == albumDropDownBgColor &&
+        other.selectedAssetBgColor == selectedAssetBgColor &&
+        other.selectedCheckBgColor == selectedCheckBgColor &&
+        other.selectedAlbumTextColor == selectedAlbumTextColor;
   }
 
   @override
@@ -196,18 +153,20 @@ class MediaPickerParamsModel {
     crossAxisCount,
     albumTextColor,
     gridViewPhysics,
-    appBarTextColor,
-    appBarIconColor,
     thumbnailBoxFix,
+    gridViewBgColor,
+    thumbnailBgColor,
     thumbnailQuality,
     childAspectRatio,
-    albumDividerColor,
+    selectedAlbumIcon,
     gridViewController,
     selectedCheckColor,
-    albumBackGroundColor,
-    imageBackgroundColor,
-    gridViewBackgroundColor,
-    selectedBackgroundColor,
-    selectedCheckBackgroundColor,
+    selectedAlbumBgColor,
+    albumDropDownBgColor,
+    albumSelectTextColor,
+    selectedAssetBgColor,
+    albumSelectIconColor,
+    selectedCheckBgColor,
+    selectedAlbumTextColor,
   ]);
 }
