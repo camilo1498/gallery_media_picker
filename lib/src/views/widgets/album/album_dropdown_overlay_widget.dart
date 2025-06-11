@@ -1,5 +1,10 @@
 part of '../../gallery_media_picker.dart';
 
+/// A dropdown overlay that displays a list of available albums.
+///
+/// This widget appears below the album selector
+/// and allows users to switch albums.
+/// It supports animated expansion and closes when tapping outside of it.
 class _AlbumDropdownOverlay extends StatelessWidget {
   const _AlbumDropdownOverlay({
     required this.offset,
@@ -8,9 +13,17 @@ class _AlbumDropdownOverlay extends StatelessWidget {
     required this.onClose,
   });
 
+  /// The position of the dropdown relative to the screen (top-left offset).
   final Offset offset;
+
+  /// The height of the widget that triggered
+  /// the overlay (used for positioning).
   final double height;
+
+  /// Animation controlling the dropdown's height expansion.
   final Animation<double> animation;
+
+  /// Callback to be invoked when the dropdown is dismissed.
   final VoidCallback onClose;
 
   @override
@@ -19,7 +32,7 @@ class _AlbumDropdownOverlay extends StatelessWidget {
 
     return Stack(
       children: [
-        // Fondo transparente para cerrar al hacer tap fuera
+        // Transparent background layer that closes the dropdown on tap outside.
         Positioned.fill(
           child: GestureDetector(
             onTap: onClose,
@@ -27,7 +40,7 @@ class _AlbumDropdownOverlay extends StatelessWidget {
           ),
         ),
 
-        // Lista desplegable animada
+        // The animated dropdown positioned below the trigger widget.
         Positioned(
           left: offset.dx + 5,
           top: offset.dy + height,
@@ -35,8 +48,8 @@ class _AlbumDropdownOverlay extends StatelessWidget {
             color: Colors.transparent,
             child: ClipRect(
               child: Align(
-                alignment: Alignment.topCenter,
                 heightFactor: animation.value,
+                alignment: Alignment.topCenter,
                 child: Container(
                   width: MediaQuery.of(context).size.width / 2.2,
                   constraints: const BoxConstraints(maxHeight: 200),
@@ -47,7 +60,7 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
+                        color: Colors.black.withValues(alpha: .2),
                         blurRadius: 10,
                         spreadRadius: 2,
                       ),
@@ -58,16 +71,18 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                     child: Column(
                       children: [
                         const SizedBox(height: 4),
+
+                        // Map through each album and create a list entry.
                         ...provider.pathList.map((item) {
                           final isSelected =
                               provider.currentAlbum.value == item;
+
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: 4,
                               horizontal: 8,
                             ),
                             child: AnimatedTapWidget(
-                              maxScale: .98,
                               onTap: () {
                                 provider.setAlbum(item);
                                 onClose();
@@ -79,7 +94,7 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                   color:
                                       isSelected
-                                          ? Colors.white.withValues(alpha: 0.3)
+                                          ? Colors.white.withValues(alpha: .3)
                                           : Colors.transparent,
                                 ),
                                 padding: const EdgeInsets.symmetric(
@@ -87,10 +102,13 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                                 ),
                                 child: Row(
                                   children: [
+                                    // Album name.
                                     Expanded(
                                       child: Text(
                                         item.name,
+                                        maxLines: 2,
                                         textAlign: TextAlign.start,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color:
                                               provider
@@ -100,7 +118,10 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                                         ),
                                       ),
                                     ),
+
                                     const SizedBox(width: 4),
+
+                                    // Checkmark icon if selected.
                                     if (isSelected)
                                       Icon(
                                         Icons.check,
@@ -116,6 +137,7 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                             ),
                           );
                         }),
+
                         const SizedBox(height: 4),
                       ],
                     ),

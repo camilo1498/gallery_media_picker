@@ -1,6 +1,11 @@
 import 'package:flutter/foundation.dart';
 
+/// A utility class that provides commonly used static values or methods.
 class Utils {
+  /// A transparent 1x1 PNG image represented as a byte array.
+  ///
+  /// This can be used as a placeholder image in widgets that require
+  /// a non-null image but where the visual should be fully transparent.
   static final Uint8List kTransparentImage = Uint8List.fromList([
     0x89,
     0x50,
