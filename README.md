@@ -210,7 +210,7 @@ Each parameter lets you fine-tune the look and feel of the media picker.
     <img src="" width="120" alt="list_scroll_android">
   </div>
   <div style="text-align: center;">
-    <p><strong>Single widget</strong></p>
+    <p><strong>Only images</strong></p>
     <img src="" width="120" alt="list_scroll_android">
   </div>
 </div>

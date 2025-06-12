@@ -7,9 +7,9 @@ import 'package:gallery_media_picker/gallery_media_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:video_player/video_player.dart';
 
 void main() {
-  // Paint.enableDithering = true;
   WidgetsFlutterBinding.ensureInitialized();
   Provider.debugCheckInvalidValueType = null;
   SystemChrome.setPreferredOrientations([
@@ -30,7 +30,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -57,6 +56,7 @@ class _ExampleState extends State<Example> {
       child: Consumer<PickerDataProvider>(
         builder: (context, media, _) {
           return Scaffold(
+            backgroundColor: Colors.white,
             body: Column(
               children: [
                 Container(
@@ -67,7 +67,6 @@ class _ExampleState extends State<Example> {
                           ? _buildEmptyState()
                           : _buildMediaPreview(media.pickedFiles),
                 ),
-                // Gallery media picker
                 Expanded(
                   child: GalleryMediaPicker(
                     pathList: (List<PickedAssetModel> paths) {
@@ -76,28 +75,28 @@ class _ExampleState extends State<Example> {
                     appBarLeadingWidget: _buildAppBarControls(),
                     mediaPickerParams: MediaPickerParamsModel(
                       appBarHeight: 50,
-                      maxPickImages: 2,
+                      maxPickImages: 5,
                       crossAxisCount: 3,
                       childAspectRatio: .5,
                       singlePick: _singlePick,
                       appBarColor: Colors.black,
-                      gridViewBgColor: Colors.red,
+                      gridViewBgColor: Colors.black,
                       albumTextColor: Colors.white,
                       gridPadding: EdgeInsets.zero,
-                      thumbnailBgColor: Colors.cyan,
+                      thumbnailBgColor: Colors.white10,
                       thumbnailBoxFix: BoxFit.cover,
                       selectedAlbumIcon: Icons.check,
-                      selectedCheckColor: Colors.black,
-                      albumSelectIconColor: Colors.blue,
-                      selectedCheckBgColor: Colors.blue,
-                      selectedAlbumBgColor: Colors.black,
-                      albumDropDownBgColor: Colors.green,
-                      albumSelectTextColor: Colors.orange,
                       mediaType: GalleryMediaType.all,
+                      selectedCheckColor: Colors.white,
+                      albumSelectIconColor: Colors.white,
+                      selectedCheckBgColor: Colors.black.withValues(alpha: .3),
+                      selectedAlbumBgColor: Colors.white.withValues(alpha: .3),
+                      albumDropDownBgColor: Colors.black,
+                      albumSelectTextColor: Colors.white,
                       selectedAssetBgColor: Colors.orange,
                       selectedAlbumTextColor: Colors.white,
                       gridViewController: ScrollController(),
-                      thumbnailQuality: ThumbnailQuality.medium,
+                      thumbnailQuality: ThumbnailQuality.high,
                       gridViewPhysics: const BouncingScrollPhysics(),
                     ),
                   ),
@@ -112,8 +111,8 @@ class _ExampleState extends State<Example> {
 
   Widget _buildEmptyState() {
     return Container(
-      height: double.infinity,
       width: double.infinity,
+      height: double.infinity,
       alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -122,8 +121,8 @@ class _ExampleState extends State<Example> {
             scale: 8,
             child: Icon(Icons.image_outlined, color: Colors.white, size: 10),
           ),
-          SizedBox(height: 50),
-          Text(
+          const SizedBox(height: 50),
+          const Text(
             'No images selected',
             style: TextStyle(
               fontSize: 14,
@@ -150,8 +149,7 @@ class _ExampleState extends State<Example> {
                 ),
               );
             } else {
-              // You can implement video preview here if needed
-              return Container();
+              return VideoPreview(filePath: data.path);
             }
           }).toList(),
     );
@@ -247,5 +245,43 @@ class _ExampleState extends State<Example> {
         );
       },
     );
+  }
+}
+
+class VideoPreview extends StatefulWidget {
+  final String filePath;
+
+  const VideoPreview({super.key, required this.filePath});
+
+  @override
+  State<VideoPreview> createState() => _VideoPreviewState();
+}
+
+class _VideoPreviewState extends State<VideoPreview> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.file(File(widget.filePath))
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+        _controller.setLooping(true);
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_controller.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return VideoPlayer(_controller);
   }
 }
