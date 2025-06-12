@@ -12,6 +12,16 @@ A powerful and customizable Flutter package that allows users to select multiple
 
 Built on top of [`photo_manager`](https://pub.dev/packages/photo_manager), `gallery_media_picker` is ideal for apps requiring fast media access, beautiful UX, and fine-grained configuration.
 
+Claro, aquí tienes un mensaje corto y amigable que puedes usar para invitar a las personas a apoyar el proyecto en GitHub y pub.dev, junto con los **badges** correspondientes:
+
+---
+
+## 💫 Support the Project
+
+If you find this package helpful, please consider giving it a ⭐ on [GitHub](https://github.com/camilo1498/gallery_media_picker) and liking it on [pub.dev](https://pub.dev/packages/gallery_media_picker)!
+
+Your support helps improve and maintain this project! ❤️
+
 ---
 
 ## ✨ Features
@@ -62,6 +72,8 @@ In your `Info.plist`:
 ```xml
 <key>NSPhotoLibraryUsageDescription</key>
 <string>We need access to your photo library to select media.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>Allow to access to your gallery</string>
 ```
 
 #### Recommended Permission Request (with `permission_handler`)
@@ -127,7 +139,7 @@ GalleryMediaPicker(
 ###  `pathList Callback`
 This callback is triggered whenever the user selects or deselects media items.
 
-It returns a list of PickedAssetModel objects representing the currently selected files (images or videos), which you can store, preview, or process as needed.
+It returns a list of PickedAssetModel objects representing the currently selected files (images, GIF or videos), which you can store, preview, or process as needed.
 
 ---
 
@@ -165,7 +177,7 @@ Each parameter lets you fine-tune the look and feel of the media picker.
 | `thumbnailQuality`       | Enum for quality: `low`, `medium`, `high`    | `ThumbnailQuality` | `ThumbnailQuality.medium` |
 | `gridViewController`     | ScrollController for the GridView            | `ScrollController` | `ScrollController()`      |
 | `gridViewPhysics`        | Scroll behavior                              | `ScrollPhysics`    | `BouncingScrollPhysics()` |
-| `maxPickImages`          | Max number of assets to select               | `int`              | `2`                       |
+| `maxPickImages`          | Max number of assets to select               | `int`              | `5`                       |
 | `singlePick`             | Whether only one image can be picked         | `bool`             | `false`                   |
 | `mediaType`              | Type of media to display (all/images/videos) | `GalleryMediaType` | `GalleryMediaType.all`    |
 
@@ -182,24 +194,47 @@ Each parameter lets you fine-tune the look and feel of the media picker.
 
 ## 📹 Screenshots / Demo
 
+## *Personalization*
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+  <div style="text-align: center;">
+    <p><strong>Dark Setting</strong></p>
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/dark_settings.png?raw=true" width="120" alt="dark_settings">
+  </div>
+
+  <div style="text-align: center;">
+    <p><strong>Light Setting</strong></p>
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/light_settings.png?raw=true" width="120" alt="light_settings">
+  </div>
+
+  <div style="text-align: center;">
+    <p><strong>Custom Setting</strong></p>
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/demo_settings.png?raw=true" width="120" alt="custom_settings">
+  </div>
+
+  <div style="text-align: center;">
+    <p><strong>No leading widget</strong></p>
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/no_leading_widget.png?raw=true" width="120" alt="no_leading_widget">
+  </div>
+</div>
+
 ## *Album Selection*
 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
   <div>
-    <img src="" width="120" alt="list_scroll_android">
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/album_selection.gif?raw=true" width="120" alt="album_selection">
   </div>
 </div>
 
 ## *Pick single file*
 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
   <div>
-    <img src="" width="120" alt="list_scroll_android">
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/single_pick.gif?raw=true" width="120" alt="pick_single_file">
   </div>
 </div>
 
 ## *Pick multiple files*
 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
   <div>
-    <img src="" width="120" alt="list_scroll_android">
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/multi_pick.gif?raw=true" width="120" alt="pick_multiple_files">
   </div>
 </div>
 
@@ -207,11 +242,11 @@ Each parameter lets you fine-tune the look and feel of the media picker.
 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
   <div style="text-align: center;">
     <p><strong>Only videos</strong></p>
-    <img src="" width="120" alt="list_scroll_android">
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/only_videos.gif?raw=true" width="120" alt="only_videos">
   </div>
   <div style="text-align: center;">
-    <p><strong>Only images</strong></p>
-    <img src="" width="120" alt="list_scroll_android">
+    <p><strong>Only images and GIF</strong></p>
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/only_images.gif?raw=true" width="120" alt="only_images">
   </div>
 </div>
 
@@ -219,17 +254,17 @@ Each parameter lets you fine-tune the look and feel of the media picker.
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
   <div style="text-align: center;">
     <p><strong>Low</strong></p>
-    <img src="" width="120" alt="list_scroll_android">
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/quality_low.png?raw=true" width="120" alt="low_quality">
   </div>
 
   <div style="text-align: center;">
     <p><strong>Medium</strong></p>
-    <img src="" width="120" alt="list_scroll_android">
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/quality_medium.png?raw=true" width="120" alt="medium_quality">
   </div>
 
   <div style="text-align: center;">
     <p><strong>High</strong></p>
-    <img src="" width="120" alt="list_scroll_android">
+    <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/quality_high.png?raw=true" width="120" alt="high_quality">
   </div>
 </div>
 
