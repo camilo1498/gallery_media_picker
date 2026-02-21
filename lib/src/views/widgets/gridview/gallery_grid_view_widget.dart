@@ -38,6 +38,7 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
     if (_oldProvider != newProvider) {
       if (_oldProvider != null) {
         _oldProvider!.currentAlbum.removeListener(_onAlbumChanged);
+        _oldProvider!.assetCount.removeListener(_onAssetCountChanged);
         _scrollController.removeListener(_preloadWhenNearBottom);
       }
 
@@ -50,6 +51,7 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
 
       _scrollController.addListener(_preloadWhenNearBottom);
       newProvider.currentAlbum.addListener(_onAlbumChanged);
+      newProvider.assetCount.addListener(_onAssetCountChanged);
 
       if (newProvider.album != null && _assetCache.isEmpty) {
         unawaited(_loadInitialAssets(_albumChangeId));
@@ -62,6 +64,7 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
     _scrollController.removeListener(_preloadWhenNearBottom);
     _internalScrollController?.dispose();
     _oldProvider?.currentAlbum.removeListener(_onAlbumChanged);
+    _oldProvider?.assetCount.removeListener(_onAssetCountChanged);
     super.dispose();
   }
 
@@ -70,6 +73,14 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
   // Called when the selected album changes.
   // Clears cache and reloads assets from the new album.
   void _onAlbumChanged() {
+    _albumChangeId++;
+    _assetCache.clear();
+    unawaited(_loadInitialAssets(_albumChangeId));
+  }
+
+  // Called when the asset count changes (e.g. new photos saved externally).
+  // Invalidates the stale cache and reloads so new media appears.
+  void _onAssetCountChanged() {
     _albumChangeId++;
     _assetCache.clear();
     unawaited(_loadInitialAssets(_albumChangeId));
@@ -147,34 +158,40 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
         if (album == null) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (provider.assetCount.value == 0) {
-          return Center(
-            child: Text(provider.paramsModel.translations.noMediaFound),
-          );
-        }
 
-        // Build a scrollable grid of media thumbnails.
-        return Container(
-          decoration: BoxDecoration(
-            color:
-                provider.paramsModel.gridViewBgColor ??
-                Theme.of(context).colorScheme.surface,
-          ),
-          child: GridView.builder(
-            controller: _scrollController,
-            // Fallback dynamically when cache is being cleared to prevent index crashes
-            itemCount: provider.assetCount.value,
-            padding: provider.paramsModel.gridPadding,
-            physics: provider.paramsModel.gridViewPhysics,
-            gridDelegate: _buildGridDelegate(context),
-            itemBuilder: (_, index) {
-              // Fail-safe protection against out of bounds indices when album count updates
-              if (index >= provider.assetCount.value) {
-                return const SizedBox.shrink();
-              }
-              return _buildGridItem(index, album);
-            },
-          ),
+        // React to asset count changes (e.g. new photos saved externally)
+        // without requiring a full album swap that causes flicker.
+        return ValueListenableBuilder<int>(
+          valueListenable: provider.assetCount,
+          builder: (_, count, _) {
+            if (count == 0) {
+              return Center(
+                child: Text(provider.paramsModel.translations.noMediaFound),
+              );
+            }
+
+            // Build a scrollable grid of media thumbnails.
+            return Container(
+              decoration: BoxDecoration(
+                color:
+                    provider.paramsModel.gridViewBgColor ??
+                    Theme.of(context).colorScheme.surface,
+              ),
+              child: GridView.builder(
+                controller: _scrollController,
+                itemCount: count,
+                padding: provider.paramsModel.gridPadding,
+                physics: provider.paramsModel.gridViewPhysics,
+                gridDelegate: _buildGridDelegate(context),
+                itemBuilder: (_, index) {
+                  if (index >= count) {
+                    return const SizedBox.shrink();
+                  }
+                  return _buildGridItem(index, album);
+                },
+              ),
+            );
+          },
         );
       },
     );

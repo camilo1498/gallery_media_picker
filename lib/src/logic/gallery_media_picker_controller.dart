@@ -98,17 +98,34 @@ class MediaPickerController extends ChangeNotifier {
   // ================================
 
   /// Set available albums and optionally set the initial album.
+  ///
+  /// When [reset] is `true`, forces a full album swap (used when the
+  /// media-type filter changes). Otherwise it preserves the current album
+  /// selection and only refreshes the asset count so newly-saved media
+  /// appears without a visual teardown of the grid.
   void resetPathList(List<AssetPathEntity> newPaths, {bool reset = false}) {
     pathList
       ..clear()
       ..addAll(newPaths);
-    if (pathList.isNotEmpty && (currentAlbum.value == null || reset)) {
-      currentAlbum.value = pathList.first;
-      unawaited(_updateAssetCount());
-    } else if (pathList.isEmpty) {
+
+    if (pathList.isEmpty) {
       currentAlbum.value = null;
       unawaited(_updateAssetCount());
+      return;
     }
+
+    final shouldSwapAlbum =
+        currentAlbum.value == null ||
+        reset ||
+        !pathList.any((p) => p.id == currentAlbum.value!.id);
+
+    if (shouldSwapAlbum) {
+      // Full album change — grid will teardown and reload.
+      currentAlbum.value = pathList.first;
+    }
+
+    // Always refresh the count so new photos appear without a flicker.
+    unawaited(_updateAssetCount());
   }
 
   /// Select or deselect an asset.
