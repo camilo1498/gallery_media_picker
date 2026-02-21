@@ -21,76 +21,99 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
   final _assetCache = <int, AssetEntity>{};
 
   // Scroll controller to monitor scroll position for preloading logic.
-  late final ScrollController _scrollController;
+  ScrollController? _internalScrollController;
+  ScrollController get _scrollController =>
+      provider.paramsModel.gridViewController ?? _internalScrollController!;
 
-  // Shortcut to access the singleton controller.
-  MediaPickerController get provider => MediaPickerController.instance;
+  // Shortcut to access the inherited controller.
+  MediaPickerController get provider => GalleryMediaProvider.of(context);
+
+  MediaPickerController? _oldProvider;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    _scrollController =
-        provider.paramsModel.gridViewController ?? ScrollController();
+    final newProvider = provider;
+    if (_oldProvider != newProvider) {
+      if (_oldProvider != null) {
+        _oldProvider!.currentAlbum.removeListener(_onAlbumChanged);
+        _scrollController.removeListener(_preloadWhenNearBottom);
+      }
 
-    // Attach scroll listener to trigger preloading when nearing the bottom.
-    _scrollController
-      ..addListener(_preloadWhenNearBottom)
-      ..addListener(_preloadWhenNearBottom); // duplicated intentionally?
+      _oldProvider = newProvider;
 
-    // Listen for album changes to reload content.
-    provider.currentAlbum.addListener(_onAlbumChanged);
+      if (newProvider.paramsModel.gridViewController == null &&
+          _internalScrollController == null) {
+        _internalScrollController = ScrollController();
+      }
 
-    // Load initial assets if an album is already selected.
-    if (provider.album != null) _loadInitialAssets();
+      _scrollController.addListener(_preloadWhenNearBottom);
+      newProvider.currentAlbum.addListener(_onAlbumChanged);
+
+      if (newProvider.album != null && _assetCache.isEmpty) {
+        unawaited(_loadInitialAssets(_albumChangeId));
+      }
+    }
   }
 
   @override
   void dispose() {
-    // Remove scroll listeners and clean up scroll controller.
-    _scrollController
-      ..removeListener(_preloadWhenNearBottom)
-      ..removeListener(_preloadWhenNearBottom)
-      ..dispose();
-
-    // Unsubscribe from album change notifications.
-    provider.currentAlbum.removeListener(_onAlbumChanged);
-
+    _scrollController.removeListener(_preloadWhenNearBottom);
+    _internalScrollController?.dispose();
+    _oldProvider?.currentAlbum.removeListener(_onAlbumChanged);
     super.dispose();
   }
+
+  int _albumChangeId = 0;
 
   // Called when the selected album changes.
   // Clears cache and reloads assets from the new album.
   void _onAlbumChanged() {
+    _albumChangeId++;
     _assetCache.clear();
-    _loadInitialAssets();
+    unawaited(_loadInitialAssets(_albumChangeId));
   }
 
   // If the scroll position is near the bottom, preload more assets.
   void _preloadWhenNearBottom() {
     if (_scrollController.position.extentAfter < 500) {
-      _preloadAssets(_assetCache.length, _assetCache.length + _preloadAmount);
+      unawaited(
+        _preloadAssets(
+          _assetCache.length,
+          _assetCache.length + _preloadAmount,
+          _albumChangeId,
+        ),
+      );
     }
   }
 
   // Loads the initial batch of assets when an album is selected.
-  Future<void> _loadInitialAssets() async {
-    if (_isLoading || provider.album == null) return;
-    _isLoading = true;
+  Future<void> _loadInitialAssets(int changeId) async {
+    final album = provider.album;
+    if (album == null) return;
 
     // Fetch total asset count to configure grid.
-    provider.assetCount.value = await provider.album!.assetCountAsync;
+    final count = await album.assetCountAsync;
+
+    if (changeId != _albumChangeId) return;
+    provider.assetCount.value = count;
+
+    // Wait until any previous preload is done
+    while (_isLoading) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      if (changeId != _albumChangeId) return;
+    }
 
     // Load first N assets.
-    await _preloadAssets(0, _preloadAmount);
+    await _preloadAssets(0, _preloadAmount, changeId);
 
-    // Update UI after loading.
+    if (changeId != _albumChangeId) return;
     if (mounted) setState(() {});
-    _isLoading = false;
   }
 
   // Preloads a range of assets from [start] to [end] (exclusive).
-  Future<void> _preloadAssets(int start, int end) async {
+  Future<void> _preloadAssets(int start, int end, int changeId) async {
     if (_isLoading ||
         provider.album == null ||
         start >= provider.assetCount.value) {
@@ -98,10 +121,16 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
     }
     _isLoading = true;
 
-    final assets = await provider.album!.getAssetListRange(
+    final album = provider.album!;
+    final assets = await album.getAssetListRange(
       start: start,
       end: end.clamp(0, provider.assetCount.value),
     );
+
+    if (changeId != _albumChangeId) {
+      _isLoading = false;
+      return;
+    }
 
     // Store loaded assets in cache.
     assets.asMap().forEach((i, asset) => _assetCache[start + i] = asset);
@@ -114,26 +143,37 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AssetPathEntity?>(
       valueListenable: provider.currentAlbum,
-      builder: (_, album, __) {
+      builder: (_, album, _) {
         if (album == null) {
           return const Center(child: CircularProgressIndicator());
         }
         if (provider.assetCount.value == 0) {
-          return const Center(child: Text('No media found.'));
+          return Center(
+            child: Text(provider.paramsModel.translations.noMediaFound),
+          );
         }
 
         // Build a scrollable grid of media thumbnails.
         return Container(
           decoration: BoxDecoration(
-            color: provider.paramsModel.gridViewBgColor,
+            color:
+                provider.paramsModel.gridViewBgColor ??
+                Theme.of(context).colorScheme.surface,
           ),
           child: GridView.builder(
             controller: _scrollController,
+            // Fallback dynamically when cache is being cleared to prevent index crashes
             itemCount: provider.assetCount.value,
             padding: provider.paramsModel.gridPadding,
             physics: provider.paramsModel.gridViewPhysics,
-            gridDelegate: _buildGridDelegate(),
-            itemBuilder: (_, index) => _buildGridItem(index, album),
+            gridDelegate: _buildGridDelegate(context),
+            itemBuilder: (_, index) {
+              // Fail-safe protection against out of bounds indices when album count updates
+              if (index >= provider.assetCount.value) {
+                return const SizedBox.shrink();
+              }
+              return _buildGridItem(index, album);
+            },
           ),
         );
       },
@@ -141,23 +181,32 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
   }
 
   // Creates a grid delegate using the user's layout preferences.
-  SliverGridDelegateWithFixedCrossAxisCount _buildGridDelegate() {
+  SliverGridDelegateWithMaxCrossAxisExtent _buildGridDelegate(
+    BuildContext context,
+  ) {
     final params = provider.paramsModel;
-    return SliverGridDelegateWithFixedCrossAxisCount(
+    // Calculate a max extent relative to a standard mobile width so that it
+    // respects the user's column preference on mobile, but auto-expands the
+    // column count on wider screens like tablets or desktop.
+    final maxExtent = 360.0 / params.crossAxisCount;
+
+    return SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: maxExtent,
       mainAxisSpacing: 1.5,
       crossAxisSpacing: 1.5,
-      crossAxisCount: params.crossAxisCount,
       childAspectRatio: params.childAspectRatio,
     );
   }
 
   // Builds an individual grid item (thumbnail) at the specified index.
   Widget _buildGridItem(int index, AssetPathEntity album) {
+    if (index < 0) return const SizedBox.shrink();
+
     final asset = _assetCache[index];
     if (asset != null) return _buildAssetWidget(asset, index);
 
     // Fallback to async load if not already cached.
-    return FutureBuilder<AssetEntity>(
+    return FutureBuilder<AssetEntity?>(
       future: _loadAsset(index, album),
       builder: (_, snapshot) => snapshot.hasData
           ? _buildAssetWidget(snapshot.data!, index)
@@ -167,11 +216,10 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
 
   // Builds the widget for a single media asset, including selection overlay.
   Widget _buildAssetWidget(AssetEntity asset, int index) {
-    return ValueListenableBuilder<List<AssetEntity>>(
-      valueListenable: provider.picked,
-      builder: (_, picked, __) {
-        final isSelected = picked.contains(asset);
-
+    return _SelectionWatcher(
+      key: ValueKey(asset.id),
+      asset: asset,
+      builder: (_, {required isSelected}) {
         return AnimatedTapWidget(
           onTap: () => provider.pickEntity(asset),
           child: ThumbnailWidget(
@@ -185,8 +233,71 @@ class _GalleryGridViewWidgetState extends State<_GalleryGridViewWidget> {
   }
 
   // Loads a single asset entity for a specific index.
-  Future<AssetEntity> _loadAsset(int index, AssetPathEntity album) async {
+  Future<AssetEntity?> _loadAsset(int index, AssetPathEntity album) async {
     final assets = await album.getAssetListRange(start: index, end: index + 1);
-    return _assetCache[index] = assets.first;
+    if (assets.isEmpty) return null;
+    final asset = assets.first;
+    _assetCache[index] = asset;
+    return asset;
+  }
+}
+
+/// A highly-optimized stateful watcher that isolates selection rebuilds.
+///
+/// Under a standard reactive architecture, selecting a photo rebuilds the
+/// entire list of visible items because they all listen to the global `picked`
+/// list. [ _SelectionWatcher ] subscribes to the `picked` list but manually
+/// caches its own Boolean state. It only invokes `setState` if its exact
+/// ownership flips, guaranteeing O(1) selection rebuilds across thousands
+/// of grid items.
+class _SelectionWatcher extends StatefulWidget {
+  const _SelectionWatcher({
+    super.key,
+    required this.asset,
+    required this.builder,
+  });
+
+  final AssetEntity asset;
+  final Widget Function(BuildContext context, {required bool isSelected})
+  builder;
+
+  @override
+  State<_SelectionWatcher> createState() => _SelectionWatcherState();
+}
+
+class _SelectionWatcherState extends State<_SelectionWatcher> {
+  bool _isSelected = false;
+  MediaPickerController? _provider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newProvider = GalleryMediaProvider.of(context);
+    if (_provider != newProvider) {
+      _provider?.picked.removeListener(_onSelectionChanged);
+      _provider = newProvider;
+      _provider!.picked.addListener(_onSelectionChanged);
+      _isSelected = _provider!.picked.value.contains(widget.asset);
+    }
+  }
+
+  void _onSelectionChanged() {
+    final isNowSelected = _provider!.picked.value.contains(widget.asset);
+    if (_isSelected != isNowSelected) {
+      if (mounted) {
+        setState(() => _isSelected = isNowSelected);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _provider?.picked.removeListener(_onSelectionChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, isSelected: _isSelected);
   }
 }

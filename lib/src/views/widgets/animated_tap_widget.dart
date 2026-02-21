@@ -40,89 +40,60 @@ class AnimatedTapWidget extends StatefulWidget {
 
 class _AnimatedTapWidgetState extends State<AnimatedTapWidget>
     with TickerProviderStateMixin {
-  // Current scale values used during animation.
-  double squareScaleA = 1;
-  double squareScaleB = 1;
+  // Current scale value used during animation.
+  double squareScale = 1;
 
-  // Animation controllers to handle scale animations.
-  late AnimationController _controllerA;
-  late AnimationController _controllerB;
-
-  // A timer used to delay the animation reset after tap.
-  late Timer _timer;
+  // Animation controller to handle scale animations.
+  late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize controller A with a lower bound from maxScale to 1.
-    _controllerA = AnimationController(
-      vsync: this,
-      lowerBound: widget.maxScale,
-      value: 1,
-      duration: const Duration(milliseconds: 10),
-    )..addListener(() {
-      setState(() {
-        squareScaleA = _controllerA.value;
-      });
-    });
-
-    // Initialize controller B (unused for scale but
-    // maintained for legacy or symmetry).
-    _controllerB = AnimationController(
-      vsync: this,
-      value: 1,
-      duration: const Duration(milliseconds: 10),
-    )..addListener(() {
-      setState(() {
-        squareScaleB = _controllerB.value;
-      });
-    });
-
-    // Initialize a dummy timer to avoid null references.
-    _timer = Timer(const Duration(milliseconds: 300), () {});
+    // Initialize controller with a lower bound from maxScale to 1.
+    _controller =
+        AnimationController(
+          vsync: this,
+          lowerBound: widget.maxScale,
+          value: 1,
+          duration: const Duration(milliseconds: 10),
+        )..addListener(() {
+          setState(() {
+            squareScale = _controller.value;
+          });
+        });
   }
 
   @override
   void dispose() {
-    _controllerA.dispose();
-    _controllerB.dispose();
-    _timer.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap:
-          widget.onTap != null
-              ? () {
-                HapticFeedback.lightImpact();
-                _controllerA.reverse();
-                _controllerB.reverse();
-                widget.onTap!();
-              }
-              : () {},
-      onTapDown: (dp) {
-        _controllerA.reverse();
-        _controllerB.reverse();
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.onTap != null
+          ? () {
+              unawaited(HapticFeedback.lightImpact());
+              unawaited(_controller.reverse());
+              widget.onTap!();
+              unawaited(_controller.fling());
+            }
+          : null,
+      onTapDown: (_) {
+        unawaited(_controller.reverse());
       },
-      onTapUp: (dp) {
-        if (mounted) {
-          _timer = Timer(const Duration(milliseconds: 100), () {
-            _controllerA.fling(); // Restore scale
-            _controllerB.fling();
-          });
-        }
+      onTapUp: (_) {
+        if (mounted) unawaited(_controller.fling());
       },
       onTapCancel: () {
-        _controllerA.fling();
-        _controllerB.fling();
+        if (mounted) unawaited(_controller.fling());
       },
       child: Transform.scale(
-        scale: squareScaleA,
-        child: AnimatedContainer(duration: Duration.zero, child: widget.child),
+        scale: squareScale,
+        child: widget.child,
       ),
     );
   }

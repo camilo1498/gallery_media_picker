@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_media_picker/gallery_media_picker.dart';
-import 'package:gallery_media_picker/src/core/decode_image.dart';
-import 'package:gallery_media_picker/src/core/utils.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 /// A widget that displays a thumbnail of a media [AssetEntity]
 /// (image or video),including optional overlay for selection,
@@ -37,100 +36,139 @@ class ThumbnailWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      child: DecoratedBox(
-        decoration: BoxDecoration(color: params.thumbnailBgColor),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            _buildImage(),
-            if (isSelected) _buildOverlay(),
-            if (isSelected) _buildCheckmark(),
-            if (asset.type == AssetType.video) _buildVideoDuration(),
-            if (_isGif) _buildGifBadge(),
-          ],
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final thumbnailBg =
+        params.thumbnailBgColor ?? colorScheme.surfaceContainerHighest;
+    final selectedAssetBg = params.selectedAssetBgColor ?? colorScheme.primary;
+    final selectedCheckBg = params.selectedCheckBgColor ?? Colors.transparent;
+    final selectedCheck = params.selectedCheckColor ?? colorScheme.onPrimary;
+
+    return Semantics(
+      label: _getSemanticLabel(),
+      selected: isSelected,
+      child: ClipRRect(
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: thumbnailBg),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildImage(thumbnailBg),
+              if (isSelected) _buildOverlay(selectedAssetBg),
+              if (isSelected) _buildCheckmark(selectedCheckBg, selectedCheck),
+              if (asset.type == AssetType.video) _buildVideoDuration(),
+              if (_isGif) _buildGifBadge(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Builds the main thumbnail image using a fade-in effect.
-  Widget _buildImage() => FadeInImage(
-        placeholderFit: BoxFit.cover,
-        fit: params.thumbnailBoxFix,
-        placeholder: MemoryImage(Utils.kTransparentImage),
-        fadeInDuration: const Duration(milliseconds: 200),
-        image:
-            DecodeImage(asset: asset, thumbSize: params.thumbnailQuality.size),
-        imageErrorBuilder: (_, __, ___) =>
-            const ColoredBox(color: Colors.black),
-        filterQuality: FilterQuality.high,
-        placeholderColor: params.thumbnailBgColor,
+  String _getSemanticLabel() {
+    final trans = params.translations;
+    final typeLabel = _isGif
+        ? trans.gifLabel
+        : asset.type == AssetType.video
+        ? trans.videoLabel
+        : trans.imageLabel;
+
+    final statusLabel = isSelected
+        ? trans.selectedLabel
+        : trans.notSelectedLabel;
+
+    if (asset.type == AssetType.video) {
+      return '$typeLabel, $statusLabel, ${_formatDuration(asset.videoDuration)}';
+    }
+    return '$typeLabel, $statusLabel';
+  }
+
+  // Builds the main thumbnail image using a native fade-in effect.
+  Widget _buildImage(Color thumbnailBg) => Image(
+    fit: params.thumbnailBoxFix,
+    errorBuilder: (_, _, _) => const ColoredBox(color: Colors.black),
+    filterQuality: FilterQuality.high,
+    image: AssetEntityImageProvider(
+      asset,
+      isOriginal: false,
+      thumbnailSize: ThumbnailSize.square(params.thumbnailQuality.size),
+    ),
+    frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+      if (wasSynchronouslyLoaded) return child;
+      return AnimatedOpacity(
+        opacity: frame == null ? 0 : 1,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        child: child,
       );
+    },
+  );
 
   // Builds the semi-transparent selection overlay.
-  Widget _buildOverlay() => AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        color: params.selectedAssetBgColor.withValues(alpha: 0.4),
-      );
+  Widget _buildOverlay(Color selectedAssetBg) => AnimatedContainer(
+    duration: const Duration(milliseconds: 200),
+    color: selectedAssetBg.withValues(alpha: 0.4),
+  );
 
   // Builds the checkmark indicator when the asset is selected.
-  Widget _buildCheckmark() => Positioned(
+  Widget _buildCheckmark(Color selectedCheckBg, Color selectedCheck) =>
+      Positioned(
         top: 8,
         right: 8,
         child: Container(
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: params.selectedCheckBgColor,
-            border: Border.all(color: params.selectedCheckColor, width: 1.5),
+            color: selectedCheckBg,
+            border: Border.all(color: selectedCheck, width: 1.5),
           ),
-          child: Icon(Icons.check, size: 16, color: params.selectedCheckColor),
+          child: Icon(Icons.check, size: 16, color: selectedCheck),
         ),
       );
 
   // Builds the duration badge shown on videos.
   Widget _buildVideoDuration() => Positioned(
-        right: 6,
-        bottom: 6,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            color: Colors.black.withValues(alpha: 0.5),
-          ),
-          child: Text(
-            _formatDuration(asset.videoDuration),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              shadows: [Shadow(blurRadius: 1)],
-            ),
-          ),
+    right: 6,
+    bottom: 6,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        color: Colors.black.withValues(alpha: 0.5),
+      ),
+      child: Text(
+        _formatDuration(asset.videoDuration),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
+          shadows: [Shadow(blurRadius: 1)],
         ),
-      );
+      ),
+    ),
+  );
 
   // Builds a small badge indicating the media is a GIF.
   Widget _buildGifBadge() => Positioned(
-        left: 6,
-        bottom: 6,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            color: Colors.black.withValues(alpha: 0.5),
-          ),
-          child: const Text(
-            'GIF',
-            style: TextStyle(
-              fontSize: 8,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+    left: 6,
+    bottom: 6,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        color: Colors.black.withValues(alpha: 0.5),
+      ),
+      child: const Text(
+        'GIF',
+        style: TextStyle(
+          fontSize: 8,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
         ),
-      );
+      ),
+    ),
+  );
 
   // Formats a [Duration] into a human-readable string.
   //

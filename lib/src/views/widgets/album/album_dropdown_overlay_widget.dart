@@ -11,6 +11,7 @@ class _AlbumDropdownOverlay extends StatelessWidget {
     required this.height,
     required this.animation,
     required this.onClose,
+    required this.provider,
   });
 
   /// The position of the dropdown relative to the screen (top-left offset).
@@ -26,10 +27,11 @@ class _AlbumDropdownOverlay extends StatelessWidget {
   /// Callback to be invoked when the dropdown is dismissed.
   final VoidCallback onClose;
 
+  /// Explicitly passed provider because Overlay context differs from widget tree.
+  final MediaPickerController provider;
+
   @override
   Widget build(BuildContext context) {
-    final provider = MediaPickerController.instance;
-
     return Stack(
       children: [
         // Transparent background layer that closes the dropdown on tap outside.
@@ -90,12 +92,11 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  color:
-                                      isSelected
-                                          ? provider
-                                              .paramsModel
-                                              .selectedAlbumBgColor
-                                          : Colors.transparent,
+                                  color: isSelected
+                                      ? provider
+                                            .paramsModel
+                                            .selectedAlbumBgColor
+                                      : Colors.transparent,
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -104,21 +105,35 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                                   children: [
                                     // Album name.
                                     Expanded(
-                                      child: Text(
-                                        item.name,
-                                        maxLines: 2,
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color:
-                                              isSelected
+                                      child: Builder(
+                                        builder: (context) {
+                                          final originalName = item.name;
+                                          final isRecent =
+                                              AlbumConstants.isRecentAlbum(
+                                                originalName,
+                                              );
+                                          final displayName = isRecent
+                                              ? provider
+                                                    .paramsModel
+                                                    .translations
+                                                    .recent
+                                              : originalName;
+                                          return Text(
+                                            displayName,
+                                            maxLines: 2,
+                                            textAlign: TextAlign.start,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: isSelected
                                                   ? provider
-                                                      .paramsModel
-                                                      .selectedAlbumTextColor
+                                                        .paramsModel
+                                                        .selectedAlbumTextColor
                                                   : provider
-                                                      .paramsModel
-                                                      .albumTextColor,
-                                        ),
+                                                        .paramsModel
+                                                        .albumTextColor,
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
 
@@ -129,10 +144,9 @@ class _AlbumDropdownOverlay extends StatelessWidget {
                                       Icon(
                                         provider.paramsModel.selectedAlbumIcon,
                                         size: 15,
-                                        color:
-                                            provider
-                                                .paramsModel
-                                                .selectedAlbumTextColor,
+                                        color: provider
+                                            .paramsModel
+                                            .selectedAlbumTextColor,
                                       ),
                                   ],
                                 ),

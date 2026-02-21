@@ -20,21 +20,22 @@ class MediaPickerParamsModel {
     this.gridViewController,
     this.crossAxisCount = 3,
     this.childAspectRatio = 0.5,
-    this.appBarColor = Colors.black,
-    this.albumTextColor = Colors.white,
+    this.appBarColor,
+    this.albumTextColor,
     this.thumbnailBoxFix = BoxFit.cover,
     this.selectedAlbumIcon = Icons.check,
-    this.thumbnailBgColor = Colors.white,
-    this.gridViewBgColor = Colors.black54,
-    this.selectedCheckColor = Colors.white,
-    this.albumSelectIconColor = Colors.white,
-    this.albumSelectTextColor = Colors.white,
-    this.selectedAlbumBgColor = Colors.white,
-    this.selectedAssetBgColor = Colors.white,
-    this.albumDropDownBgColor = Colors.black,
+    this.thumbnailBgColor,
+    this.gridViewBgColor,
+    this.selectedCheckColor,
+    this.albumSelectIconColor,
+    this.albumSelectTextColor,
+    this.selectedAlbumBgColor,
+    this.selectedAssetBgColor,
+    this.albumDropDownBgColor,
     this.mediaType = GalleryMediaType.all,
-    this.selectedAlbumTextColor = Colors.white,
-    this.selectedCheckBgColor = Colors.transparent,
+    this.selectedAlbumTextColor,
+    this.selectedCheckBgColor,
+    this.translations = const GalleryMediaPickerTranslations(),
     this.thumbnailQuality = ThumbnailQuality.medium,
     this.gridViewPhysics = const BouncingScrollPhysics(),
   });
@@ -46,7 +47,7 @@ class MediaPickerParamsModel {
   final int maxPickImages;
 
   /// The color of the app bar background.
-  final Color appBarColor;
+  final Color? appBarColor;
 
   /// Number of columns in the grid.
   final int crossAxisCount;
@@ -55,16 +56,16 @@ class MediaPickerParamsModel {
   final double appBarHeight;
 
   /// Color of album title text.
-  final Color albumTextColor;
+  final Color? albumTextColor;
 
   /// Background color of the entire grid view.
-  final Color gridViewBgColor;
+  final Color? gridViewBgColor;
 
   /// How the thumbnails should be fit within their boxes.
   final BoxFit thumbnailBoxFix;
 
   /// Background color of media thumbnails.
-  final Color thumbnailBgColor;
+  final Color? thumbnailBgColor;
 
   /// Padding applied to the entire grid view.
   final EdgeInsets? gridPadding;
@@ -73,13 +74,13 @@ class MediaPickerParamsModel {
   final double childAspectRatio;
 
   /// Color of the checkmark icon used when an item is selected.
-  final Color selectedCheckColor;
+  final Color? selectedCheckColor;
 
   /// Color of text in the app bar.
-  final Color albumSelectTextColor;
+  final Color? albumSelectTextColor;
 
   /// Background color behind the selection checkmark.
-  final Color selectedCheckBgColor;
+  final Color? selectedCheckBgColor;
 
   /// Color of icons in the app bar.
   final Color? albumSelectIconColor;
@@ -88,16 +89,16 @@ class MediaPickerParamsModel {
   final Color? selectedAlbumBgColor;
 
   /// Background color of the album dropdown panel.
-  final Color albumDropDownBgColor;
+  final Color? albumDropDownBgColor;
 
   /// Icon displayed in the app bar when an album is selected.
   final IconData selectedAlbumIcon;
 
   /// Background color shown when a thumbnail is selected.
-  final Color selectedAssetBgColor;
+  final Color? selectedAssetBgColor;
 
   /// Color of the text in the selected album dropdown.
-  final Color selectedAlbumTextColor;
+  final Color? selectedAlbumTextColor;
 
   /// Scroll physics for the grid view.
   final ScrollPhysics gridViewPhysics;
@@ -107,6 +108,9 @@ class MediaPickerParamsModel {
 
   /// Quality of generated thumbnails (0–1000).
   final ThumbnailQuality thumbnailQuality;
+
+  /// Text translations and labels used throughout the picker.
+  final GalleryMediaPickerTranslations translations;
 
   /// Scroll controller used to manage grid view scroll behavior.
   final ScrollController? gridViewController;
@@ -139,6 +143,7 @@ class MediaPickerParamsModel {
         other.albumDropDownBgColor == albumDropDownBgColor &&
         other.selectedAssetBgColor == selectedAssetBgColor &&
         other.selectedCheckBgColor == selectedCheckBgColor &&
+        other.translations == translations &&
         other.selectedAlbumTextColor == selectedAlbumTextColor;
   }
 
@@ -167,6 +172,7 @@ class MediaPickerParamsModel {
     selectedAssetBgColor,
     albumSelectIconColor,
     selectedCheckBgColor,
+    translations,
     selectedAlbumTextColor,
   ]);
 }

@@ -15,8 +15,8 @@ class _AlbumSelector extends StatefulWidget {
 
 class _AlbumSelectorState extends State<_AlbumSelector>
     with SingleTickerProviderStateMixin {
-  // Access to the singleton media picker controller.
-  final MediaPickerController provider = MediaPickerController.instance;
+  // Access to the scoped media picker controller.
+  MediaPickerController get provider => GalleryMediaProvider.of(context);
 
   // Controls the animation for the dropdown height.
   late final AnimationController _animationController;
@@ -74,6 +74,7 @@ class _AlbumSelectorState extends State<_AlbumSelector>
         height: height,
         animation: _heightFactorAnimation,
         onClose: _closeDropdown,
+        provider: provider,
       ),
     );
 
@@ -81,11 +82,10 @@ class _AlbumSelectorState extends State<_AlbumSelector>
     Overlay.of(context).insert(_overlayEntry!);
 
     // Start the dropdown expand animation and refresh the overlay on each tick.
-    _animationController
-      ..addListener(() {
-        _overlayEntry?.markNeedsBuild();
-      })
-      ..forward();
+    _animationController.addListener(() {
+      _overlayEntry?.markNeedsBuild();
+    });
+    unawaited(_animationController.forward());
 
     setState(() => _isOpen = true);
   }
@@ -108,7 +108,7 @@ class _AlbumSelectorState extends State<_AlbumSelector>
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         if (_isOpen) {
-          _closeDropdown();
+          unawaited(_closeDropdown());
         }
       },
       child: Container(
@@ -117,12 +117,19 @@ class _AlbumSelectorState extends State<_AlbumSelector>
         height: params.appBarHeight,
         child: ValueListenableBuilder<AssetPathEntity?>(
           valueListenable: provider.currentAlbum,
-          builder: (_, album, __) {
+          builder: (_, album, _) {
             if (album == null) return const SizedBox.shrink();
+
+            // Map OS specific generic names to translations
+            final originalName = album.name;
+            final isRecent = AlbumConstants.isRecentAlbum(originalName);
+            final displayName = isRecent
+                ? params.translations.recent
+                : originalName;
 
             // Main tappable dropdown widget shown in the app bar.
             return _AlbumDropDown(
-              name: album.name,
+              name: displayName,
               isOpen: _isOpen,
               onTap: _toggleDropdown,
               appBarIconColor: params.albumSelectIconColor,

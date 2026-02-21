@@ -88,13 +88,24 @@ class PickedAssetModel {
   ///
   /// This method extracts all relevant metadata and media file
   /// information to construct a complete instance of [PickedAssetModel].
-  static Future<PickedAssetModel> fromAssetEntity(AssetEntity entity) async {
-    final file = await entity.file;
-    final thumbnail = await entity.thumbnailData;
-    final type =
-        entity.type == AssetType.video
-            ? PickedAssetType.video
-            : PickedAssetType.image;
+  static Future<PickedAssetModel> fromAssetEntity(
+    AssetEntity entity, {
+    PMCancelToken? cancelToken,
+  }) async {
+    // Attempt to grab the raw origin file first to bypass iOS/Android HEIC/HEVC
+    // transcoding which takes hundreds of milliseconds for heavy images.
+    final file =
+        await entity.loadFile(
+          isOrigin: true,
+          cancelToken: cancelToken,
+        ) ??
+        await entity.loadFile(
+          isOrigin: false,
+          cancelToken: cancelToken,
+        );
+    final type = entity.type == AssetType.video
+        ? PickedAssetType.video
+        : PickedAssetType.image;
 
     return PickedAssetModel(
       file: file,
@@ -103,7 +114,6 @@ class PickedAssetModel {
       size: entity.size,
       width: entity.width,
       title: entity.title,
-      thumbnail: thumbnail,
       height: entity.height,
       path: file?.path ?? '',
       latitude: entity.latitude,

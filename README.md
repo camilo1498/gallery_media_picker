@@ -1,4 +1,4 @@
-# 📸 Gallery Media Picker - Flutter Package
+# 📸 Gallery Media Picker
 
 [![Author](https://img.shields.io/badge/Author-camilo1498-blue)](https://github.com/camilo1498)
 ![Pub Version](https://img.shields.io/pub/v/gallery_media_picker)
@@ -6,13 +6,9 @@
 ![Platform](https://img.shields.io/badge/platform-Flutter-blue)
 [![GitHub stars](https://img.shields.io/github/stars/camilo1498/gallery_media_picker?style=social)](https://github.com/camilo1498/gallery_media_picker/stargazers)
 
+A powerful, high-performance Flutter media picker with an Instagram-style interface. Select images, videos, GIFs, and audio directly from the device gallery with fine-grained control over appearance, behavior, and accessibility.
 
-
-A powerful and customizable Flutter package that allows users to select multiple media files (images or videos) directly from the device's gallery, featuring an Instagram-style interface and performance-optimized thumbnail rendering.
-
-Built on top of [`photo_manager`](https://pub.dev/packages/photo_manager), `gallery_media_picker` is ideal for apps requiring fast media access, beautiful UX, and fine-grained configuration.
-
-Claro, aquí tienes un mensaje corto y amigable que puedes usar para invitar a las personas a apoyar el proyecto en GitHub y pub.dev, junto con los **badges** correspondientes:
+Built on top of [`photo_manager`](https://pub.dev/packages/photo_manager) with native-level optimizations including `PMCancelToken` cancellation, automatic cache management, and O(1) selection rebuilds.
 
 ---
 
@@ -26,12 +22,17 @@ Your support helps improve and maintain this project! ❤️
 
 ## ✨ Features
 
-- 📷 Pick single or multiple images / videos / GIF
-- 🖼️ Scrollable grid with infinite loading
-- 🔎 Album selector (dropdown style)
-- 🎛️ Highly customizable UI
-- ✅ Built for Android & iOS
-- 🔍 Support for GIF and video duration tags
+- 📷 Pick single or multiple **images / videos / GIFs / audio**
+- 🖼️ Scrollable grid with infinite loading and **persistent thumbnail caching**
+- 🔎 Album selector (dropdown overlay style)
+- 🎛️ Highly customizable UI (25+ parameters)
+- ✅ Built for **Android & iOS**
+- 🔍 Automatic GIF badge and video duration overlay
+- ♿ Full **accessibility** support (semantic labels for screen readers)
+- 🌐 **i18n-ready** with `GalleryMediaPickerTranslations`
+- ⚡ **O(1) selection rebuilds** — selecting a photo doesn't rebuild the entire grid
+- 🗑️ **Native cache cleanup** on dispose (`PhotoManager.clearFileCache()`)
+- 🚫 **Background task cancellation** via `PMCancelToken` when items are deselected
 
 ---
 
@@ -41,14 +42,22 @@ Your support helps improve and maintain this project! ❤️
 
 ```yaml
 dependencies:
-  gallery_media_picker: ^<latest_version>
-````
+  gallery_media_picker: ^0.2.0
+```
+
+### 2. Platform Requirements
+
+| | Minimum |
+|---|---|
+| **Flutter** | `>= 3.41.0` |
+| **Dart SDK** | `>= 3.11.0` |
+| **photo_manager** | `^3.8.0` |
 
 ---
 
-### 2. Permissions Setup
+### 3. Permissions Setup
 
-Although [`photo_manager`](https://pub.dev/packages/photo_manager) handles media access and platform integration, it is **strongly recommended** to use [`permission_handler`](https://pub.dev/packages/permission_handler) to request permissions explicitly. This ensures better user experience, avoids permission-related issues, and complies with app store policies.
+The package uses [`photo_manager`](https://pub.dev/packages/photo_manager) for native media access. It is **strongly recommended** to use [`permission_handler`](https://pub.dev/packages/permission_handler) to request permissions explicitly before displaying the picker.
 
 #### Android
 
@@ -57,9 +66,10 @@ Add the following permissions to your `AndroidManifest.xml`:
 ```xml
 <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
 <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+<uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
 ```
 
-> On older Android versions (API < 33), you may need:
+> On older Android versions (API < 33), you may also need:
 
 ```xml
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -73,10 +83,10 @@ In your `Info.plist`:
 <key>NSPhotoLibraryUsageDescription</key>
 <string>We need access to your photo library to select media.</string>
 <key>NSPhotoLibraryAddUsageDescription</key>
-<string>Allow to access to your gallery</string>
+<string>Allow access to your gallery</string>
 ```
 
-#### Recommended Permission Request (with `permission_handler`)
+#### Recommended Permission Request
 
 ```dart
 import 'package:permission_handler/permission_handler.dart';
@@ -89,112 +99,212 @@ Future<void> requestPermissions() async {
 }
 ```
 
-> ⚠️ Call this function before using `GalleryMediaPicker`.
-
+> ⚠️ Call this function **before** using `GalleryMediaPicker`.
 
 ---
 
-### 3. Basic Usage
+### 4. Basic Usage
 
 ```dart
 GalleryMediaPicker(
   pathList: (List<PickedAssetModel> paths) {
-    // Handle selected media
-    media.setPickedFiles(paths);
+    // Handle selected media files
+    for (final asset in paths) {
+      print('Selected: ${asset.path} (${asset.type})');
+    }
   },
-  appBarLeadingWidget: Icon(Icons.close),
+  appBarLeadingWidget: const Icon(Icons.close, color: Colors.white),
   mediaPickerParams: MediaPickerParamsModel(
-    appBarHeight: 50,
-    maxPickImages: 2,
-    crossAxisCount: 3,
-    childAspectRatio: .5,
+    maxPickImages: 5,
     singlePick: false,
-    appBarColor: Colors.black,
-    gridViewBgColor: Colors.red,
-    albumTextColor: Colors.white,
-    gridPadding: EdgeInsets.zero,
-    thumbnailBgColor: Colors.cyan,
-    thumbnailBoxFix: BoxFit.cover,
-    selectedAlbumIcon: Icons.check,
-    selectedCheckColor: Colors.black,
-    albumSelectIconColor: Colors.blue,
-    selectedCheckBgColor: Colors.blue,
-    selectedAlbumBgColor: Colors.black,
-    albumDropDownBgColor: Colors.green,
-    albumSelectTextColor: Colors.orange,
-    selectedAssetBgColor: Colors.orange,
-    selectedAlbumTextColor: Colors.white,
     mediaType: GalleryMediaType.all,
-    gridViewController: ScrollController(),
-    thumbnailQuality: ThumbnailQuality.medium,
-    gridViewPhysics: const BouncingScrollPhysics(),
+    thumbnailQuality: ThumbnailQuality.high,
   ),
-),
+)
 ```
 
 ---
 
-## 🧩 MediaPickerParamsModel – Full Parameter Guide
+### 5. Advanced Usage (Dark Theme Example)
 
-###  `pathList Callback`
-This callback is triggered whenever the user selects or deselects media items.
-
-It returns a list of PickedAssetModel objects representing the currently selected files (images, GIF or videos), which you can store, preview, or process as needed.
-
----
-
-###  `appBarLeadingWidget`
-
-Optional widget to be displayed at the leading position of the album selector (top row).
-Use this to insert a custom control like a back button, close icon, or any widget you'd like to show at the start of the toolbar.
-
----
-
-###  `mediaPickerParams`
-
-Each parameter lets you fine-tune the look and feel of the media picker.
-
-| Parameter                | Description                                  | Type               | Default                   |
-|--------------------------|----------------------------------------------|--------------------|---------------------------|
-| `appBarHeight`           | Height of the top AppBar                     | `double`           | `50.0`                    |
-| `appBarColor`            | Background color of the AppBar               | `Color`            | `Colors.black`            |
-| `albumTextColor`         | Text color of the selected album             | `Color`            | `Colors.white`            |
-| `albumDropDownBgColor`   | Background color of album dropdown           | `Color`            | `Colors.green`            |
-| `albumSelectIconColor`   | Icon color in dropdown                       | `Color`            | `Colors.blue`             |
-| `albumSelectTextColor`   | Text color in dropdown list                  | `Color`            | `Colors.orange`           |
-| `selectedAlbumTextColor` | Color of selected album title                | `Color`            | `Colors.white`            |
-| `selectedAlbumIcon`      | Icon shown when album is selected            | `IconData`         | `Icons.check`             |
-| `selectedAlbumBgColor`   | Background of selected album                 | `Color`            | `Colors.black`            |
-| `selectedAssetBgColor`   | Background color for selected media          | `Color`            | `Colors.orange`           |
-| `selectedCheckColor`     | Checkmark color for selected assets          | `Color`            | `Colors.black`            |
-| `selectedCheckBgColor`   | Checkmark background circle color            | `Color`            | `Colors.blue`             |
-| `gridViewBgColor`        | GridView background color                    | `Color`            | `Colors.red`              |
-| `gridPadding`            | Grid padding                                 | `EdgeInsets`       | `EdgeInsets.zero`         |
-| `crossAxisCount`         | Number of columns                            | `int`              | `3`                       |
-| `childAspectRatio`       | Ratio of width to height                     | `double`           | `.5`                      |
-| `thumbnailBoxFix`        | Fit mode for thumbnails                      | `BoxFit`           | `BoxFit.cover`            |
-| `thumbnailBgColor`       | Thumbnail container color                    | `Color`            | `Colors.cyan`             |
-| `thumbnailQuality`       | Enum for quality: `low`, `medium`, `high`    | `ThumbnailQuality` | `ThumbnailQuality.medium` |
-| `gridViewController`     | ScrollController for the GridView            | `ScrollController` | `ScrollController()`      |
-| `gridViewPhysics`        | Scroll behavior                              | `ScrollPhysics`    | `BouncingScrollPhysics()` |
-| `maxPickImages`          | Max number of assets to select               | `int`              | `5`                       |
-| `singlePick`             | Whether only one image can be picked         | `bool`             | `false`                   |
-| `mediaType`              | Type of media to display (all/images/videos) | `GalleryMediaType` | `GalleryMediaType.all`    |
-
-## 🧠 Enum: ThumbnailQuality
-
-| Value    | Description                    | Pixel size |
-|----------|--------------------------------|------------|
-| `low`    | Fastest loading, lowest detail | `100x100`  |
-| `medium` | Good balance                   | `200x200`  |
-| `high`   | Best quality, slower load      | `350x350`  |
+```dart
+GalleryMediaPicker(
+  pathList: (List<PickedAssetModel> paths) {
+    context.read<MediaProvider>().setPickedFiles(paths);
+  },
+  mediaPickerParams: MediaPickerParamsModel(
+    appBarHeight: 50,
+    maxPickImages: 10,
+    crossAxisCount: 4,
+    childAspectRatio: 1,
+    singlePick: false,
+    appBarColor: Colors.transparent,
+    gridViewBgColor: const Color(0xFF09090B),
+    albumTextColor: Colors.white,
+    gridPadding: const EdgeInsets.all(2),
+    thumbnailBgColor: const Color(0xFF18181B),
+    thumbnailBoxFix: BoxFit.cover,
+    selectedAlbumIcon: Icons.check_circle_rounded,
+    mediaType: GalleryMediaType.image,
+    selectedCheckColor: Colors.white,
+    albumSelectIconColor: Colors.white,
+    selectedCheckBgColor: const Color(0xFF3B82F6),
+    selectedAlbumBgColor: Colors.white10,
+    albumDropDownBgColor: const Color(0xFF18181B),
+    albumSelectTextColor: Colors.white,
+    selectedAssetBgColor: const Color(0xFF3B82F6).withOpacity(0.2),
+    selectedAlbumTextColor: const Color(0xFF3B82F6),
+    gridViewController: _scrollController, // Use a persistent controller!
+    thumbnailQuality: ThumbnailQuality.high,
+    gridViewPhysics: const BouncingScrollPhysics(),
+    translations: const GalleryMediaPickerTranslations(
+      noMediaFound: 'No hay archivos multimedia.',
+      permissionDenied: 'Permisos denegados.',
+    ),
+  ),
+)
+```
 
 ---
 
+## 🧩 API Reference
+
+### `GalleryMediaPicker` Widget
+
+| Property | Type | Description |
+|---|---|---|
+| `pathList` | `Function(List<PickedAssetModel>)` | **Required.** Callback triggered on selection change. |
+| `appBarLeadingWidget` | `Widget?` | Optional widget at the leading position of the toolbar. |
+| `mediaPickerParams` | `MediaPickerParamsModel` | **Required.** Configuration model for all picker behavior & styling. |
+
+---
+
+### `MediaPickerParamsModel`
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `appBarHeight` | `double` | `50.0` | Height of the top AppBar. |
+| `appBarColor` | `Color?` | `null` | Background color of the AppBar. Falls back to theme. |
+| `maxPickImages` | `int` | `2` | Maximum number of items allowed to select. |
+| `singlePick` | `bool` | `true` | Whether only a single item can be picked. |
+| `crossAxisCount` | `int` | `3` | Number of columns in the grid. |
+| `childAspectRatio` | `double` | `0.5` | Width-to-height ratio of each grid item. |
+| `mediaType` | `GalleryMediaType` | `.all` | Type of media to display (all / image / video / audio). |
+| `thumbnailQuality` | `ThumbnailQuality` | `.medium` | Quality of generated thumbnails. |
+| `thumbnailBoxFix` | `BoxFit` | `.cover` | How thumbnails fit within their boxes. |
+| `thumbnailBgColor` | `Color?` | `null` | Background color of thumbnail containers. |
+| `gridViewBgColor` | `Color?` | `null` | Background color of the entire grid view. |
+| `gridPadding` | `EdgeInsets?` | `null` | Padding applied to the grid view. |
+| `gridViewPhysics` | `ScrollPhysics` | `BouncingScrollPhysics()` | Scroll behavior of the grid. |
+| `gridViewController` | `ScrollController?` | `null` | External scroll controller for the grid. |
+| `albumTextColor` | `Color?` | `null` | Text color of the selected album name. |
+| `albumDropDownBgColor` | `Color?` | `null` | Background color of the album dropdown overlay. |
+| `albumSelectIconColor` | `Color?` | `null` | Icon color inside the album dropdown. |
+| `albumSelectTextColor` | `Color?` | `null` | Text color inside the album dropdown. |
+| `selectedAlbumTextColor` | `Color?` | `null` | Text color of the currently selected album. |
+| `selectedAlbumIcon` | `IconData` | `Icons.check` | Icon shown next to the selected album. |
+| `selectedAlbumBgColor` | `Color?` | `null` | Background of the selected album row. |
+| `selectedAssetBgColor` | `Color?` | `null` | Overlay color applied to selected thumbnails. |
+| `selectedCheckColor` | `Color?` | `null` | Color of the checkmark icon on selected items. |
+| `selectedCheckBgColor` | `Color?` | `null` | Background color behind the selection checkmark. |
+| `translations` | `GalleryMediaPickerTranslations` | `(defaults)` | Override all user-facing strings for i18n. |
+
+---
+
+### `GalleryMediaType`
+
+Controls which types of media assets are fetched from the device gallery.
+
+| Value | Description |
+|---|---|
+| `all` | Show all media types (images, videos, GIFs, audio). |
+| `image` | Show only image files (includes GIFs). |
+| `video` | Show only video files. |
+| `audio` | Show only audio files. |
+
+---
+
+### `ThumbnailQuality`
+
+Controls the resolution of native thumbnail generation. Higher quality provides more detail but may impact performance with very large galleries.
+
+| Value | Pixel Size | Description |
+|---|---|---|
+| `low` | `100×100` | Fastest loading, lowest detail. |
+| `medium` | `250×250` | Good balance for most use cases. |
+| `high` | `400×400` | Best quality, recommended for full-screen pickers. |
+
+---
+
+### `PickedAssetModel`
+
+The data model returned for each selected asset via the `pathList` callback.
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | `String` | Unique native identifier of the asset. |
+| `path` | `String` | File path to the asset on disk. |
+| `type` | `PickedAssetType` | Asset type: `.image`, `.video`, or `.other`. |
+| `file` | `File?` | File object, if available. |
+| `title` | `String?` | Original filename or title. |
+| `width` | `int` | Width in pixels. |
+| `height` | `int` | Height in pixels. |
+| `size` | `Size` | Original size. |
+| `orientationWidth` | `int` | Orientation-corrected width. |
+| `orientationHeight` | `int` | Orientation-corrected height. |
+| `orientationSize` | `Size` | Orientation-corrected size. |
+| `videoDuration` | `Duration` | Duration (zero for images). |
+| `createDateTime` | `DateTime` | Creation timestamp. |
+| `modifiedDateTime` | `DateTime` | Last modification timestamp. |
+| `latitude` | `double?` | GPS latitude, if available. |
+| `longitude` | `double?` | GPS longitude, if available. |
+| `thumbnail` | `Uint8List?` | Thumbnail bytes, if generated. |
+
+---
+
+### `GalleryMediaPickerTranslations`
+
+Override all user-facing strings for localization and accessibility.
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `noMediaFound` | `String` | `'No media found.'` | Shown when an album is empty. |
+| `recent` | `String` | `'Recent'` | Label for the recents album. |
+| `tapToOpenSettings` | `String` | `'Tap to open settings'` | Settings redirect label. |
+| `permissionDenied` | `String` | `'Permissions denied...'` | Shown when gallery access is denied. |
+| `maxItemsPicked` | `String` | `'You have already picked %s items.'` | Toast when selection limit is reached. Use `%s` for the number. |
+| `videoLabel` | `String` | `'Video'` | Accessibility label for videos. |
+| `imageLabel` | `String` | `'Image'` | Accessibility label for images. |
+| `gifLabel` | `String` | `'GIF'` | Accessibility label for GIFs. |
+| `selectedLabel` | `String` | `'Selected'` | Accessibility label for selected state. |
+| `notSelectedLabel` | `String` | `'Not selected'` | Accessibility label for unselected state. |
+
+---
+
+## ⚡ Performance Architecture
+
+The picker includes several performance optimizations built into its core:
+
+### O(1) Selection Rebuilds
+Each thumbnail uses an internal `_SelectionWatcher` widget that caches its own selection boolean. When the global selection list changes, only thumbnails whose ownership **actually flips** trigger a `setState`. This means selecting one photo in a grid of 10,000 items rebuilds exactly **1 widget**, not all visible items.
+
+### Persistent Thumbnail Caching with `ValueKey`
+Each grid item is keyed with `ValueKey(asset.id)`, ensuring Flutter's element tree correctly identifies and reuses cached images during rapid scrolling. This prevents the common "flicker on scroll back" issue where thumbnails would reload from disk.
+
+### Native Background Task Cancellation
+When a user deselects a media item, the in-flight native file extraction (`loadFile`) is automatically cancelled via `PMCancelToken.cancelRequest()`, preventing wasted CPU/battery on files the user no longer wants.
+
+### Automatic Cache Cleanup
+On dispose, `PhotoManager.clearFileCache()` is called to clean up temporary OS-generated cache files, preventing storage leaks especially on iOS where HEIC/HEVC transcoding creates temporary copies.
+
+### Race Condition Protection
+An internal `_albumChangeId` counter prevents race conditions when rapidly switching between albums or media types, ensuring only the most recent request completes and updates the UI.
+
+---
 
 ## 📹 Screenshots / Demo
 
-## *Personalization*
+### *Personalization*
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
   <div style="text-align: center;">
     <p><strong>Dark Setting</strong></p>
@@ -217,28 +327,28 @@ Each parameter lets you fine-tune the look and feel of the media picker.
   </div>
 </div>
 
-## *Album Selection*
+### *Album Selection*
 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
   <div>
     <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/album_selection.gif?raw=true" width="120" alt="album_selection">
   </div>
 </div>
 
-## *Pick single file*
+### *Pick single file*
 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
   <div>
     <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/single_pick.gif?raw=true" width="120" alt="pick_single_file">
   </div>
 </div>
 
-## *Pick multiple files*
+### *Pick multiple files*
 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
   <div>
     <img src="https://github.com/camilo1498/gallery_media_picker/blob/master/media_doc/multi_pick.gif?raw=true" width="120" alt="pick_multiple_files">
   </div>
 </div>
 
-## *Select media type*
+### *Select media type*
 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
   <div style="text-align: center;">
     <p><strong>Only videos</strong></p>
@@ -250,7 +360,7 @@ Each parameter lets you fine-tune the look and feel of the media picker.
   </div>
 </div>
 
-## *Quality comparison*
+### *Quality comparison*
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
   <div style="text-align: center;">
     <p><strong>Low</strong></p>
@@ -279,5 +389,3 @@ Pull requests are welcome! If you find bugs or have suggestions, feel free to op
 ## 📄 License
 
 MIT License — see the [LICENSE](LICENSE) file for details.
-
----

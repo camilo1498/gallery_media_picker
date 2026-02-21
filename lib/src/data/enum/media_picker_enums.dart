@@ -37,16 +37,19 @@ enum PickedAssetType {
 /// in the gallery media picker.
 ///
 /// It controls whether the picker should show all media, only images,
-/// or only videos.
+/// only videos, or exclusively audio.
 enum GalleryMediaType {
-  /// Show all types of media (images and videos).
+  /// Show all types of media (images, videos, etc.)
   all,
 
-  /// Show only image files.
-  onlyImages,
+  /// Show only image files (includes GIFs and standard images).
+  image,
 
   /// Show only video files.
-  onlyVideos,
+  video,
+
+  /// Show only audio files.
+  audio,
 }
 
 /// Extension to convert a [GalleryMediaType] to a [RequestType].
@@ -57,10 +60,12 @@ extension GalleryMediaTypeExtension on GalleryMediaType {
     switch (this) {
       case GalleryMediaType.all:
         return RequestType.all;
-      case GalleryMediaType.onlyImages:
+      case GalleryMediaType.image:
         return RequestType.image;
-      case GalleryMediaType.onlyVideos:
+      case GalleryMediaType.video:
         return RequestType.video;
+      case GalleryMediaType.audio:
+        return RequestType.audio;
     }
   }
 }

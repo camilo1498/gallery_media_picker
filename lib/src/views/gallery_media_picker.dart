@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gallery_media_picker/gallery_media_picker.dart';
+import 'package:gallery_media_picker/src/data/constants/album_constants.dart';
 import 'package:gallery_media_picker/src/logic/gallery_media_picker_controller.dart';
+import 'package:gallery_media_picker/src/logic/gallery_media_provider.dart';
 import 'package:gallery_media_picker/src/views/widgets/animated_tap_widget.dart';
 import 'package:gallery_media_picker/src/views/widgets/gridview/grid_thumbnail_item_widget.dart';
 import 'package:oktoast/oktoast.dart';
@@ -47,12 +51,13 @@ class GalleryMediaPicker extends StatefulWidget {
 }
 
 class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
-  /// Singleton controller managing picker state and logic.
-  final MediaPickerController provider = MediaPickerController.instance;
+  /// Controller managing picker state and logic for this specific instance.
+  late final MediaPickerController provider;
 
   @override
   void initState() {
     super.initState();
+    provider = MediaPickerController();
 
     provider
       ..onPickMax = _onPickMaxReached
@@ -61,13 +66,14 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
       ..isSinglePick = widget.mediaPickerParams.singlePick
       ..maxSelection = widget.mediaPickerParams.maxPickImages;
 
-    _initPicker();
+    unawaited(_initPicker());
     _startGalleryObserver();
   }
 
   // Initializes the picker by requesting permissions and loading album data.
-  Future<void> _initPicker() async {
+  Future<void> _initPicker({bool reset = false}) async {
     final result = await PhotoManager.requestPermissionExtend();
+    provider.permitState.value = result;
     if (!result.isAuth) return;
 
     final paths = await PhotoManager.getAssetPathList(
@@ -81,23 +87,26 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
           needTitle: true,
           sizeConstraint: SizeConstraint(ignoreSize: true),
         ),
+        audioOption: const FilterOption(
+          needTitle: true,
+          sizeConstraint: SizeConstraint(ignoreSize: true),
+        ),
       ),
     );
 
-    if (paths.isNotEmpty) {
-      provider.resetPathList(paths);
-    }
+    provider.resetPathList(paths, reset: reset);
   }
 
   // Callback when user exceeds the maximum number of selected media.
   void _onPickMaxReached() {
-    showToast('You have already picked ${provider.max.value} items.');
+    final trans = provider.paramsModel.translations;
+    showToast(trans.maxItemsPicked.replaceAll('%s', '${provider.max.value}'));
   }
 
   // Called when changes in the gallery are detected.
   Future<void> _onGalleryChanged(MethodCall call) async {
     final paths = await PhotoManager.getAssetPathList(
-      type: RequestType.all,
+      type: provider.paramsModel.mediaType.type,
       filterOption: FilterOptionGroup(
         imageOption: const FilterOption(
           needTitle: true,
@@ -107,24 +116,26 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
           needTitle: true,
           sizeConstraint: SizeConstraint(ignoreSize: true),
         ),
+        audioOption: const FilterOption(
+          needTitle: true,
+          sizeConstraint: SizeConstraint(ignoreSize: true),
+        ),
         orders: [const OrderOption()],
       ),
     );
-    if (paths.isNotEmpty) {
-      provider.resetPathList(paths);
-    }
+    provider.resetPathList(paths);
   }
 
   // Starts observing the gallery for changes in real time.
   void _startGalleryObserver() {
     PhotoManager.addChangeCallback(_onGalleryChanged);
-    PhotoManager.startChangeNotify();
+    unawaited(PhotoManager.startChangeNotify());
   }
 
   // Stops observing gallery changes when the widget is disposed.
   void _stopGalleryObserver() {
     PhotoManager.removeChangeCallback(_onGalleryChanged);
-    PhotoManager.stopChangeNotify();
+    unawaited(PhotoManager.stopChangeNotify());
   }
 
   @override
@@ -139,6 +150,10 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
       provider
         ..isSinglePick = newParams.singlePick
         ..maxSelection = newParams.maxPickImages;
+
+      if (oldParams.mediaType != newParams.mediaType) {
+        unawaited(_initPicker(reset: true));
+      }
     }
   }
 
@@ -150,27 +165,76 @@ class _GalleryMediaPickerState extends State<GalleryMediaPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return OKToast(
-      child: Column(
-        children: [
-          // Album selection bar (dropdown)
-          _AlbumSelector(appBarLeadingWidget: widget.appBarLeadingWidget),
-          const SizedBox(height: 2),
+    return GalleryMediaProvider(
+      controller: provider,
+      child: OKToast(
+        child: Column(
+          children: [
+            // Album selection bar (dropdown)
+            _AlbumSelector(appBarLeadingWidget: widget.appBarLeadingWidget),
+            const SizedBox(height: 2),
 
-          // Grid displaying the media thumbnails
-          Expanded(
-            child: RepaintBoundary(
-              child: NotificationListener<OverscrollIndicatorNotification>(
-                onNotification: (overscroll) {
-                  overscroll.disallowIndicator();
-                  return false;
+            // Grid displaying the media thumbnails
+            Expanded(
+              child: ValueListenableBuilder<PermissionState>(
+                valueListenable: provider.permitState,
+                builder: (_, permit, __) {
+                  if (permit == PermissionState.notDetermined) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!permit.isAuth) {
+                    return _buildPermissionDeniedUI();
+                  }
+
+                  return RepaintBoundary(
+                    child:
+                        NotificationListener<OverscrollIndicatorNotification>(
+                          onNotification: (overscroll) {
+                            overscroll.disallowIndicator();
+                            return false;
+                          },
+                          child: ValueListenableBuilder<AssetPathEntity?>(
+                            valueListenable: provider.currentAlbum,
+                            builder: (_, album, _) =>
+                                const _GalleryGridViewWidget(),
+                          ),
+                        ),
+                  );
                 },
-                child: ValueListenableBuilder<AssetPathEntity?>(
-                  valueListenable: provider.currentAlbum,
-                  builder: (_, album, __) => const _GalleryGridViewWidget(),
-                ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // UI displayed when the user explicitly denies gallery permissions.
+  Widget _buildPermissionDeniedUI() {
+    final theme = Theme.of(context);
+    final trans = provider.paramsModel.translations;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.photo_library_outlined,
+            size: 64,
+            color: theme.colorScheme.error,
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              trans.permissionDenied,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium,
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: PhotoManager.openSetting,
+            child: Text(trans.tapToOpenSettings),
           ),
         ],
       ),
